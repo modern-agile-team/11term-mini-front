@@ -60,7 +60,7 @@ const Footer = () => {
              </div>
              <p className="text-[11px] text-gray-400">
                [인증범위] 번개장터 중고거래 플랫폼 서비스 운영(심사받지 않은 물리적 인프라 제외)<br />
-               [유효기간] 2024.05.18 ~ 2027.05.17
+               [유효기간] 2024.05.18 ~ 2027.05.17.
              </p>
           </div>
           <p className="text-[11px] text-gray-400 leading-5">
