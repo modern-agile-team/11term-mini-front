@@ -1,8 +1,6 @@
 // src/components/QuickMenu.tsx
 const QuickMenu = () => {
   return (
-    // 📍 top: 200px로 내려서 헤더와 거리를 둡니다.
-    // 📍 left: 중앙(50%)에서 상품 리스트 너비의 절반(512px) + 여백(20px)만큼 이동합니다.
     <aside className="fixed top-[200px] left-[calc(50%+532px)] hidden min-[1250px]:flex flex-col gap-2 z-40">
       
       {/* 찜한 상품 */}

@@ -14,7 +14,6 @@ const Header = () => {
 
       {/* 2. 메인 헤더 영역 */}
       <div className="max-w-[1024px] mx-auto flex items-center justify-between py-6 px-4 gap-8">
-        {/* 📍 로고 (Link 추가) */}
         <Link to="/">
           <h1 className="text-3xl font-bold text-[#ff5058] cursor-pointer flex-shrink-0">
             번개장터

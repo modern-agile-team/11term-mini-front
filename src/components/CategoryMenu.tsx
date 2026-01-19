@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CATEGORIES } from '../data/categories';
 import type { Category } from '../types/Category';
-import { Link } from 'react-router-dom'; // 👈 Link 임포트 확인
+import { Link } from 'react-router-dom'; 
 
 const CategoryMenu = () => {
   const [activeLarge, setActiveLarge] = useState<Category | null>(null);
