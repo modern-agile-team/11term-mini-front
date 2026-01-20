@@ -53,7 +53,7 @@
       <img src="https://github.com/imdongyoung.png" width="200"/><br/>
       임동영<br>
       <strong>imdongyeong</strong><br>
-      <a href="https://github.com/yxxjxxeee">@imdongyeong</a>
+      <a href="https://github.com/imdongyeong">@imdongyeong</a>
     </td>
   </tr>
 </table>
