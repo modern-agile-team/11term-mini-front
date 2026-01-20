@@ -1,6 +1,6 @@
 # 🚀 소개
 
-- 모던 애자일 11기 미니 프로젝트 "당근 마켓 클론 코딩" 프론트엔드 레포지토리입니다.
+- 모던 애자일 11기 미니 프로젝트 "번개장터 클론 코딩" 프론트엔드 레포지토리입니다.
 
 # 🛠️ 사용 라이브러리 & 스택
 
@@ -37,10 +37,10 @@
       <a href="https://github.com/Nova02114">@Nova021114</a>
     </td>
     <td align="center">
-      <img src="https://github.com/wjddns0122.png" width="200"/><br/>
-      노정운<br>
-      <strong>wjddns0122</strong><br>
-      <a href="https://github.com/wjddns0122">@wjddns0122</a>
+      <img src="https://github.com/junho04-max.png" width="200"/><br/>
+      서준호<br>
+      <strong>junho04-max</strong><br>
+      <a href="https://github.com/junho04-max">@junho04-max</a>
     </td>
   </tr>
 </table>
@@ -51,15 +51,9 @@
   <tr>
     <td align="center">
       <img src="https://github.com/imdongyoung.png" width="200"/><br/>
-      imdongyeong<br>
-      <strong>Back-End</strong><br>
+      임동영<br>
+      <strong>imdongyeong</strong><br>
       <a href="https://github.com/yxxjxxeee">@imdongyeong</a>
-    </td>
-    <td align="center">
-      <img src="https://github.com/junho04-max.png" width="200"/><br/>
-      junho04-max<br>
-      <strong>Back-End</strong><br>
-      <a href="https://github.com/junho04-max">@junho04-max</a>
     </td>
   </tr>
 </table>
