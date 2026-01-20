@@ -9,7 +9,7 @@ const Header = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // 📍 공통 검색 실행 함수 (엔터 & 돋보기 클릭 & 드롭다운 클릭 공용)
+  //  공통 검색 실행 함수 (엔터 & 돋보기 클릭 & 드롭다운 클릭 공용)
   const executeSearch = (term: string) => {
     if (term.trim() === '') return;
 

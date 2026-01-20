@@ -11,7 +11,7 @@ const CategoryDetail = () => {
     <div className="min-h-screen bg-white">
       <QuickMenu />
       <main className="max-w-[1024px] mx-auto px-4 py-8">
-        {/* 📍 카테고리 상세 페이지 전용 경로 표시 */}
+        {/*  카테고리 상세 페이지 전용 경로 표시 */}
         <CategoryNav /> 
         
         <div className="mt-8 mb-6 flex justify-between items-end border-b pb-4">
