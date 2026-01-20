@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/* 1. 폰트 불러오기 */
+@font-face {
+  font-family: 'MyCustomFont';
+  src: url('./assets/fonts/my-font.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. Tailwind v4 테마 변수 등록 */
+@theme {
+  /* --font-<별명> 형태로 작성하면 font-<별명> 클래스가 자동 생성됨. */
+  --font-main: "MyCustomFont", sans-serif;
+  --font-brand: "BunjangFont", cursive;
+}
