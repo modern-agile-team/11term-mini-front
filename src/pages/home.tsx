@@ -13,7 +13,7 @@ const Home = () => {
           <div className="w-full h-[300px] bg-[#54b454] rounded-sm flex items-center justify-center overflow-hidden cursor-pointer relative">
              <div className="text-white text-center z-10">
                 <h2 className="text-4xl font-bold mb-2">EDITION 1</h2>
-                <p className="text-2xl font-light">남친 룩의 완성인 '이 아이템'은??</p>
+                <p className="text-2xl font-light">남친 룩의 완성인 '이 아이템'은?</p>
              </div>
           </div>
           
