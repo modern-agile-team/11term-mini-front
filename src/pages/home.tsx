@@ -9,14 +9,12 @@ const Home = () => {
       <QuickMenu />
 
       <main className="max-w-[1024px] mx-auto px-4 py-8">
-        {/* 📍 메인 배너 영역 (image_1142cd.png 스타일 적용) */}
         <section className="w-full mb-10">
           <div className="w-full h-[300px] bg-[#54b454] rounded-sm flex items-center justify-center overflow-hidden cursor-pointer relative">
              <div className="text-white text-center z-10">
                 <h2 className="text-4xl font-bold mb-2">EDITION 1</h2>
-                <p className="text-2xl font-light">남친 룩의 완성인 '이 아이템'은?</p>
+                <p className="text-2xl font-light">남친 룩의 완성인 '이 아이템'은??</p>
              </div>
-             {/* 배경에 은은한 이미지를 넣고 싶다면 여기에 추가 */}
           </div>
           
           {/* 하단 앱 홍보 배너 */}
