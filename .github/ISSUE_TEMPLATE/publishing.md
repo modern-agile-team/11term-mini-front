@@ -3,7 +3,7 @@ name: 퍼블리싱 이슈
 about: '🎨 UI 마크업, 스타일링, 반응형 작업에 대해 간결하게 설명해주세요.'
 title: 'UI 마크업, 스타일링, 반응형 작업'
 labels: 🎨 publishing
-assignees: electrohyun
+assignees: Nova021114
 ---
 
 ## 🧐 어떤 UI 작업인가요?

@@ -15,9 +15,9 @@ const Header = () => {
 
     const saved = localStorage.getItem('recentSearches');
     const prevSearches = saved ? JSON.parse(saved) : [];
-    const updated = [term, ...prevSearches.filter((t: string) => t !== term)].slice(0, 12);
+    const updatedPrevSearches = [term, ...prevSearches.filter((t: string) => t !== term)].slice(0, 12);
     
-    localStorage.setItem('recentSearches', JSON.stringify(updated));
+    localStorage.setItem('recentSearches', JSON.stringify(updatedPrevSearches));
     
     setIsSearchOpen(false); 
     setSearchValue(''); 

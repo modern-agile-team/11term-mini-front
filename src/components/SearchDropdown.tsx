@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-interface Props {
+interface SearchDropdownProps {
   onClose: () => void;
   onSearch: (term: string) => void;
 }
 
-const SearchDropdown = ({ onClose, onSearch }: Props) => {
+const SearchDropdown = ({ onClose, onSearch }: SearchDropdownProps) => {
   const [activeTab, setActiveTab] = useState<'recent' | 'popular'>('recent');
 
   //로컬 스트리지에서 읽어오기
@@ -55,7 +55,7 @@ const SearchDropdown = ({ onClose, onSearch }: Props) => {
               {recent.map((term, i) => (
                 <li key={i} className="flex justify-between items-center cursor-pointer group" onClick={() => onSearch(term)}>
                   <span className="text-sm text-gray-700">{term}</span>
-                  <button onClick={(e) => handleDelete(e, term)} className="text-gray-300 hover:text-gray-500 p-1">✕</button>
+                  <button onClick={(event) => handleDelete(event, term)} className="text-gray-300 hover:text-gray-500 p-1">✕</button>
                 </li>
               ))}
             </ul>

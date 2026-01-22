@@ -66,7 +66,7 @@ const SearchPage = () => {
         </div>
       </div>
 
-      {/* 📍 3. 상품 리스트 그리드: ProductCard 재사용 */}
+      {/*  3. 상품 리스트 그리드: ProductCard 재사용 */}
       <div className="grid grid-cols-5 gap-x-4 gap-y-10">
         {sortedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
