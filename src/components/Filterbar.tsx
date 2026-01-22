@@ -6,7 +6,7 @@ const FilterBar = () => {
           <h2 className="text-[18px] font-bold">아우터</h2>
           <span className="text-gray-400 text-[14px]">131,067개</span>
         </div>
-        
+
         <div className="flex gap-4 text-[13px] text-gray-500">
           <button className="text-[#ff5058] font-bold">최신순</button>
           <button className="hover:text-black">인기순</button>

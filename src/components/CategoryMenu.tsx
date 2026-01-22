@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CATEGORIES } from '../data/categories';
 import type { Category } from '../types/Category';
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
 
 const CategoryMenu = () => {
   const [activeLarge, setActiveLarge] = useState<Category | null>(null);
@@ -14,13 +14,18 @@ const CategoryMenu = () => {
       </button>
 
       <div className="absolute top-full left-0 hidden group-hover:flex bg-white border border-gray-200 shadow-xl z-[100] h-[550px]">
-        
         {/* 1단계: 대분류 */}
         <ul className="w-[180px] border-r border-gray-100 overflow-y-auto py-2">
           {CATEGORIES.map((cat) => (
-            <li key={cat.id} onMouseEnter={() => { setActiveLarge(cat); setActiveMedium(null); }}>
+            <li
+              key={cat.id}
+              onMouseEnter={() => {
+                setActiveLarge(cat);
+                setActiveMedium(null);
+              }}
+            >
               {/*  Link 추가: 클릭 시 해당 대분류 페이지로 이동 */}
-              <Link 
+              <Link
                 to={`/category/${cat.id}`}
                 className={`px-4 py-2.5 cursor-pointer text-[14px] flex justify-between items-center w-full
                   ${activeLarge?.id === cat.id ? 'bg-[#ff5058] text-white' : 'hover:bg-gray-50 hover:text-[#ff5058]'}`}
@@ -37,8 +42,7 @@ const CategoryMenu = () => {
           <ul className="w-[180px] border-r border-gray-100 overflow-y-auto bg-gray-50 py-2">
             {activeLarge.subCategories.map((sub) => (
               <li key={sub.id} onMouseEnter={() => setActiveMedium(sub)}>
-                {/* 📍 Link 추가 */}
-                <Link 
+                <Link
                   to={`/category/${sub.id}`}
                   className={`px-4 py-2.5 cursor-pointer text-[14px] flex justify-between items-center w-full
                     ${activeMedium?.id === sub.id ? 'text-[#ff5058] font-bold' : 'hover:text-[#ff5058]'}`}
@@ -56,8 +60,7 @@ const CategoryMenu = () => {
           <ul className="w-[180px] overflow-y-auto bg-white py-2 shadow-inner">
             {activeMedium.subCategories.map((small) => (
               <li key={small.id}>
-                {/* 📍 Link 추가 */}
-                <Link 
+                <Link
                   to={`/category/${small.id}`}
                   className="px-4 py-2.5 cursor-pointer text-[14px] text-gray-600 hover:text-[#ff5058] hover:font-bold block w-full"
                 >
