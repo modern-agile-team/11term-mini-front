@@ -8,19 +8,19 @@ const QuickMenu = () => {
   const loadData = useCallback(() => {
     const recent = JSON.parse(localStorage.getItem('recently_viewed') || '[]');
     const wishes = JSON.parse(localStorage.getItem('wish_list') || '[]');
-    
-    setRecentItems(prev => {
+
+    setRecentItems((prev) => {
       const isSame = JSON.stringify(prev) === JSON.stringify(recent);
       return isSame ? prev : recent;
     });
-    
-    setWishCount(prev => (prev === wishes.length ? prev : wishes.length));
+
+    setWishCount((prev) => (prev === wishes.length ? prev : wishes.length));
   }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
-    
+
     const onUpdate = () => {
       loadData();
     };
@@ -42,24 +42,31 @@ const QuickMenu = () => {
       </div>
 
       <div className="border border-gray-200 bg-white p-2 text-center shadow-sm w-[90px]">
-        <p className="text-[11px] text-gray-500 mb-2 border-b border-gray-100 pb-1 font-semibold">최근본상품</p>
+        <p className="text-[11px] text-gray-500 mb-2 border-b border-gray-100 pb-1 font-semibold">
+          최근본상품
+        </p>
         <div className="flex flex-col gap-2 items-center bg-white min-h-[60px] py-1">
           <span className="text-red-500 font-bold text-[13px]">{recentItems.length}</span>
           <div className="w-full border-b border-dotted border-gray-200 mb-1"></div>
-          
+
           {recentItems.length > 0 ? (
             recentItems.slice(0, 2).map((item) => (
-              <div key={item.id} className="w-[70px] h-[70px] border border-gray-100 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors">
+              <div
+                key={item.id}
+                className="w-[70px] h-[70px] border border-gray-100 overflow-hidden cursor-pointer hover:border-gray-300 transition-colors"
+              >
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
               </div>
             ))
           ) : (
-            <p className="text-[10px] text-gray-400 leading-tight text-center py-4">최근 본 상품이 없습니다.</p>
+            <p className="text-[10px] text-gray-400 leading-tight text-center py-4">
+              최근 본 상품이 없습니다.
+            </p>
           )}
         </div>
       </div>
 
-      <button 
+      <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="border border-gray-200 bg-white py-2 text-[11px] font-bold text-gray-500 shadow-sm hover:text-black transition-all"
       >

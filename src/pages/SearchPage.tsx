@@ -8,23 +8,21 @@ type SortType = 'accuracy' | 'recent' | 'lowPrice' | 'highPrice';
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
-  
+
   const [sortType, setSortType] = useState<SortType>('accuracy');
 
   // 1. 검색어 필터링
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((p) =>
-      p.title.toLowerCase().includes(query.toLowerCase())
-    );
+    return MOCK_PRODUCTS.filter((p) => p.title.toLowerCase().includes(query.toLowerCase()));
   }, [query]);
 
   // 2. 정렬 로직
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts];
-    
+
     switch (sortType) {
       case 'recent':
-        return list.sort((a, b) => a.id - b.id); 
+        return list.sort((a, b) => a.id - b.id);
       case 'lowPrice':
         return list.sort((a, b) => a.price - b.price);
       case 'highPrice':
@@ -75,9 +73,7 @@ const SearchPage = () => {
 
       {/* 결과 없음 처리 */}
       {sortedProducts.length === 0 && (
-        <div className="py-40 text-center text-gray-400">
-          검색 결과가 없습니다.
-        </div>
+        <div className="py-40 text-center text-gray-400">검색 결과가 없습니다.</div>
       )}
     </div>
   );

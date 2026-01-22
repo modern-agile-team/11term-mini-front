@@ -12,8 +12,8 @@ const CategoryDetail = () => {
       <QuickMenu />
       <main className="max-w-[1024px] mx-auto px-4 py-8">
         {/*  카테고리 상세 페이지 전용 경로 표시 */}
-        <CategoryNav /> 
-        
+        <CategoryNav />
+
         <div className="mt-8 mb-6 flex justify-between items-end border-b pb-4">
           <h2 className="text-2xl font-bold">
             {id} <span className="text-gray-400 text-lg font-normal ml-2">131,067개</span>
@@ -25,7 +25,7 @@ const CategoryDetail = () => {
             <button>고가순</button>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {MOCK_PRODUCTS.map((product) => (
             <ProductCard key={product.id} product={product} />

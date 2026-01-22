@@ -5,6 +5,6 @@ export interface Product {
   price: number;
   location: string;
   createdAt: string;
-  image: string;          
+  image: string;
   isThunderPay?: boolean;
 }

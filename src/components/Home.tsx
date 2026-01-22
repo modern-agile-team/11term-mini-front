@@ -4,19 +4,23 @@ import { MOCK_PRODUCTS } from '../data/mock';
 const Home = () => {
   return (
     <div className="min-h-screen bg-white">
-
       <main className="max-w-[1024px] mx-auto px-4 py-8">
         <section className="w-full mb-10">
           <div className="w-full h-[300px] bg-[#99d9f3] rounded-sm flex items-center justify-center overflow-hidden cursor-pointer">
-              <span className="text-white text-3xl font-bold">나 혼자만 알고 싶은 6만원 쿠폰팩</span>
+            <span className="text-white text-3xl font-bold">나 혼자만 알고 싶은 6만원 쿠폰팩</span>
           </div>
-          
+
           <div className="w-full h-[100px] bg-white border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer">
-              <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-xl">📱</div>
-              <div>
-                 <p className="font-bold text-sm text-gray-600">스마트폰에서 더 편리한</p>
-                 <p className="font-bold text-xl text-[#ff5058]">취향 중고거래 앱 번개장터 <span className="text-gray-400 font-normal text-sm ml-2">지금 다운받기</span></p>
-              </div>
+            <div className="bg-gray-100 w-12 h-12 rounded-full flex items-center justify-center text-xl">
+              📱
+            </div>
+            <div>
+              <p className="font-bold text-sm text-gray-600">스마트폰에서 더 편리한</p>
+              <p className="font-bold text-xl text-[#ff5058]">
+                취향 중고거래 앱 번개장터{' '}
+                <span className="text-gray-400 font-normal text-sm ml-2">지금 다운받기</span>
+              </p>
+            </div>
           </div>
         </section>
 

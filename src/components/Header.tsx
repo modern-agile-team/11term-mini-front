@@ -15,12 +15,15 @@ const Header = () => {
 
     const saved = localStorage.getItem('recentSearches');
     const prevSearches = saved ? JSON.parse(saved) : [];
-    const updatedPrevSearches = [term, ...prevSearches.filter((t: string) => t !== term)].slice(0, 12);
-    
+    const updatedPrevSearches = [term, ...prevSearches.filter((t: string) => t !== term)].slice(
+      0,
+      12,
+    );
+
     localStorage.setItem('recentSearches', JSON.stringify(updatedPrevSearches));
-    
-    setIsSearchOpen(false); 
-    setSearchValue(''); 
+
+    setIsSearchOpen(false);
+    setSearchValue('');
     navigate(`/search?q=${encodeURIComponent(term)}`);
   };
 
@@ -58,8 +61,8 @@ const Header = () => {
 
         {/* 검색창 영역 */}
         <div className="flex-1 max-w-[460px] relative" ref={searchRef}>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -68,7 +71,7 @@ const Header = () => {
             placeholder="상품명, 지역명, @상점명 입력"
             className="w-full border-2 border-[#ff5058] px-4 py-2 outline-none text-sm"
           />
-          <span 
+          <span
             onClick={() => executeSearch(searchValue)}
             className="absolute right-4 top-2.5 text-[#ff5058] cursor-pointer font-bold text-lg select-none"
           >
@@ -77,10 +80,7 @@ const Header = () => {
 
           {/* 📍 드롭다운 컴포넌트 호출 */}
           {isSearchOpen && (
-            <SearchDropdown 
-              onClose={() => setIsSearchOpen(false)} 
-              onSearch={executeSearch} 
-            />
+            <SearchDropdown onClose={() => setIsSearchOpen(false)} onSearch={executeSearch} />
           )}
         </div>
 
