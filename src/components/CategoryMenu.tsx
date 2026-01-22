@@ -24,7 +24,6 @@ const CategoryMenu = () => {
                 setActiveMedium(null);
               }}
             >
-              {/*  Link 추가: 클릭 시 해당 대분류 페이지로 이동 */}
               <Link
                 to={`/category/${cat.id}`}
                 className={`px-4 py-2.5 cursor-pointer text-[14px] flex justify-between items-center w-full

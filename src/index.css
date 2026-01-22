@@ -11,7 +11,6 @@
 
 /* 2. Tailwind v4 테마 변수 등록 */
 @theme {
-  /* --font-<별명> 형태로 작성하면 font-<별명> 클래스가 자동 생성됨. */
   --font-main: 'MyCustomFont', sans-serif;
   --font-brand: 'BunjangFont', cursive;
 }
