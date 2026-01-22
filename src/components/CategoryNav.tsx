@@ -39,7 +39,7 @@ const CategoryNav = () => {
 
         <span className="text-gray-300 mx-1">〉</span>
 
-        {/* 소분류 드롭다운 (현재 위치 강조) */}
+        {/* 소분류 드롭다운  */}
         <div className="relative group">
           <button className="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded border-gray-400 font-bold text-black bg-white">
             패딩 <span className="text-[10px] text-gray-400 group-hover:rotate-180 transition-transform">▼</span>
