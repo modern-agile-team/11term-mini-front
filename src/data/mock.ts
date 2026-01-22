@@ -2,7 +2,7 @@ export interface Product {
   id: number;
   title: string;
   price: number;
-  image: string; // 📍 이름을 image로 통일!
+  image: string; 
   createdAt: string;
   location: string;
 }

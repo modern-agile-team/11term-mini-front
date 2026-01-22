@@ -18,11 +18,9 @@ const QuickMenu = () => {
   }, []);
 
   useEffect(() => {
-    //  1. 컴포넌트 마운트 시 데이터 로드
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
     
-    //  2. 커스텀 이벤트를 통한 실시간 업데이트 핸들러
     const onUpdate = () => {
       loadData();
     };

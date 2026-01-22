@@ -23,6 +23,7 @@ const ProductDetail = () => {
     const wishArr: number[] = savedWishes ? JSON.parse(savedWishes) : [];
     const currentWished = wishArr.includes(product.id);
     
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsWished(prev => (prev !== currentWished ? currentWished : prev));
 
     // 3. 퀵메뉴 동기화 이벤트

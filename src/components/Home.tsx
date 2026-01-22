@@ -1,4 +1,3 @@
-// src/pages/home.tsx
 import ProductCard from '../components/ProductCard';
 import { MOCK_PRODUCTS } from '../data/mock';
 
@@ -7,7 +6,6 @@ const Home = () => {
     <div className="min-h-screen bg-white">
 
       <main className="max-w-[1024px] mx-auto px-4 py-8">
-        {/* ... 배너 섹션은 동일 ... */}
         <section className="w-full mb-10">
           <div className="w-full h-[300px] bg-[#99d9f3] rounded-sm flex items-center justify-center overflow-hidden cursor-pointer">
               <span className="text-white text-3xl font-bold">나 혼자만 알고 싶은 6만원 쿠폰팩</span>

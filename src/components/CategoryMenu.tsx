@@ -37,7 +37,6 @@ const CategoryMenu = () => {
           <ul className="w-[180px] border-r border-gray-100 overflow-y-auto bg-gray-50 py-2">
             {activeLarge.subCategories.map((sub) => (
               <li key={sub.id} onMouseEnter={() => setActiveMedium(sub)}>
-                {/* 📍 Link 추가 */}
                 <Link 
                   to={`/category/${sub.id}`}
                   className={`px-4 py-2.5 cursor-pointer text-[14px] flex justify-between items-center w-full
@@ -56,7 +55,6 @@ const CategoryMenu = () => {
           <ul className="w-[180px] overflow-y-auto bg-white py-2 shadow-inner">
             {activeMedium.subCategories.map((small) => (
               <li key={small.id}>
-                {/* 📍 Link 추가 */}
                 <Link 
                   to={`/category/${small.id}`}
                   className="px-4 py-2.5 cursor-pointer text-[14px] text-gray-600 hover:text-[#ff5058] hover:font-bold block w-full"

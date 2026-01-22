@@ -1,6 +1,5 @@
 const Banner = () => {
   return (
-    // 배경색은 전체 너비 (번개장터 특유의 연회색 혹은 연하늘색)
     <section className="w-full bg-[#F2F2F2] overflow-hidden">
       <div className="max-w-[1024px] mx-auto h-[300px] flex items-center justify-between px-4 relative">
         
