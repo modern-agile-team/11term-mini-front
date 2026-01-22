@@ -30,7 +30,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '소니 WH-1000XM5 헤드셋',
     price: 380000,
     image: 'https://loremflickr.com/400/400/headphone',
-    createdAt: '12분 전',
+    createdAt: '13분 전',
     location: '서울 마포구',
   },
   {
