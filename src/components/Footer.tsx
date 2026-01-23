@@ -25,15 +25,15 @@ const Footer = () => {
             <button className="underline mt-2">사업자정보 확인</button>
 
             <div className="mt-6">
-              <h3 className="font-bold mb-1 text-gray-800">번개장터(주)센터필드점</h3>
-              <p>서울특별시 강남구 테헤란로 231, 쇼핑몰동 1층 W124호(역삼동(역삼동, 센터필드))</p>
+              <h3 className="font-bold mb-1 text-gray-800">모던애자일(주)동아리</h3>
+              <p> 서울 노원구 초안산로 12 인덕대학교</p>
             </div>
           </div>
 
           {/* 오른쪽: 고객센터 & 보증 안내 */}
           <div className="w-[300px]">
             <h3 className="font-bold mb-2 text-gray-800 text-[15px]">고객센터 〉</h3>
-            <p className="text-[24px] font-bold text-gray-800 mb-1">1670-2910</p>
+            <p className="text-[24px] font-bold text-gray-800 mb-1">0000-0000</p>
             <p>운영시간 9시 - 18시 (주말/공휴일 휴무, 점심시간 12시 - 13시)</p>
             <div className="flex gap-3 mt-2 underline">
               <button>공지사항</button>
@@ -62,7 +62,7 @@ const Footer = () => {
             <p className="text-[11px] text-gray-400">
               [인증범위] 번개장터 중고거래 플랫폼 서비스 운영(심사받지 않은 물리적 인프라 제외)
               <br />
-              [유효기간] 2024.05.18 ~ 2027.05.17.
+              [유효기간] 2026.01.12 ~ 2026.03.01.
             </p>
           </div>
           <p className="text-[11px] text-gray-400 leading-5">

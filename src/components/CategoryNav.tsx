@@ -1,4 +1,3 @@
-// src/components/CategoryNav.tsx
 import { CATEGORIES } from '../data/categories';
 
 const CategoryNav = () => {
