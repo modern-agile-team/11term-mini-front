@@ -1,89 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { VALIDATION_PATTERNS, type Account } from '../types/Account';
+import { useMyPage } from '../hooks/useMyPage';
+import { Store, Users, ShoppingBag } from 'lucide-react';
 
 const MyPage = () => {
-  const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState('상품');
-  const [isNicknameEditing, setIsNicknameEditing] = useState(false);
-  const [isIntroEditing, setIsIntroEditing] = useState(false);
-
-  const [userInfo, setUserInfo] = useState<Account | null>(() => {
-    const saved = localStorage.getItem('currentUser');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const [tempNickname, setTempNickname] = useState(userInfo?.nickname || '');
-  const [tempIntro, setTempIntro] = useState(userInfo?.shopIntro || '');
-
-  useEffect(() => {
-    if (!userInfo) {
-      alert('로그인이 필요한 페이지입니다.');
-      navigate('/');
-    }
-  }, [userInfo, navigate]);
+  const {
+    userInfo,
+    activeTab,
+    setActiveTab,
+    isNicknameEditing,
+    setIsNicknameEditing,
+    isIntroEditing,
+    setIsIntroEditing,
+    tempNickname,
+    setTempNickname,
+    tempIntro,
+    setTempIntro,
+    fileInputRef,
+    getOpenDays,
+    saveNickname,
+    saveIntro,
+    handleImageChange,
+  } = useMyPage();
 
   if (!userInfo) return null;
-
-  const getOpenDays = (joinDate: string) => {
-    if (!joinDate) return 1;
-    const startDate = new Date(joinDate.replace(/\./g, '-'));
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - startDate.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
-
-  const handleUpdateAccount = (updateData: Partial<Account>) => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const currentUserFullData = users.find((u: Account) => u.email === userInfo.email);
-
-    if (!currentUserFullData) {
-      alert('사용자 정보를 찾을 수 없습니다.');
-      return;
-    }
-
-    const updatedUser = { ...currentUserFullData, ...updateData };
-    const updatedUsers = users.map((u: Account) => (u.email === userInfo.email ? updatedUser : u));
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-
-    setUserInfo(updatedUser);
-    window.dispatchEvent(new Event('auth-change'));
-  };
-
-  const saveNickname = () => {
-    if (!VALIDATION_PATTERNS.nickname.test(tempNickname)) {
-      alert('닉네임은 한글, 영문, 숫자 조합 2~10자로 입력해주세요.');
-      return;
-    }
-    handleUpdateAccount({ nickname: tempNickname });
-    setIsNicknameEditing(false);
-  };
-
-  const saveIntro = () => {
-    if (tempIntro.length > 1000) {
-      alert('소개글은 최대 1000자까지 작성 가능합니다.');
-      return;
-    }
-    handleUpdateAccount({ shopIntro: tempIntro });
-    setIsIntroEditing(false);
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleUpdateAccount({ avatar: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   return (
     <div className="max-w-[1024px] mx-auto py-10 px-4">
       <div className="flex border border-gray-200 h-[310px] mb-12 bg-white shadow-sm">
+        {/* 왼쪽 섹션 */}
         <div className="w-[310px] bg-[#fafafa] flex flex-col items-center justify-center border-r border-gray-200">
           <div
             className="group relative w-[100px] h-[100px] bg-white rounded-full flex items-center justify-center text-5xl border border-gray-200 shadow-sm mb-4 overflow-hidden cursor-pointer"
@@ -120,6 +63,7 @@ const MyPage = () => {
           </div>
         </div>
 
+        {/* 오른쪽 정보 영역 */}
         <div className="flex-1 p-8 flex flex-col">
           <div className="flex items-center gap-3 mb-6">
             {isNicknameEditing ? (
@@ -162,20 +106,21 @@ const MyPage = () => {
             </span>
           </div>
 
-          <div className="flex gap-10 text-sm text-gray-400 mb-6 border-t border-b border-gray-50 py-4 flex-shrink-0">
+          <div className="flex gap-10 text-[13px] text-gray-500 mb-6 border-t border-b border-gray-50 py-5 flex-shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-[#ff5058]">🏪</span> 상점오픈일{' '}
-              <span className="text-gray-900 font-semibold">
-                {getOpenDays(userInfo.joinDate)}일 전
-              </span>
+              <Store size={18} className="text-gray-400" strokeWidth={1.5} />
+              <span>상점오픈일</span>
+              <span className="text-gray-900 font-bold">{getOpenDays(userInfo.joinDate)}일 전</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[#3498db]">👤</span> 상점방문수{' '}
-              <span className="text-gray-900 font-semibold">0 명</span>
+              <Users size={18} className="text-gray-400" strokeWidth={1.5} />
+              <span>상점방문수</span>
+              <span className="text-gray-900 font-bold">0 명</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[#2ecc71]">🛍️</span> 상품판매{' '}
-              <span className="text-gray-900 font-semibold">0 회</span>
+              <ShoppingBag size={18} className="text-gray-400" strokeWidth={1.5} />
+              <span>상품판매</span>
+              <span className="text-gray-900 font-bold">0 회</span>
             </div>
           </div>
 
