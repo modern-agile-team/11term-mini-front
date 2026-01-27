@@ -1,53 +1,85 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Account } from '../types/Account';
+
+// 알럿 중복 방지를 위한 모듈 스코프 변수
+let isAlerting = false;
 
 export const useAuth = () => {
   const navigate = useNavigate();
 
-  //  초기 사용자 정보 로드
-  const [userInfo, setUserInfo] = useState<Account | null>(() => {
+  const getStoredUser = useCallback(() => {
     const saved = localStorage.getItem('currentUser');
-    return saved ? JSON.parse(saved) : null;
-  });
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  }, []);
 
-  //  비로그인 사용자 튕겨내기 (필요 시 호출)
-  const requireAuth = () => {
+  const [userInfo, setUserInfo] = useState<Account | null>(getStoredUser);
+
+  const refreshAuth = useCallback(() => {
+    setUserInfo(getStoredUser());
+  }, [getStoredUser]);
+
+  useEffect(() => {
+    window.addEventListener('auth-change', refreshAuth);
+    window.addEventListener('storage', refreshAuth);
+    return () => {
+      window.removeEventListener('auth-change', refreshAuth);
+      window.removeEventListener('storage', refreshAuth);
+    };
+  }, [refreshAuth]);
+
+  // 1번만 뜨게 수정된 requireAuth
+  const requireAuth = useCallback(() => {
     if (!userInfo) {
-      alert('로그인이 필요한 서비스입니다.');
-      navigate('/');
+      if (!isAlerting) {
+        isAlerting = true;
+        alert('로그인이 필요한 서비스입니다.');
+        navigate('/');
+        // 알럿 확인 후 플래그 초기화 (약간의 지연을 주어 중복 호출 방지)
+        setTimeout(() => {
+          isAlerting = false;
+        }, 500);
+      }
       return false;
     }
     return true;
+  }, [userInfo, navigate]);
+
+  const logout = () => {
+    localStorage.removeItem('currentUser');
+    setUserInfo(null);
+    window.dispatchEvent(new Event('auth-change'));
+    alert('로그아웃 되었습니다.');
+    navigate('/');
   };
 
-  //  로컬 스토리지 데이터 동기화 함수
   const updateUserInfo = (updateData: Partial<Account>) => {
-    if (!userInfo) return;
+    const currentUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    const currentUser = getStoredUser();
+    if (!currentUser) return;
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const currentUserFullData = users.find((u: Account) => u.email === userInfo.email);
+    const userIndex = currentUsers.findIndex((u: Account) => u.email === currentUser.email);
+    if (userIndex === -1) return;
 
-    if (!currentUserFullData) {
-      alert('사용자 정보를 찾을 수 없습니다.');
-      return;
-    }
-
-    const updatedUser = { ...currentUserFullData, ...updateData };
-    const updatedUsers = users.map((u: Account) => (u.email === userInfo.email ? updatedUser : u));
+    const updatedUser = { ...currentUsers[userIndex], ...updateData };
+    const updatedUsers = [...currentUsers];
+    updatedUsers[userIndex] = updatedUser;
 
     localStorage.setItem('users', JSON.stringify(updatedUsers));
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-
     setUserInfo(updatedUser);
-    // 다른 컴포넌트에 변경 알림
     window.dispatchEvent(new Event('auth-change'));
   };
 
   return {
     userInfo,
-    updateUserInfo,
+    logout,
     requireAuth,
+    updateUserInfo,
     isLoggedIn: !!userInfo,
   };
 };

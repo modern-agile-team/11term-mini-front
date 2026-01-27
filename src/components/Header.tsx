@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CategoryMenu from './CategoryMenu';
 import SearchDropdown from './SearchDropdown';
-import type { Account } from '../types/Account';
+import { useAuth } from '../hooks/useAuth';
+import { SEARCH_CONFIG, HEADER_TEXT, HEADER_ACTIONS } from '../constants/header';
 
 interface HeaderProps {
   onLoginClick: () => void;
@@ -14,29 +15,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // 유저 정보 상태 관리
-  const [user, setUser] = useState<Account | null>(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    try {
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch (error) {
-      console.error('유저 데이터 파싱 오류:', error);
-      return null;
-    }
-  });
-
-  // 인증 상태 확인 함수
-  const checkAuth = useCallback(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    const userData = savedUser ? JSON.parse(savedUser) : null;
-
-    setUser((prev) => {
-      if (JSON.stringify(prev) !== JSON.stringify(userData)) {
-        return userData;
-      }
-      return prev;
-    });
-  }, []);
+  const { userInfo: user, logout } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,35 +23,22 @@ const Header = ({ onLoginClick }: HeaderProps) => {
         setIsSearchOpen(false);
       }
     };
-
-    window.addEventListener('auth-change', checkAuth);
-    window.addEventListener('storage', checkAuth);
     document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      window.removeEventListener('auth-change', checkAuth);
-      window.removeEventListener('storage', checkAuth);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [checkAuth]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    setUser(null);
-    alert('로그아웃 되었습니다.');
-    navigate('/');
-    window.dispatchEvent(new Event('auth-change'));
-  };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const executeSearch = (term: string) => {
     if (term.trim() === '') return;
-    const saved = localStorage.getItem('recentSearches');
+
+    const saved = localStorage.getItem(SEARCH_CONFIG.STORAGE_KEY);
     const prevSearches = saved ? JSON.parse(saved) : [];
+
     const updatedPrevSearches = [term, ...prevSearches.filter((t: string) => t !== term)].slice(
       0,
-      12,
+      SEARCH_CONFIG.MAX_RECENT_SEARCHES,
     );
-    localStorage.setItem('recentSearches', JSON.stringify(updatedPrevSearches));
+
+    localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, JSON.stringify(updatedPrevSearches));
     setIsSearchOpen(false);
     setSearchValue('');
     navigate(`/search?q=${encodeURIComponent(term)}`);
@@ -85,7 +51,6 @@ const Header = ({ onLoginClick }: HeaderProps) => {
         <div className="flex justify-end max-w-[1024px] mx-auto py-2 px-4 text-xs text-gray-500 gap-4 items-center h-10">
           {user ? (
             <>
-              {/* 닉네임 표시 및 마이페이지 이동 */}
               <div
                 className="flex items-center gap-1 cursor-pointer group"
                 onClick={() => navigate('/mypage')}
@@ -95,19 +60,17 @@ const Header = ({ onLoginClick }: HeaderProps) => {
                 </span>
                 <span className="text-[8px] text-gray-400 group-hover:text-black">▼</span>
               </div>
-
               <div className="w-[1px] h-3 bg-gray-200" />
-
-              <button onClick={handleLogout} className="hover:text-black cursor-pointer">
-                로그아웃
+              <button onClick={logout} className="hover:text-black cursor-pointer">
+                {HEADER_TEXT.LOGOUT}
               </button>
             </>
           ) : (
             <button onClick={onLoginClick} className="hover:text-black cursor-pointer">
-              로그인/회원가입
+              {HEADER_TEXT.LOGIN_SIGNUP}
             </button>
           )}
-          <button className="hover:text-black cursor-pointer">내단체</button>
+          <button className="hover:text-black cursor-pointer">{HEADER_TEXT.MY_GROUP}</button>
         </div>
       </div>
 
@@ -115,10 +78,11 @@ const Header = ({ onLoginClick }: HeaderProps) => {
       <div className="max-w-[1024px] mx-auto flex items-center justify-between py-6 px-4 gap-8">
         <Link to="/">
           <h1 className="text-3xl font-bold text-[#ff5058] cursor-pointer flex-shrink-0">
-            번개장터
+            {HEADER_TEXT.LOGO_TITLE}
           </h1>
         </Link>
 
+        {/* 검색창 섹션 */}
         <div className="flex-1 max-w-[460px] relative" ref={searchRef}>
           <input
             type="text"
@@ -126,7 +90,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && executeSearch(searchValue)}
             onFocus={() => setIsSearchOpen(true)}
-            placeholder="상품명, 지역명, @상점명 입력"
+            placeholder={SEARCH_CONFIG.PLACEHOLDER}
             className="w-full border-2 border-[#ff5058] px-4 py-2 outline-none text-sm"
           />
           <span
@@ -140,29 +104,22 @@ const Header = ({ onLoginClick }: HeaderProps) => {
           )}
         </div>
 
+        {/* 아이콘 액션 메뉴 */}
         <div className="flex items-center gap-4 text-[14px] font-medium flex-shrink-0">
-          {/* 판매하기 */}
-          <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-60 transition-opacity">
-            <span className="text-xl">💰</span>
-            <span className="text-gray-800">판매하기</span>
-          </div>
-          <div className="w-[1px] h-3 bg-gray-300 mx-0.5" />
-
-          {/* 내상점 (마이페이지 이동) */}
-          <div
-            onClick={() => navigate('/mypage')}
-            className="flex items-center gap-1.5 cursor-pointer hover:opacity-60 transition-opacity"
-          >
-            <span className="text-xl">👤</span>
-            <span className="text-gray-800">내상점</span>
-          </div>
-          <div className="w-[1px] h-3 bg-gray-300 mx-0.5" />
-
-          {/* 번개톡 */}
-          <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-60 transition-opacity">
-            <span className="text-xl">💬</span>
-            <span className="text-gray-800">번개톡</span>
-          </div>
+          {HEADER_ACTIONS.map((action, index) => (
+            <React.Fragment key={action.id}>
+              <div
+                onClick={() => navigate(action.path)}
+                className="flex items-center gap-1.5 cursor-pointer hover:opacity-60 transition-opacity"
+              >
+                <span className="text-xl">{action.icon}</span>
+                <span className="text-gray-800">{action.label}</span>
+              </div>
+              {index < HEADER_ACTIONS.length - 1 && (
+                <div className="w-[1px] h-3 bg-gray-300 mx-0.5" />
+              )}
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
@@ -175,7 +132,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
             onClick={() => navigate('/seller-center')}
             className="text-[14px] font-semibold hover:text-[#ff5058] py-4 cursor-pointer"
           >
-            번개장터 판매자센터
+            {HEADER_TEXT.SELLER_CENTER}
           </button>
         </div>
       </div>

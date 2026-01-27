@@ -1,3 +1,4 @@
+//상품양식
 export interface Product {
   id: number;
   title: string;
@@ -5,6 +6,14 @@ export interface Product {
   image: string;
   createdAt: string;
   location: string;
+}
+//광고
+export interface AdItem {
+  id: number;
+  image: string;
+  title: string;
+  subTitle: string;
+  bgColor: string;
 }
 
 export const MOCK_PRODUCTS: Product[] = [
