@@ -1,26 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Account } from '../types/Account';
+import api from '../api/axios';
+import type { Account, LoginData } from '../types/Account';
 
 let isAlerting = false;
 
 export const useAuth = () => {
   const navigate = useNavigate();
 
-  const getStoredUser = useCallback(() => {
+  const getStoredUser = () => {
     const saved = localStorage.getItem('currentUser');
     try {
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
-  }, []);
+  };
 
   const [userInfo, setUserInfo] = useState<Account | null>(getStoredUser);
 
   const refreshAuth = useCallback(() => {
     setUserInfo(getStoredUser());
-  }, [getStoredUser]);
+  }, []);
 
   useEffect(() => {
     window.addEventListener('auth-change', refreshAuth);
@@ -31,39 +32,58 @@ export const useAuth = () => {
     };
   }, [refreshAuth]);
 
-  // 회원 탈퇴 (전체 목록에서도 삭제)
-  const withdraw = useCallback(() => {
-    const currentUser = getStoredUser();
-    if (!currentUser) return;
+  //  로그인
+  const login = async (credentials: LoginData) => {
+    const { data } = await api.post('/api/auth/login', credentials);
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('currentUser', JSON.stringify(data.user));
+    setUserInfo(data.user);
+    window.dispatchEvent(new Event('auth-change'));
+    navigate('/');
+  };
 
-    if (window.confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.')) {
-      // 1. 전체 유저 목록(users)에서 현재 이메일과 일치하는 유저 제거
-      const allUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const filteredUsers = allUsers.filter((u: Account) => u.email !== currentUser.email);
-      localStorage.setItem('users', JSON.stringify(filteredUsers));
-
-      // 2. 로그인 정보 및 찜 목록 삭제
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('wish_list');
-
-      // 3. 상태 업데이트 및 알림
-      setUserInfo(null);
-      window.dispatchEvent(new Event('auth-change'));
-      alert('회원 탈퇴가 완료되었습니다.');
-      navigate('/');
-    }
-  }, [getStoredUser, navigate]);
-
-  const logout = () => {
+  //  로그아웃
+  const logout = useCallback(() => {
     if (window.confirm('로그아웃 하시겠습니까?')) {
+      localStorage.removeItem('accessToken');
       localStorage.removeItem('currentUser');
       setUserInfo(null);
       window.dispatchEvent(new Event('auth-change'));
       alert('로그아웃 되었습니다.');
       navigate('/');
     }
+  }, [navigate]);
+
+  //  회원 탈퇴
+  const withdraw = useCallback(async () => {
+    if (!window.confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.')) return;
+    try {
+      await api.delete('/api/auth/withdraw');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('wish_list');
+      setUserInfo(null);
+      window.dispatchEvent(new Event('auth-change'));
+      alert('탈퇴가 완료되었습니다.');
+      navigate('/');
+    } catch {
+      alert('탈퇴 처리 중 오류 발생');
+    }
+  }, [navigate]);
+
+  //  정보 수정
+  const updateUserInfo = async (updateData: Partial<Account>) => {
+    try {
+      const { data } = await api.patch('/api/auth/update', updateData);
+      localStorage.setItem('currentUser', JSON.stringify(data));
+      setUserInfo(data);
+      window.dispatchEvent(new Event('auth-change'));
+    } catch {
+      alert('정보 수정 실패');
+    }
   };
 
+  //  권한 체크
   const requireAuth = useCallback(() => {
     if (!userInfo) {
       if (!isAlerting) {
@@ -79,26 +99,9 @@ export const useAuth = () => {
     return true;
   }, [userInfo, navigate]);
 
-  const updateUserInfo = (updateData: Partial<Account>) => {
-    const currentUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const currentUser = getStoredUser();
-    if (!currentUser) return;
-
-    const userIndex = currentUsers.findIndex((u: Account) => u.email === currentUser.email);
-    if (userIndex === -1) return;
-
-    const updatedUser = { ...currentUsers[userIndex], ...updateData };
-    const updatedUsers = [...currentUsers];
-    updatedUsers[userIndex] = updatedUser;
-
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-    setUserInfo(updatedUser);
-    window.dispatchEvent(new Event('auth-change'));
-  };
-
   return {
     userInfo,
+    login,
     logout,
     withdraw,
     requireAuth,

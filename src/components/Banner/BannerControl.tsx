@@ -1,6 +1,8 @@
+import type { MouseEvent } from 'react';
+
 interface BannerControlProps {
   direction: 'left' | 'right';
-  onClick: (e: React.MouseEvent) => void;
+  onClick: (e: MouseEvent) => void;
 }
 
 export const BannerControl = ({ direction, onClick }: BannerControlProps) => (

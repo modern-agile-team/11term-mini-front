@@ -1,7 +1,9 @@
+import type { MouseEvent } from 'react';
+
 interface BannerIndicatorProps {
   total: number;
   current: number;
-  onDotClick: (index: number, e: React.MouseEvent) => void;
+  onDotClick: (index: number, e: MouseEvent) => void;
 }
 
 export const BannerIndicator = ({ total, current, onDotClick }: BannerIndicatorProps) => (
