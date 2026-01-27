@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Account } from '../types/Account';
 
-// 알럿 중복 방지를 위한 모듈 스코프 변수
 let isAlerting = false;
 
 export const useAuth = () => {
@@ -32,14 +31,45 @@ export const useAuth = () => {
     };
   }, [refreshAuth]);
 
-  // 1번만 뜨게 수정된 requireAuth
+  // 회원 탈퇴 (전체 목록에서도 삭제)
+  const withdraw = useCallback(() => {
+    const currentUser = getStoredUser();
+    if (!currentUser) return;
+
+    if (window.confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.')) {
+      // 1. 전체 유저 목록(users)에서 현재 이메일과 일치하는 유저 제거
+      const allUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      const filteredUsers = allUsers.filter((u: Account) => u.email !== currentUser.email);
+      localStorage.setItem('users', JSON.stringify(filteredUsers));
+
+      // 2. 로그인 정보 및 찜 목록 삭제
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('wish_list');
+
+      // 3. 상태 업데이트 및 알림
+      setUserInfo(null);
+      window.dispatchEvent(new Event('auth-change'));
+      alert('회원 탈퇴가 완료되었습니다.');
+      navigate('/');
+    }
+  }, [getStoredUser, navigate]);
+
+  const logout = () => {
+    if (window.confirm('로그아웃 하시겠습니까?')) {
+      localStorage.removeItem('currentUser');
+      setUserInfo(null);
+      window.dispatchEvent(new Event('auth-change'));
+      alert('로그아웃 되었습니다.');
+      navigate('/');
+    }
+  };
+
   const requireAuth = useCallback(() => {
     if (!userInfo) {
       if (!isAlerting) {
         isAlerting = true;
         alert('로그인이 필요한 서비스입니다.');
         navigate('/');
-        // 알럿 확인 후 플래그 초기화 (약간의 지연을 주어 중복 호출 방지)
         setTimeout(() => {
           isAlerting = false;
         }, 500);
@@ -48,14 +78,6 @@ export const useAuth = () => {
     }
     return true;
   }, [userInfo, navigate]);
-
-  const logout = () => {
-    localStorage.removeItem('currentUser');
-    setUserInfo(null);
-    window.dispatchEvent(new Event('auth-change'));
-    alert('로그아웃 되었습니다.');
-    navigate('/');
-  };
 
   const updateUserInfo = (updateData: Partial<Account>) => {
     const currentUsers = JSON.parse(localStorage.getItem('users') || '[]');
@@ -78,6 +100,7 @@ export const useAuth = () => {
   return {
     userInfo,
     logout,
+    withdraw,
     requireAuth,
     updateUserInfo,
     isLoggedIn: !!userInfo,
