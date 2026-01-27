@@ -10,6 +10,7 @@ import QuickMenu from './components/QuickMenu';
 import LoginModal from './components/LoginModal';
 import SellerCenter from './pages/SellerCenter';
 import MyPage from './pages/Mypage';
+import SettingsPage from './pages/SettingsPage';
 
 //  퀵메뉴 및 레이아웃 제어를 위한 서브 컴포넌트
 const AppContent = ({ onLoginClick }: { onLoginClick: () => void }) => {
@@ -30,6 +31,7 @@ const AppContent = ({ onLoginClick }: { onLoginClick: () => void }) => {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
 
       <Footer />

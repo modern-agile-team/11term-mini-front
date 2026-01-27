@@ -1,0 +1,4 @@
+export const BANNER_CONFIG = {
+  INTERVAL_MS: 4000,
+  TRANSITION_DURATION: 1000,
+} as const;
