@@ -17,7 +17,12 @@ const STYLES = {
   inactiveBtn: 'bg-gray-200 text-gray-400 cursor-not-allowed',
 };
 
-const LoginModal = ({ onClose }: { onClose: () => void }) => {
+interface LoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [step, setStep] = useState<'SELECT' | 'LOGIN' | 'SIGNUP'>('SELECT');
@@ -25,17 +30,30 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const { formData, errors, handleChange } = useAuthForm();
 
+  // 스크롤 제어
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, []);
+  }, [isOpen]);
 
-  // 닉넴 중복체크
+  // 회원가입 버튼 활성화 여부 계산
+  const isSignupValid = useMemo(
+    () =>
+      isAllChecked &&
+      isNicknameChecked &&
+      !Object.values(errors).some((e) => e) &&
+      !!(formData.email && formData.password && formData.nickname && formData.name),
+    [isAllChecked, isNicknameChecked, errors, formData],
+  );
+
+  if (!isOpen) return null;
+  // 핸들러 함수들
   const handleNicknameCheck = async () => {
     if (!formData.nickname || errors.nickname) return alert('올바른 닉네임을 입력해주세요.');
-
     try {
       const { data } = await api.get(`/api/auth/check?nickname=${formData.nickname}`);
       if (data.isDuplicate) {
@@ -50,7 +68,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
     }
   };
 
-  // 로그인 로직
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
     try {
@@ -62,7 +79,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
     }
   };
 
-  // 회원가입 로직
   const onSignup = async (e: FormEvent) => {
     e.preventDefault();
     try {
@@ -73,16 +89,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
       alert('이미 가입된 이메일입니다.');
     }
   };
-
-  // 회원가입 활성화 로직
-  const isSignupValid = useMemo(
-    () =>
-      isAllChecked &&
-      isNicknameChecked &&
-      !Object.values(errors).some((e) => e) &&
-      !!(formData.email && formData.password && formData.nickname && formData.name),
-    [isAllChecked, isNicknameChecked, errors, formData],
-  );
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 py-10 px-4">
@@ -95,7 +101,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
           ✕
         </button>
 
-        {/* 메인 선택 단계  */}
         {step === 'SELECT' && (
           <div className="text-center">
             <div className="mb-10 flex flex-col items-center">
@@ -126,7 +131,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
           </div>
         )}
 
-        {/* 로그인 단계  */}
         {step === 'LOGIN' && (
           <form onSubmit={onLogin}>
             <button
@@ -169,7 +173,6 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
           </form>
         )}
 
-        {/* 회원가입 단계  */}
         {step === 'SIGNUP' && (
           <form onSubmit={onSignup} className="flex flex-col gap-5">
             <button
