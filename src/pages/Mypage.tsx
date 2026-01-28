@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom'; // 1. location 추가
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useMyPage } from '../hooks/useMyPage';
 import { Store, Users, ShoppingBag } from 'lucide-react';
 import { MOCK_PRODUCTS } from '../data/mock';
@@ -7,7 +7,7 @@ import ProductCard from '../components/ProductCard';
 import type { Product } from '../types/Product';
 
 const MyPage = () => {
-  const location = useLocation(); // 2. location 변수 선언
+  const location = useLocation();
   const {
     userInfo,
     activeTab,
@@ -29,12 +29,9 @@ const MyPage = () => {
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
 
-  // 3. 헤더에서 넘어온 탭 정보가 있으면 즉시 반영
   useEffect(() => {
     if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
-      // 사용 후 state를 초기화하고 싶다면 window.history.replaceState를 쓸 수 있으나
-      // 기본적으로는 이렇게만 두어도 잘 작동합니다.
     }
   }, [location.state, setActiveTab]);
 

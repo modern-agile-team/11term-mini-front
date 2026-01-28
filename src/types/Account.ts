@@ -8,6 +8,7 @@ export interface Account {
   birth: string;
   nickname: string;
   shopIntro?: string;
+  wishList: string;
 }
 
 export type SignupData = Omit<Account, 'id' | 'joinDate'> & { password: string };
