@@ -4,6 +4,7 @@ import { SOCIAL_PROVIDERS, SIGNUP_FIELDS } from '../constants/auth';
 import { AuthField } from './auth/AuthField';
 import { useAuthForm } from '../hooks/useAuthForm';
 import { useAuth } from '../hooks/useAuth';
+import type { FormEvent } from 'react';
 import api from '../api/axios';
 
 const STYLES = {
@@ -36,7 +37,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
     if (!formData.nickname || errors.nickname) return alert('올바른 닉네임을 입력해주세요.');
 
     try {
-      const { data } = await api.get(`/api/auth/check-nickname?nickname=${formData.nickname}`);
+      const { data } = await api.get(`/api/auth/check?nickname=${formData.nickname}`);
       if (data.isDuplicate) {
         alert('이미 사용 중인 닉네임입니다.');
         setIsNicknameChecked(false);
@@ -50,7 +51,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
   };
 
   // 로그인 로직
-  const onLogin = async (e: React.FormEvent) => {
+  const onLogin = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await login({ email: formData.email, password: formData.password });
@@ -62,7 +63,7 @@ const LoginModal = ({ onClose }: { onClose: () => void }) => {
   };
 
   // 회원가입 로직
-  const onSignup = async (e: React.FormEvent) => {
+  const onSignup = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await api.post('/api/auth/signup', formData);
