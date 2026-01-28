@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { OverlayProvider } from 'overlay-kit';
 import Header from './components/Header';
 import Home from './pages/home';
 import CategoryDetail from './pages/CategoryDetail';
@@ -43,11 +44,13 @@ function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   return (
-    <Router>
-      <AppContent onLoginClick={() => setIsLoginModalOpen(true)} />
+    <OverlayProvider>
+      <Router>
+        <AppContent onLoginClick={() => setIsLoginModalOpen(true)} />
 
-      {isLoginModalOpen && <LoginModal onClose={() => setIsLoginModalOpen(false)} />}
-    </Router>
+        {isLoginModalOpen && <LoginModal onClose={() => setIsLoginModalOpen(false)} />}
+      </Router>
+    </OverlayProvider>
   );
 }
 
