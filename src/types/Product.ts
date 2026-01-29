@@ -8,9 +8,10 @@ export interface Product {
   isThunderPay?: boolean;
 }
 
-export interface CreateProductInput extends Omit<Product, 'id' | 'createAt'> {
+export interface CreateProductInput extends Omit<Product, 'id' | 'createdAt'> {
   images: string[];
   category: string;
   description: string;
   status: string;
+  tags: string[];
 }
