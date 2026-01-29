@@ -29,12 +29,12 @@ const SearchDropdown = ({ onClose, onSearch }: SearchDropdownProps) => {
   };
 
   const popular = [
-    { rank: 1, term: '엔진11' },
-    { rank: 2, term: 'RTX 4060' },
-    { rank: 3, term: '픽시' },
-    { rank: 4, term: '아이폰 15' },
-    { rank: 5, term: '패딩' },
-    { rank: 6, term: '에어팟' },
+    { rank: 1, term: '포피파커' },
+    { rank: 2, term: '아이폰5' },
+    { rank: 3, term: '메가커피' },
+    { rank: 4, term: '애플팬슬 프로' },
+    { rank: 5, term: '메디큐브 부스터프로' },
+    { rank: 6, term: '트위스테' },
   ];
 
   return (
