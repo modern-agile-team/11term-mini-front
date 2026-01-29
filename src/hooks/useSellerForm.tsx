@@ -28,11 +28,16 @@ export const useSellerForm = () => {
   });
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && formData.images.length + files.length <= 12) {
-      const newImages = Array.from(files).map((file) => URL.createObjectURL(file));
-      setFormData((prev) => ({ ...prev, images: [...prev.images, ...newImages] }));
-    } else if (files && formData.images.length + files.length > 12) {
+    const selectedFiles = e.target.files;
+    if (!selectedFiles) return;
+    const totalCount = formData.images.length + selectedFiles.length;
+    if (totalCount <= 12) {
+      const newImageUrls = Array.from(selectedFiles).map((file) => URL.createObjectURL(file));
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, ...newImageUrls],
+      }));
+    } else {
       alert('최대 12장까지 등록 가능합니다.');
     }
   };
