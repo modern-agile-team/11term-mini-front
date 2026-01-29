@@ -1,216 +1,195 @@
-import React, { useState } from 'react';
-import type { CreateProductInput } from '../../types/Product';
+import { useSellerForm } from '../../hooks/useSellerForm';
+import { SellerFormSection } from './SellerFormSection';
 import { CATEGORIES } from '../../data/categories';
-import { SELLER_NAV_MENU } from '../../constants/seller';
 import { PRODUCT_STATUS } from '../../types/Product';
+import { SellerSubNav } from './SellerNav';
 
-// 스타일 상수화로 JSX 가독성 향상
-const STYLES = {
-  container: 'max-w-[1024px] mx-auto px-4 py-10',
-  section: 'flex border-b pb-10 mb-10',
-  label: 'w-1/4 text-lg font-bold pt-2',
-  input: 'w-full border border-gray-200 p-3 outline-none focus:border-black transition-all',
-  categoryBox: 'border border-gray-200 h-72 flex text-sm mb-4 bg-white',
-  categoryList: 'w-1/3 border-r overflow-y-auto custom-scrollbar',
-  categoryItem: 'p-3 px-4 hover:bg-gray-50 cursor-pointer transition-colors',
-  activeItem: 'bg-gray-50 text-[#ff5058] font-bold',
-  footer:
-    'fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]',
-  submitBtn: 'px-14 py-4 font-bold transition-all active:scale-95',
-};
+const INPUT_STYLE =
+  'w-full border border-gray-200 p-2.5 text-sm outline-none hover:border-gray-400 focus:border-black transition-all rounded-sm';
 
 const SellerManager = () => {
-  // 1. 상태 관리
-  const [selectedMainId, setSelectedMainId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<CreateProductInput>({
-    title: '',
-    price: 0,
-    location: '전국',
-    image: '',
-    images: [],
-    category: '',
-    description: '',
-    status: 'NEW',
-    isThunderPay: false,
-    tags: [],
-  });
-
-  // 2. 핸들러 함수
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    const val = type === 'number' ? (value === '' ? 0 : Number(value)) : value;
-    setFormData((prev) => ({ ...prev, [name]: val }));
-  };
-
-  const handleMainCategoryClick = (id: string) => {
-    setSelectedMainId(id);
-    setFormData((prev) => ({ ...prev, category: '' }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.title || !formData.category || formData.price <= 0) {
-      alert('필수 정보를 모두 입력해주세요.');
-      return;
-    }
-    console.log('최종 등록 데이터:', formData);
-    alert('상품 등록이 완료되었습니다!');
-  };
+  const {
+    formData,
+    setFormData,
+    selectedMainId,
+    setSelectedMainId,
+    tagInput,
+    setTagInput,
+    handleImageUpload,
+    removeImage,
+    handleInputChange,
+    handleTagKeyDown,
+  } = useSellerForm();
 
   const selectedMainCategory = CATEGORIES.find((cat) => cat.id === selectedMainId);
 
   return (
-    <div className="bg-white min-h-screen pb-32">
-      {/* 서브 네비게이션 */}
-      <nav className="border-b sticky top-0 bg-white z-40">
-        <div className="max-w-[1024px] mx-auto flex gap-10 py-4 text-sm font-semibold px-4">
-          {SELLER_NAV_MENU.map((menu) => (
-            <span
-              key={menu.id}
-              className={`${menu.active ? 'text-[#ff5058] border-b-2 border-[#ff5058]' : 'text-gray-400'} pb-4 -mb-4 cursor-pointer`}
-            >
-              {menu.label}
-            </span>
-          ))}
-        </div>
-      </nav>
+    <div className="bg-white min-h-screen pb-32 text-gray-800 text-sm">
+      <SellerSubNav />
 
-      <form onSubmit={handleSubmit} className={STYLES.container}>
-        <h2 className="text-2xl font-bold mb-8 pb-4 border-b-2 border-black">상품정보</h2>
+      <form className="max-w-[850px] mx-auto px-4 py-8" onSubmit={(e) => e.preventDefault()}>
+        <h2 className="text-xl font-bold mb-6 pb-3 border-b-2 border-black">상품정보</h2>
 
         {/* 1. 이미지 섹션 */}
-        <section className={STYLES.section}>
-          <label className={STYLES.label}>
-            상품이미지{' '}
-            <span className="text-gray-400 text-sm font-normal">({formData.images.length}/12)</span>
-          </label>
-          <div className="w-3/4">
-            <div className="w-40 h-40 bg-gray-50 border border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 group transition-colors">
-              <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📷</span>
-              <span className="text-gray-400 text-sm">이미지 등록</span>
-            </div>
-            <p className="text-blue-500 text-xs mt-4 font-medium">
-              * 상품 이미지는 PC 1:1, 모바일 1:1.23 비율로 보여져요.
-            </p>
-          </div>
-        </section>
-
-        {/* 2. 상품명 섹션 */}
-        <section className={STYLES.section}>
-          <label className={STYLES.label}>상품명</label>
-          <div className="w-3/4">
-            <div className="relative">
+        <SellerFormSection label="상품이미지" count={`${formData.images.length}/12`}>
+          <div className="flex flex-wrap gap-3">
+            <label className="w-32 h-32 bg-gray-50 border border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+              <span className="text-2xl mb-1">📷</span>
+              <span className="text-gray-400 text-xs">이미지 등록</span>
               <input
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="상품명을 입력해 주세요."
-                className={STYLES.input}
-                maxLength={40}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                {formData.title.length}/40
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. 카테고리 섹션 (제공된 데이터 기반 2단 선택) */}
-        <section className={STYLES.section}>
-          <label className={STYLES.label}>카테고리</label>
-          <div className="w-3/4">
-            <div className={STYLES.categoryBox}>
-              {/* 대분류 */}
-              <div className={STYLES.categoryList}>
-                {CATEGORIES.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className={`${STYLES.categoryItem} ${selectedMainId === cat.id ? STYLES.activeItem : 'text-gray-700'}`}
-                    onClick={() => handleMainCategoryClick(cat.id)}
-                  >
-                    {cat.name}
-                  </div>
-                ))}
-              </div>
-              {/* 중분류 */}
-              <div className={`${STYLES.categoryList} bg-gray-50/30`}>
-                {selectedMainCategory?.subCategories ? (
-                  selectedMainCategory.subCategories.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className={`${STYLES.categoryItem} ${formData.category === sub.name ? 'text-[#ff5058] font-bold bg-white' : 'text-gray-600'}`}
-                      onClick={() => setFormData((prev) => ({ ...prev, category: sub.name }))}
-                    >
-                      {sub.name}
-                    </div>
-                  ))
-                ) : (
-                  <div className="h-full flex items-center justify-center text-gray-400 text-sm p-6 text-center">
-                    {selectedMainId ? '하위 카테고리가 없습니다.' : '대분류를 먼저 선택해주세요.'}
+            </label>
+            {formData.images.map((src, i) => (
+              <div key={i} className="relative w-32 h-32 border border-gray-100 bg-black">
+                <img src={src} alt="preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  className="absolute -top-2 -right-2 bg-black text-white w-5 h-5 rounded-full text-xs flex items-center justify-center border border-white"
+                >
+                  ×
+                </button>
+                {i === 0 && (
+                  <div className="absolute bottom-0 w-full bg-black/60 text-white text-[10px] text-center py-0.5">
+                    대표이미지
                   </div>
                 )}
               </div>
-              {/* 소분류 가이드 (디자인 유지용) */}
-              <div className="w-1/3 flex items-center justify-center text-gray-300 text-sm bg-gray-50/50">
-                소분류 없음
-              </div>
-            </div>
-            <p className="text-[#ff5058] text-[15px] font-bold">
-              선택한 카테고리 :{' '}
-              <span className="text-gray-800 ml-1">
-                {selectedMainCategory?.name} {formData.category && `> ${formData.category}`}
-              </span>
-            </p>
+            ))}
           </div>
-        </section>
+          <p className="text-blue-500 text-[11px] mt-4 font-medium">
+            * 상품 이미지는 PC 1:1, 모바일 1:1.23 비율로 보여져요.
+          </p>
+        </SellerFormSection>
 
-        {/* 4. 상품상태 섹션 */}
-        <section className={STYLES.section}>
-          <label className={STYLES.label}>상품상태</label>
-          <div className="w-3/4 flex flex-col gap-6">
+        {/* 2. 상품명 */}
+        <SellerFormSection label="상품명">
+          <div className="relative">
+            <input
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
+              placeholder="상품명을 입력해 주세요."
+              className={INPUT_STYLE}
+              maxLength={40}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
+              {formData.title.length}/40
+            </span>
+          </div>
+        </SellerFormSection>
+
+        {/* 3. 카테고리 */}
+        <SellerFormSection label="카테고리">
+          <div className="border border-gray-200 h-60 flex text-[13px] mb-3 bg-white">
+            <div className="w-1/3 border-r overflow-y-auto custom-scrollbar">
+              {CATEGORIES.map((cat) => (
+                <div
+                  key={cat.id}
+                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${selectedMainId === cat.id ? 'bg-gray-50 text-[#ff5058] font-bold' : ''}`}
+                  onClick={() => setSelectedMainId(cat.id)}
+                >
+                  {cat.name}
+                </div>
+              ))}
+            </div>
+            <div className="w-1/3 border-r overflow-y-auto custom-scrollbar bg-gray-50/30">
+              {selectedMainCategory?.subCategories?.map((sub) => (
+                <div
+                  key={sub.id}
+                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${formData.category === sub.name ? 'text-[#ff5058] font-bold bg-white' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, category: sub.name }))}
+                >
+                  {sub.name}
+                </div>
+              )) || <div className="p-10 text-center text-gray-400">대분류 선택</div>}
+            </div>
+            <div className="w-1/3 flex items-center justify-center text-gray-300 bg-gray-50/50 italic">
+              소분류 없음
+            </div>
+          </div>
+          <p className="text-[#ff5058] text-xs font-bold italic">
+            선택한 카테고리 :{' '}
+            <span className="text-gray-800 not-italic">
+              {selectedMainCategory?.name} {formData.category && `> ${formData.category}`}
+            </span>
+          </p>
+        </SellerFormSection>
+
+        {/* 4. 상품상태 */}
+        <SellerFormSection label="상품상태">
+          <div className="flex flex-col gap-4">
             {PRODUCT_STATUS.map((status) => (
-              <label key={status.id} className="flex items-start gap-3 cursor-pointer group">
+              <label key={status.id} className="flex items-start gap-2 cursor-pointer group">
                 <input
                   type="radio"
                   name="status"
-                  className="w-5 h-5 accent-[#ff5058] mt-1"
+                  className="w-4 h-4 accent-[#ff5058] mt-0.5"
                   checked={formData.status === status.id}
                   onChange={() => setFormData({ ...formData, status: status.id })}
                 />
-                <div>
-                  <div className="font-bold text-gray-800 group-hover:text-black">
+                <div className="-mt-0.5">
+                  <div className="text-[13px] font-bold text-gray-700 group-hover:text-black">
                     {status.label}
                   </div>
-                  <div className="text-sm text-gray-400 mt-0.5">{status.desc}</div>
+                  <div className="text-[11px] text-gray-400">{status.desc}</div>
                 </div>
               </label>
             ))}
           </div>
-        </section>
+        </SellerFormSection>
 
-        {/* 5. 설명 섹션 */}
-        <section className={STYLES.section}>
-          <label className={STYLES.label}>설명</label>
-          <div className="w-3/4">
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="여러 장의 상품 사진과 구입 연도, 브랜드, 사용감, 하자 유무 등 상세 정보를 입력해 주세요."
-              className={`${STYLES.input} h-44 resize-none leading-relaxed`}
-              maxLength={2000}
+        {/* 5. 설명 & 태그 */}
+        <SellerFormSection label="설명">
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            placeholder="상세 정보를 입력해 주세요."
+            className={`${INPUT_STYLE} h-32 text-[13px] mb-4 resize-none leading-relaxed`}
+            maxLength={2000}
+          />
+          <div className="mb-2 text-[13px] font-bold">태그 (선택)</div>
+          <div className="flex flex-wrap gap-2 border border-gray-200 p-2 min-h-[42px] bg-white">
+            {formData.tags.map((tag, i) => (
+              <span
+                key={i}
+                className="bg-gray-100 px-2 py-1 text-xs rounded-sm flex items-center gap-1 font-medium"
+              >
+                #{tag}{' '}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      tags: prev.tags.filter((_, idx) => idx !== i),
+                    }))
+                  }
+                  className="text-gray-400 hover:text-black"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+            <input
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              placeholder="태그를 입력해 주세요 (최대 5개)"
+              className="flex-1 outline-none text-xs"
             />
-            <div className="text-right text-gray-400 text-sm mt-2">
-              {formData.description.length}/2000
-            </div>
           </div>
-        </section>
+        </SellerFormSection>
 
-        {/* 6. 가격 섹션 */}
-        <h2 className="text-2xl font-bold mt-20 mb-8 pb-4 border-b-2 border-black">가격</h2>
-        <section className={STYLES.section}>
-          <label className={STYLES.label}>가격</label>
-          <div className="w-3/4 flex items-center gap-8">
+        {/* --- 가격 섹션 --- */}
+        <h2 className="text-xl font-bold mt-12 mb-6 pb-3 border-b-2 border-black">가격</h2>
+        <SellerFormSection label="가격">
+          <div className="flex flex-col gap-4">
             <div className="relative w-72">
               <input
                 type="number"
@@ -218,29 +197,108 @@ const SellerManager = () => {
                 value={formData.price || ''}
                 onChange={handleInputChange}
                 placeholder="가격을 입력해 주세요."
-                className={`${STYLES.input} text-lg`}
+                className={INPUT_STYLE}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 font-medium">원</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                원
+              </span>
             </div>
-            <label className="flex items-center gap-2 cursor-pointer font-bold select-none">
-              <input type="checkbox" className="w-6 h-6 accent-[#ff5058]" />
-              <span>가격제안 받기</span>
+            <label className="flex items-center gap-2 text-[13px] cursor-pointer select-none">
+              <input type="checkbox" className="w-5 h-5 accent-[#ff5058] rounded-full" />
+              <span className="text-gray-700">가격제안 받기</span>
             </label>
           </div>
-        </section>
+        </SellerFormSection>
 
-        {/* 하단 고정 푸터 */}
-        <footer className={STYLES.footer}>
-          <div className="max-w-[1024px] mx-auto flex justify-end gap-3 px-4">
+        {/* --- 택배거래 섹션 --- */}
+        <h2 className="text-xl font-bold mt-12 mb-6 pb-3 border-b-2 border-black">택배거래</h2>
+        <SellerFormSection label="배송비">
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 text-[13px] cursor-pointer group">
+                <input
+                  type="radio"
+                  name="shippingFee"
+                  checked={formData.shippingFee === 'include'}
+                  onChange={() => setFormData({ ...formData, shippingFee: 'include' })}
+                  className="w-5 h-5 accent-[#ff5058]"
+                />
+                <span className="text-gray-700">배송비포함</span>
+              </label>
+              <label className="flex items-center gap-2 text-[13px] cursor-pointer group">
+                <input
+                  type="radio"
+                  name="shippingFee"
+                  checked={formData.shippingFee === 'exclude'}
+                  onChange={() => setFormData({ ...formData, shippingFee: 'exclude' })}
+                  className="w-5 h-5 accent-[#ff5058]"
+                />
+                <span className="text-gray-700">배송비별도</span>
+              </label>
+            </div>
+            <label className="flex items-center gap-2 text-[13px] text-gray-400 cursor-not-allowed select-none">
+              <div className="w-5 h-5 border border-gray-200 rounded-full flex items-center justify-center bg-gray-50">
+                <span className="text-[10px]">✓</span>
+              </div>
+              <span>다음 등록시에도 사용</span>
+            </label>
+          </div>
+        </SellerFormSection>
+
+        {/* --- 추가정보 섹션 --- */}
+        <h2 className="text-xl font-bold mt-12 mb-6 pb-3 border-b-2 border-black">추가정보</h2>
+        <SellerFormSection label="직거래">
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 text-[13px] cursor-pointer group">
+              <input
+                type="radio"
+                name="directTrade"
+                checked={formData.directTrade}
+                onChange={() => setFormData({ ...formData, directTrade: true })}
+                className="w-5 h-5 accent-[#ff5058]"
+              />
+              <span className="text-gray-700">가능</span>
+            </label>
+            <label className="flex items-center gap-2 text-[13px] cursor-pointer group">
+              <input
+                type="radio"
+                name="directTrade"
+                checked={!formData.directTrade}
+                onChange={() => setFormData({ ...formData, directTrade: false })}
+                className="w-5 h-5 accent-[#ff5058]"
+              />
+              <span className="text-gray-700">불가</span>
+            </label>
+          </div>
+        </SellerFormSection>
+
+        <SellerFormSection label="수량" isLast>
+          <div className="relative w-72">
+            <input
+              type="number"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleInputChange}
+              className={`${INPUT_STYLE} pl-4`}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">
+              개
+            </span>
+          </div>
+        </SellerFormSection>
+
+        {/* 하단 푸터 */}
+        <footer className="fixed bottom-0 left-0 right-0 bg-white border-t p-3.5 z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+          <div className="max-w-[850px] mx-auto flex justify-end gap-3 px-4">
             <button
               type="button"
-              className={`${STYLES.submitBtn} bg-gray-100 text-gray-700 hover:bg-gray-200`}
+              className="px-10 py-3 text-sm font-bold bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors"
             >
               임시저장
             </button>
             <button
               type="submit"
-              className={`${STYLES.submitBtn} bg-[#ff5058] text-white shadow-md hover:bg-[#e64951]`}
+              className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-lg active:scale-95 transition-all hover:bg-[#e64951]"
             >
               등록하기
             </button>
