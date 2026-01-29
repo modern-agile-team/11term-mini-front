@@ -44,11 +44,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <OverlayProvider>
-      <Router>
+    <Router>
+      <OverlayProvider>
         <AppContent />
-      </Router>
-    </OverlayProvider>
+      </OverlayProvider>
+    </Router>
   );
 }
 
