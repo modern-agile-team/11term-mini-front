@@ -1,6 +1,6 @@
 import React from 'react';
 import { ImageUploader } from './ImageUploader';
-import type { SectionProps } from '../../types/Sellerform';
+import type { SectionProps } from '../../types/SellerForm';
 
 const INPUT_STYLE =
   'w-full border border-gray-200 p-2.5 text-sm outline-none hover:border-gray-400 focus:border-black transition-all rounded-sm';
