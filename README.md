@@ -34,13 +34,19 @@
       <img src="https://github.com/Nova021114.png" width="200"/><br/>
       이재혁<br>
       <strong>Nova021114</strong><br>
-      <a href="https://github.com/Nova02114">@Nova021114</a>
+      <a href="https://github.com/Nova021114">@Nova021114</a>
     </td>
     <td align="center">
       <img src="https://github.com/junho04-max.png" width="200"/><br/>
       서준호<br>
       <strong>junho04-max</strong><br>
       <a href="https://github.com/junho04-max">@junho04-max</a>
+    </td>
+    <td align="center">
+      <img src="https://github.com/one3883.png" width="200"/><br/>
+      김대건<br>
+      <strong>one3883</strong><br>
+      <a href="https://github.com/one3883">@one3883</a>
     </td>
   </tr>
 </table>
@@ -52,8 +58,8 @@
     <td align="center">
       <img src="https://github.com/imdongyoung.png" width="200"/><br/>
       임동영<br>
-      <strong>imdongyeong</strong><br>
-      <a href="https://github.com/imdongyeong">@imdongyeong</a>
+      <strong>imdongyoung</strong><br>
+      <a href="https://github.com/imdongyoung">@imdongyoung</a>
     </td>
   </tr>
 </table>
