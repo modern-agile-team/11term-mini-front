@@ -1,6 +1,6 @@
 import ProductCard from '../components/ProductCard';
 import QuickMenu from '../components/QuickMenu';
-import HomeBanner from '../components/banner/HomeBanner';
+import HomeBanner from '../components/Banner/HomeBanner';
 import { MOCK_PRODUCTS } from '../data/mock';
 
 const Home = () => {

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ImageUploader } from './ImageUploader';
 import type { SectionProps } from '../../types/SellerForm';
 

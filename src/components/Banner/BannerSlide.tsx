@@ -1,4 +1,3 @@
-import React from 'react';
 import type { AdItem } from '../../data/ADmock';
 
 interface BannerSlideProps {
