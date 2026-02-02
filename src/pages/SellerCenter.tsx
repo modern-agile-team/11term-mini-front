@@ -1,4 +1,3 @@
-import React from 'react';
 import { LeftColumn } from '../SellerCenter/LeftColumn';
 import { MiddleColumn } from '../SellerCenter/MiddleColumn';
 import { RightColumn } from '../SellerCenter/RightColumn';
