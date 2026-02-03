@@ -1,34 +1,43 @@
 import { useParams } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+
 import CategoryNav from '../components/CategoryNav';
 import ProductCard from '../components/ProductCard';
 import QuickMenu from '../components/QuickMenu';
+import Filterbar from '../components/Filterbar';
 import { MOCK_PRODUCTS } from '../data/mock';
+
+import { sortProducts } from '../utils/sortProducts';
+import type { SortKey } from '../types/sort';
+import type { Product } from '../types/Product';
 
 const CategoryDetail = () => {
   const { id } = useParams();
+  const [sort, setSort] = useState<SortKey>('latest');
+
+  const products = MOCK_PRODUCTS as unknown as Product[];
+
+  const sortedProducts = useMemo(() => sortProducts(products, sort), [products, sort]);
 
   return (
     <div className="min-h-screen bg-white">
       <QuickMenu />
       <main className="max-w-[1024px] mx-auto px-4 py-8">
-        {/*  카테고리 상세 페이지 전용 경로 표시 */}
         <CategoryNav />
 
-        <div className="mt-8 mb-6 flex justify-between items-end border-b pb-4">
-          <h2 className="text-2xl font-bold">
-            {id} <span className="text-gray-400 text-lg font-normal ml-2">131,067개</span>
-          </h2>
-          <div className="flex gap-4 text-sm text-gray-500">
-            <button className="text-[#ff5058] font-bold">최신순</button>
-            <button>인기순</button>
-            <button>저가순</button>
-            <button>고가순</button>
-          </div>
-        </div>
+        <Filterbar
+          title={id ?? '카테고리'}
+          countText="131,067개"
+          sort={sort}
+          onChangeSort={setSort}
+        />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {MOCK_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {sortedProducts.map((product) => (
+            <ProductCard
+              key={(product as unknown as { id: string | number }).id}
+              product={product}
+            />
           ))}
         </div>
       </main>
