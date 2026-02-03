@@ -1,13 +1,13 @@
-type SortKey = 'latest' | 'popular' | 'low' | 'high';
+import type { SortKey } from '../types/sort';
 
-type Props = {
+type FilterbarProps = {
   title: string;
   countText: string;
   sort: SortKey;
   onChangeSort: (next: SortKey) => void;
 };
 
-const Filterbar = ({ title, countText, sort, onChangeSort }: Props) => {
+const Filterbar = ({ title, countText, sort, onChangeSort }: FilterbarProps) => {
   const active = 'text-[#ff5058] font-bold';
   const normal = 'hover:text-black';
 
