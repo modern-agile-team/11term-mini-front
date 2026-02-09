@@ -1,4 +1,3 @@
-// src/pages/CategoryDetail.tsx
 import { useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 
@@ -12,13 +11,21 @@ import { sortProducts } from '../utils/sortProducts';
 import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
 
+import { CATEGORIES } from '../data/categories';
+import { findCategoryPath } from '../utils/findCategoryPath';
+
 const CategoryDetail = () => {
   const { id } = useParams();
   const [sort, setSort] = useState<SortKey>('latest');
 
   const products = MOCK_PRODUCTS as Product[];
-
   const sortedProducts = useMemo(() => sortProducts(products, sort), [products, sort]);
+
+  const categoryTitle = useMemo(() => {
+    if (!id) return '카테고리';
+    const path = findCategoryPath(CATEGORIES, id);
+    return path.length > 0 ? path[path.length - 1].name : '카테고리';
+  }, [id]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -27,8 +34,8 @@ const CategoryDetail = () => {
         <CategoryNav />
 
         <Filterbar
-          title={id ?? '카테고리'}
-          countText={`${sortedProducts.length.toLocaleString()}개`}
+          title={categoryTitle}
+          countText={`${sortedProducts.length}개`}
           sort={sort}
           onChangeSort={setSort}
         />
