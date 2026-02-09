@@ -1,11 +1,5 @@
-import type { SortKey } from '../types/sort';
-
-type FilterbarProps = {
-  title: string;
-  countText: string;
-  sort: SortKey;
-  onChangeSort: (next: SortKey) => void;
-};
+// src/components/Filterbar.tsx
+import type { FilterbarProps } from '../types/sort';
 
 const Filterbar = ({ title, countText, sort, onChangeSort }: FilterbarProps) => {
   const active = 'text-[#ff5058] font-bold';

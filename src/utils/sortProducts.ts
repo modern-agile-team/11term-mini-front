@@ -1,3 +1,4 @@
+// src/utils/sortProducts.ts
 import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
 

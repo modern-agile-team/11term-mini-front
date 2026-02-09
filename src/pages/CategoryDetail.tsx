@@ -1,3 +1,4 @@
+// src/pages/CategoryDetail.tsx
 import { useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 
@@ -15,7 +16,7 @@ const CategoryDetail = () => {
   const { id } = useParams();
   const [sort, setSort] = useState<SortKey>('latest');
 
-  const products = MOCK_PRODUCTS as unknown as Product[];
+  const products = MOCK_PRODUCTS as Product[];
 
   const sortedProducts = useMemo(() => sortProducts(products, sort), [products, sort]);
 
@@ -27,17 +28,14 @@ const CategoryDetail = () => {
 
         <Filterbar
           title={id ?? '카테고리'}
-          countText="131,067개"
+          countText={`${sortedProducts.length.toLocaleString()}개`}
           sort={sort}
           onChangeSort={setSort}
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {sortedProducts.map((product) => (
-            <ProductCard
-              key={(product as unknown as { id: string | number }).id}
-              product={product}
-            />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </main>
