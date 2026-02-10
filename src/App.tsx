@@ -12,6 +12,8 @@ import SellerCenter from './pages/SellerCenter';
 import MyPage from './pages/Mypage';
 import SettingsPage from './pages/SettingsPage';
 import SellerManager from './components/seller/SellerManeger';
+import WithdrawReasonPage from './pages/WithdrawConfirmPage';
+import WithdrawConfirmPage from './pages/WithdrawReasonPage';
 
 const AppContent = () => {
   const location = useLocation();
@@ -35,6 +37,8 @@ const AppContent = () => {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/sell" element={<SellerManager />} />
+        <Route path="/settings/withdraw/reason" element={<WithdrawReasonPage />} />
+        <Route path="/settings/withdraw/confirm" element={<WithdrawConfirmPage />} />
       </Routes>
 
       <Footer />
