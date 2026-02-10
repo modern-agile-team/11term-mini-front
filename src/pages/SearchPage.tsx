@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MOCK_PRODUCTS } from '../data/mock';
+import api from '../api/axios';
+import type { Product } from '../types/Product';
 import ProductCard from '../components/ProductCard';
 
 type SortType = 'accuracy' | 'recent' | 'lowPrice' | 'highPrice';
@@ -9,20 +10,34 @@ const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
+  const [products, setProducts] = useState<Product[]>([]);
   const [sortType, setSortType] = useState<SortType>('accuracy');
 
-  // 1. 검색어 필터링
-  const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((p) => p.title.toLowerCase().includes(query.toLowerCase()));
-  }, [query]);
+  // 데이터 페칭 로직 추가
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/api/products');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('검색 데이터 로딩 실패:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
-  // 2. 정렬 로직
+  // 검색어 필터링
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => p.title.toLowerCase().includes(query.toLowerCase()));
+  }, [query, products]);
+
+  // 정렬 로직
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts];
 
     switch (sortType) {
       case 'recent':
-        return list.sort((a, b) => a.id - b.id);
+        return list.sort((a, b) => b.id - a.id);
       case 'lowPrice':
         return list.sort((a, b) => a.price - b.price);
       case 'highPrice':
@@ -35,7 +50,6 @@ const SearchPage = () => {
 
   return (
     <div className="max-w-[1024px] mx-auto px-4 py-8">
-      {/* 상단 검색 정보 및 정렬 탭 */}
       <div className="flex justify-between items-center mb-6 border-b pb-4">
         <div>
           <h2 className="text-xl inline">
@@ -64,14 +78,12 @@ const SearchPage = () => {
         </div>
       </div>
 
-      {/*  3. 상품 리스트 그리드 */}
-      <div className="grid grid-cols-5 gap-x-4 gap-y-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-10">
         {sortedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
-      {/* 결과 없음 처리 */}
       {sortedProducts.length === 0 && (
         <div className="py-40 text-center text-gray-400">검색 결과가 없습니다.</div>
       )}
