@@ -24,6 +24,7 @@ const WithdrawConfirmPage = () => {
 
       <div className="px-5 py-8 flex-1">
         <h2 className="text-xl font-bold mb-6">탈퇴 전 유의사항</h2>
+
         <div className="bg-gray-50 p-4 rounded-lg mb-8">
           <p className="text-sm text-gray-600">
             선택하신 탈퇴 사유: <span className="font-bold text-gray-900">{reason}</span>
@@ -38,7 +39,7 @@ const WithdrawConfirmPage = () => {
             <span>•</span> 유료 구매한 아이템은 자동 소멸되며, 환불이 불가능합니다.
           </li>
           <li className="flex gap-2">
-            <span>•</span> 탈퇴 시, 계정의 모든 정보는 삭제되며 복구되지 않습니다.
+            <span>•</span> 탈퇴 시, 계정의 모든 정보는 삭제되며 재가입 시에도 복구되지 않습니다.
           </li>
           <li className="flex gap-2 font-medium text-gray-700">
             <span>•</span> 사용하지 않은 번개포인트는 모두 소멸됩니다.

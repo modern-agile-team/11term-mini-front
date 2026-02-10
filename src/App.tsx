@@ -12,12 +12,13 @@ import SellerCenter from './pages/SellerCenter';
 import MyPage from './pages/Mypage';
 import SettingsPage from './pages/SettingsPage';
 import SellerManager from './components/seller/SellerManeger';
-import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
 import WithdrawReasonPage from './pages/WithdrawReasonPage';
+import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
 
 const AppContent = () => {
   const location = useLocation();
   const isSellerCenter = location.pathname === '/seller-center';
+
   const handleLoginClick = () => {
     overlay.open(({ isOpen, close }) => <LoginModal isOpen={isOpen} onClose={close} />);
   };
@@ -25,7 +26,6 @@ const AppContent = () => {
   return (
     <div className="bg-[#f9f9f9] min-h-screen relative">
       <Header onLoginClick={handleLoginClick} />
-
       {!isSellerCenter && <QuickMenu />}
 
       <Routes>
