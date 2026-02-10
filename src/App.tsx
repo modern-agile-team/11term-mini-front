@@ -12,8 +12,8 @@ import SellerCenter from './pages/SellerCenter';
 import MyPage from './pages/Mypage';
 import SettingsPage from './pages/SettingsPage';
 import SellerManager from './components/seller/SellerManeger';
-import WithdrawReasonPage from './pages/WithdrawConfirmPage';
-import WithdrawConfirmPage from './pages/WithdrawReasonPage';
+import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
+import WithdrawReasonPage from './pages/WithdrawReasonPage';
 
 const AppContent = () => {
   const location = useLocation();
