@@ -1,60 +1,112 @@
+// src/components/CategoryNav.tsx
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+
 import { CATEGORIES } from '../data/categories';
+import type { Category } from '../types/Category';
+import { findCategoryPath } from '../utils/findCategoryPath';
 
 const CategoryNav = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const path = useMemo(() => {
+    if (!id) return [];
+    return findCategoryPath(CATEGORIES, id);
+  }, [id]);
+
+  const main = path[0] ?? null;
+  const mid = path[1] ?? null;
+  const sub = path[2] ?? null;
+
+  const mainList = CATEGORIES;
+
+  const midList = useMemo<Category[]>(() => {
+    if (!main) return [];
+    return (main.subCategories ?? []) as Category[];
+  }, [main]);
+
+  const subList = useMemo<Category[]>(() => {
+    if (!mid) return [];
+    return (mid.subCategories ?? []) as Category[];
+  }, [mid]);
+
+  const go = (nextId: string) => {
+    navigate(`/category/${nextId}`);
+  };
+
+  const menu =
+    'absolute left-0 top-full mt-0 w-48 bg-white border border-gray-200 rounded shadow-md z-50 max-h-72 overflow-auto';
+
+  const item = 'w-full text-left px-3 py-2 text-sm hover:bg-gray-50';
+
+  const btn =
+    'flex items-center gap-1 px-3 py-1 border border-gray-200 rounded hover:border-gray-400 bg-white';
+
   return (
     <section className="w-full border-b border-gray-200 bg-white">
       <div className="max-w-[1024px] mx-auto py-4 px-4 flex items-center text-sm text-gray-600 gap-2">
-        {/* 홈 아이콘 */}
-        <span className="cursor-pointer hover:text-black flex items-center gap-1">🏠 홈</span>
-        <span className="text-gray-300 mx-1">〉</span>
+        <Link to="/" className="cursor-pointer hover:text-black flex items-center gap-1">
+          🏠 홈
+        </Link>
 
-        {/* 대분류 드롭다운 */}
+        <span className="text-gray-300 mx-1">〉</span>
         <div className="relative group">
-          <button className="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded hover:border-gray-400 bg-white">
-            여성의류{' '}
+          <button className={btn}>
+            {main?.name ?? '대분류'}
             <span className="text-[10px] text-gray-400 group-hover:rotate-180 transition-transform">
               ▼
             </span>
           </button>
-          {/* 실제 드롭다운 목록 */}
-          <ul className="absolute left-0 top-full mt-1 w-40 bg-white border border-gray-200 shadow-lg hidden group-hover:block z-50">
-            {CATEGORIES.map((cat) => (
-              <li key={cat.id} className="px-3 py-2 hover:bg-gray-50 cursor-pointer">
-                {cat.name}
+
+          <ul className={`${menu} hidden group-hover:block`}>
+            {mainList.map((c) => (
+              <li key={c.id}>
+                <button className={item} onClick={() => go(c.id)}>
+                  {c.name}
+                </button>
               </li>
             ))}
           </ul>
         </div>
 
         <span className="text-gray-300 mx-1">〉</span>
-
-        {/* 중분류 드롭다운 */}
-        <div className="relative group">
-          <button className="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded hover:border-gray-400 bg-white">
-            아우터{' '}
+        <div className={`relative group ${!main ? 'pointer-events-none opacity-50' : ''}`}>
+          <button className={btn}>
+            {mid?.name ?? '중분류'}
             <span className="text-[10px] text-gray-400 group-hover:rotate-180 transition-transform">
               ▼
             </span>
           </button>
-          <ul className="absolute left-0 top-full mt-1 w-40 bg-white border border-gray-200 shadow-lg hidden group-hover:block z-50">
-            <li className="px-3 py-2 hover:bg-gray-50 cursor-pointer">아우터</li>
-            <li className="px-3 py-2 hover:bg-gray-50 cursor-pointer">상의</li>
+
+          <ul className={`${menu} hidden group-hover:block`}>
+            {midList.map((c) => (
+              <li key={c.id}>
+                <button className={item} onClick={() => go(c.id)}>
+                  {c.name}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
 
         <span className="text-gray-300 mx-1">〉</span>
-
-        {/* 소분류 드롭다운  */}
-        <div className="relative group">
-          <button className="flex items-center gap-1 px-3 py-1 border border-gray-200 rounded border-gray-400 font-bold text-black bg-white">
-            패딩{' '}
+        <div className={`relative group ${!mid ? 'pointer-events-none opacity-50' : ''}`}>
+          <button className={btn}>
+            {sub?.name ?? '소분류'}
             <span className="text-[10px] text-gray-400 group-hover:rotate-180 transition-transform">
               ▼
             </span>
           </button>
-          <ul className="absolute left-0 top-full mt-1 w-40 bg-white border border-gray-200 shadow-lg hidden group-hover:block z-50 font-normal">
-            <li className="px-3 py-2 hover:bg-gray-50 cursor-pointer">패딩</li>
-            <li className="px-3 py-2 hover:bg-gray-50 cursor-pointer">코트</li>
+
+          <ul className={`${menu} hidden group-hover:block`}>
+            {subList.map((c) => (
+              <li key={c.id}>
+                <button className={item} onClick={() => go(c.id)}>
+                  {c.name}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
