@@ -1,4 +1,4 @@
 import { authhandler } from './authhandler';
-import { productHandlers } from './producthandlers';
+import { aa } from './producthandler';
 
-export const handlers = [...authhandler, ...productHandlers];
+export const handlers = [...authhandler, ...aa];
