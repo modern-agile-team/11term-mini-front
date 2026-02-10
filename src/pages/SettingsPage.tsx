@@ -14,11 +14,7 @@ const SettingsPage = () => {
   };
 
   const handleWithdraw = () => {
-    if (window.confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.')) {
-      alert('탈퇴 처리가 완료되었습니다.');
-      logout();
-      navigate('/');
-    }
+    navigate('/settings/withdraw/reason');
   };
 
   const menuItems = [
