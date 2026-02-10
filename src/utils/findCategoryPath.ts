@@ -1,19 +1,25 @@
 import type { Category } from '../types/Category';
 
 export const findCategoryPath = (categories: Category[], targetId: string): Category[] => {
-  const dfs = (nodes: Category[], path: Category[]): Category[] | null => {
-    for (const node of nodes) {
-      const next = [...path, node];
-      if (node.id === targetId) return next;
+  const path: Category[] = [];
 
-      const children = node.subCategories ?? [];
+  const dfs = (nodes: Category[]): boolean => {
+    for (const node of nodes) {
+      path.push(node);
+
+      if (node.id === targetId) return true;
+
+      const children = (node.subCategories ?? []) as Category[];
       if (children.length > 0) {
-        const found = dfs(children as Category[], next);
-        if (found) return found;
+        if (dfs(children)) return true;
       }
+
+      path.pop();
     }
-    return null;
+
+    return false;
   };
 
-  return dfs(categories, []) ?? [];
+  dfs(categories);
+  return path;
 };
