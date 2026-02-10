@@ -2,10 +2,9 @@ import { http, HttpResponse } from 'msw';
 import { MOCK_PRODUCTS } from './mock';
 import type { Product, CreateProductInput } from '../types/Product';
 
-// 로컬 스토리지에서 데이터를 가져오거나 초기화하는 헬퍼 함수
+// 로컬 스토리지 데이터 관리 헬퍼
 const getStoredProducts = (): Product[] => {
   const stored = localStorage.getItem('products');
-  // 1. 데이터가 존재하면 그대로 파싱해서 반환 (유지 핵심!)
   if (stored) {
     try {
       return JSON.parse(stored);
@@ -13,23 +12,41 @@ const getStoredProducts = (): Product[] => {
       console.error('로컬스토리지 파싱 에러:', e);
     }
   }
-
-  // 2. 데이터가 아예 없을 때만(처음 접속 시) MOCK_PRODUCTS를 넣음
   localStorage.setItem('products', JSON.stringify(MOCK_PRODUCTS));
   return MOCK_PRODUCTS;
 };
 
 export const producthandler = [
-  // 1. 전체 상품 목록 조회 (홈 화면 & 검색용)
+  // 1. 전체 상품 목록 조회
   http.get('/api/products', () => {
-    console.log('✅ MSW: 상품 목록 요청을 가로챘습니다.');
     const products = getStoredProducts();
     return HttpResponse.json(products);
   }),
 
-  // 2. 상품 등록 (판매하기용)
+  // 2. 특정 상품 상세 조회 (조회수 증가 로직 포함)
+  http.get('/api/products/:id', ({ params }) => {
+    const { id } = params;
+    const products = getStoredProducts();
+    const index = products.findIndex((p) => String(p.id) === String(id));
+
+    if (index === -1) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    // 조회수 1 증가
+    products[index] = {
+      ...products[index],
+      views: (products[index].views || 0) + 1,
+    };
+
+    // 업데이트된 목록 저장
+    localStorage.setItem('products', JSON.stringify(products));
+
+    return HttpResponse.json(products[index]);
+  }),
+
+  // 3. 상품 등록
   http.post('/api/products', async ({ request }) => {
-    console.log('✅ MSW: 상품 등록 요청을 가로챘습니다!');
     const inputData = (await request.json()) as CreateProductInput;
     const products = getStoredProducts();
 
@@ -39,9 +56,19 @@ export const producthandler = [
       price: Number(inputData.price),
       location: inputData.location || '지역 정보 없음',
       createdAt: new Date().toISOString(),
-      image: inputData.images?.[0] || 'https://via.placeholder.com/400',
+      // Blob URL 깨짐 방지를 위해 임시 이미지 활용
+      image: inputData.images?.[0] || `https://picsum.photos/400/400?random=${Date.now()}`,
       isThunderPay: inputData.isThunderPay ?? true,
+
+      // 확장 필드 초기화
+      views: 0,
+      wishCount: 0,
+      description: inputData.description || '',
+      category: inputData.category || '기타',
+      status: inputData.status || 'NEW',
+      tags: inputData.tags || [],
     };
+
     const updatedProducts = [newProduct, ...products];
     localStorage.setItem('products', JSON.stringify(updatedProducts));
 
