@@ -23,7 +23,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '애플워치 SE2 44mm GPS 미개봉',
     price: 320000,
     image: 'https://loremflickr.com/400/400/applewatch',
-    createdAt: '방금 전',
+    createdAt: new Date(Date.now() - 1000 * 60).toISOString(), // 1분 전
     location: '서울 강남구',
   },
   {
@@ -31,7 +31,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '아이폰 15 프로 128GB 티타늄',
     price: 1150000,
     image: 'https://loremflickr.com/400/400/iphone',
-    createdAt: '5분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(), // 5분 전
     location: '경기 수원시',
   },
   {
@@ -39,7 +39,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '소니 WH-1000XM5 헤드셋',
     price: 380000,
     image: 'https://loremflickr.com/400/400/headphone',
-    createdAt: '13분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 13).toISOString(), // 13분 전
     location: '서울 마포구',
   },
   {
@@ -47,7 +47,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '아이패드 에어 5세대 64GB',
     price: 620000,
     image: 'https://loremflickr.com/400/400/ipad',
-    createdAt: '20분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(), // 20분 전
     location: '대구 중구',
   },
   {
@@ -55,7 +55,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '로지텍 MX Master 3S 마우스',
     price: 95000,
     image: 'https://loremflickr.com/400/400/mouse',
-    createdAt: '45분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45분 전
     location: '인천 연수구',
   },
   {
@@ -63,7 +63,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '닌텐도 스위치 OLED 화이트',
     price: 340000,
     image: 'https://loremflickr.com/400/400/nintendo',
-    createdAt: '1시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1시간 전
     location: '부산 해운대구',
   },
   {
@@ -71,7 +71,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '맥북 에어 M2 13인치 램 16G',
     price: 1450000,
     image: 'https://loremflickr.com/400/400/macbook',
-    createdAt: '2시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2시간 전
     location: '대전 서구',
   },
   {
@@ -79,7 +79,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '에어팟 프로 2세대 C타입',
     price: 240000,
     image: 'https://loremflickr.com/400/400/airpods',
-    createdAt: '3시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3시간 전
     location: '서울 송파구',
   },
   {
@@ -87,7 +87,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '다이슨 에어랩 멀티 스타일러',
     price: 480000,
     image: 'https://loremflickr.com/400/400/dyson',
-    createdAt: '5시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5시간 전
     location: '경기 용인시',
   },
   {
@@ -95,7 +95,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '플레이스테이션 5 디스크 에디션',
     price: 450000,
     image: 'https://loremflickr.com/400/400/ps5',
-    createdAt: '7시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(), // 7시간 전
     location: '광주 북구',
   },
 
@@ -105,7 +105,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '나이키 덩크 로우 범고래 270',
     price: 125000,
     image: 'https://loremflickr.com/400/400/sneakers',
-    createdAt: '10분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(), // 10분 전
     location: '서울 성동구',
   },
   {
@@ -113,7 +113,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '아크테릭스 헬리아드 15 백팩',
     price: 190000,
     image: 'https://loremflickr.com/400/400/backpack',
-    createdAt: '30분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30분 전
     location: '서울 노원구',
   },
   {
@@ -121,7 +121,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '스톤아일랜드 와펜 맨투맨 L',
     price: 280000,
     image: 'https://loremflickr.com/400/400/sweatshirt',
-    createdAt: '1시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1시간 전
     location: '경기 부천시',
   },
   {
@@ -129,7 +129,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '폴로 랄프로렌 케이블 니트 M',
     price: 85000,
     image: 'https://loremflickr.com/400/400/knit',
-    createdAt: '2시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2시간 전
     location: '충남 천안시',
   },
   {
@@ -137,7 +137,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '파타고니아 레트로X 자켓 L',
     price: 180000,
     image: 'https://loremflickr.com/400/400/jacket',
-    createdAt: '4시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4시간 전
     location: '전북 전주시',
   },
   {
@@ -145,7 +145,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '가니 로고 비니 핑크 미개봉',
     price: 55000,
     image: 'https://loremflickr.com/400/400/beanie',
-    createdAt: '6시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6시간 전
     location: '서울 은평구',
   },
   {
@@ -153,7 +153,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '살로몬 XT-6 화이트 265',
     price: 210000,
     image: 'https://loremflickr.com/400/400/salomon',
-    createdAt: '8시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8시간 전
     location: '경기 안양시',
   },
   {
@@ -161,7 +161,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '코스 퀼티드 미니백 구름백',
     price: 60000,
     image: 'https://loremflickr.com/400/400/bag',
-    createdAt: '12시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12시간 전
     location: '울산 남구',
   },
   {
@@ -169,7 +169,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '바버 인터내셔널 자켓 40',
     price: 230000,
     image: 'https://loremflickr.com/400/400/barbour',
-    createdAt: '어제',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 어제
     location: '서울 용산구',
   },
   {
@@ -177,7 +177,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '메종 키츠네 가디건 네이비 L',
     price: 150000,
     image: 'https://loremflickr.com/400/400/cardigan',
-    createdAt: '어제',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 25).toISOString(), // 어제
     location: '경기 고양시',
   },
 
@@ -187,7 +187,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '후지필름 X100V 실버 풀박스',
     price: 1850000,
     image: 'https://loremflickr.com/400/400/camera',
-    createdAt: '5분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
     location: '서울 마포구',
   },
   {
@@ -195,7 +195,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '마샬 엠버튼 2 블루투스 스피커',
     price: 140000,
     image: 'https://loremflickr.com/400/400/speaker',
-    createdAt: '25분 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
     location: '경기 화성시',
   },
   {
@@ -203,7 +203,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '레고 스타워즈 밀레니엄 팔콘',
     price: 250000,
     image: 'https://loremflickr.com/400/400/lego',
-    createdAt: '1시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
     location: '강원 원주시',
   },
   {
@@ -211,7 +211,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '캐논 EOS R6 바디 급매',
     price: 1950000,
     image: 'https://loremflickr.com/400/400/canon',
-    createdAt: '3시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
     location: '서울 서대문구',
   },
   {
@@ -219,7 +219,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '펜더 스트라토캐스터 기타',
     price: 1200000,
     image: 'https://loremflickr.com/400/400/guitar',
-    createdAt: '5시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
     location: '서울 광진구',
   },
   {
@@ -227,7 +227,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '코닥 펀세이버 일회용 카메라',
     price: 18000,
     image: 'https://loremflickr.com/400/400/film',
-    createdAt: '10시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString(),
     location: '경기 파주시',
   },
   {
@@ -235,7 +235,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '보드게임 스플렌더 확장 포함',
     price: 35000,
     image: 'https://loremflickr.com/400/400/boardgame',
-    createdAt: '어제',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     location: '충북 청주시',
   },
   {
@@ -243,7 +243,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '헬리녹스 체어원 블랙 2개',
     price: 180000,
     image: 'https://loremflickr.com/400/400/camping',
-    createdAt: '어제',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
     location: '경남 김해시',
   },
   {
@@ -251,7 +251,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '야마하 P-125 디지털 피아노',
     price: 450000,
     image: 'https://loremflickr.com/400/400/piano',
-    createdAt: '2일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2일 전
     location: '서울 동대문구',
   },
   {
@@ -259,7 +259,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '포켓몬 카드 뮤츠 VSTAR SAR',
     price: 120000,
     image: 'https://loremflickr.com/400/400/card',
-    createdAt: '3일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3일 전
     location: '부산 수영구',
   },
 
@@ -269,7 +269,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '브롬톤 M6R 블랙 에디션',
     price: 2400000,
     image: 'https://loremflickr.com/400/400/bicycle',
-    createdAt: '1시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
     location: '서울 강동구',
   },
   {
@@ -277,7 +277,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '발뮤다 더 토스터 화이트',
     price: 190000,
     image: 'https://loremflickr.com/400/400/toaster',
-    createdAt: '2시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
     location: '경기 남양주시',
   },
   {
@@ -285,7 +285,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '네스프레소 버츄오 플러스',
     price: 110000,
     image: 'https://loremflickr.com/400/400/coffee',
-    createdAt: '4시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
     location: '인천 부평구',
   },
   {
@@ -293,7 +293,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '몽블랑 사토리얼 카드지갑',
     price: 150000,
     image: 'https://loremflickr.com/400/400/wallet',
-    createdAt: '6시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
     location: '서울 관악구',
   },
   {
@@ -301,7 +301,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '프라이탁 하와이 파이브 오',
     price: 220000,
     image: 'https://loremflickr.com/400/400/freitag',
-    createdAt: '8시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
     location: '서울 동작구',
   },
   {
@@ -309,7 +309,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '루이스폴센 PH5 조명',
     price: 750000,
     image: 'https://loremflickr.com/400/400/lamp',
-    createdAt: '10시간 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString(),
     location: '제주 제주시',
   },
   {
@@ -317,7 +317,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '테일러메이드 스텔스 드라이버',
     price: 320000,
     image: 'https://loremflickr.com/400/400/golf',
-    createdAt: '어제',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
     location: '경북 포항시',
   },
   {
@@ -325,7 +325,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '요가매트 룰루레몬 5mm',
     price: 70000,
     image: 'https://loremflickr.com/400/400/yoga',
-    createdAt: '어제',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 25).toISOString(),
     location: '서울 서초구',
   },
   {
@@ -333,7 +333,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '르 라보 상탈 33 50ml',
     price: 180000,
     image: 'https://loremflickr.com/400/400/perfume',
-    createdAt: '2일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
     location: '경기 김포시',
   },
   {
@@ -341,7 +341,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '이솝 레저렉션 핸드밤 75ml',
     price: 25000,
     image: 'https://loremflickr.com/400/400/aesop',
-    createdAt: '2일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2.5).toISOString(),
     location: '서울 성북구',
   },
   {
@@ -349,7 +349,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '딥티크 도손 오드퍼퓸',
     price: 140000,
     image: 'https://loremflickr.com/400/400/diptyque',
-    createdAt: '3일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
     location: '경기 성남시',
   },
   {
@@ -357,7 +357,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '요시다 포터 탱커 숄더백',
     price: 280000,
     image: 'https://loremflickr.com/400/400/porter',
-    createdAt: '3일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3.5).toISOString(),
     location: '서울 강남구',
   },
   {
@@ -365,7 +365,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '아디다스 삼바 비건 화이트',
     price: 110000,
     image: 'https://loremflickr.com/400/400/adidas',
-    createdAt: '4일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
     location: '서울 양천구',
   },
   {
@@ -373,7 +373,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '올리브영 기프트카드 5만원권',
     price: 46000,
     image: 'https://loremflickr.com/400/400/giftcard',
-    createdAt: '4일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4.5).toISOString(),
     location: '온라인거래',
   },
   {
@@ -381,7 +381,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '스타벅스 에코백 미사용',
     price: 10000,
     image: 'https://loremflickr.com/400/400/starbucks',
-    createdAt: '5일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     location: '서울 금천구',
   },
   {
@@ -389,7 +389,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '킨토 데이오프 텀블러 500ml',
     price: 30000,
     image: 'https://loremflickr.com/400/400/tumbler',
-    createdAt: '5일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5.5).toISOString(),
     location: '경기 시흥시',
   },
   {
@@ -397,7 +397,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '러쉬 더티 스프레이 200ml',
     price: 35000,
     image: 'https://loremflickr.com/400/400/lush',
-    createdAt: '6일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
     location: '서울 중랑구',
   },
   {
@@ -405,7 +405,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '크리드 어벤투스 100ml',
     price: 350000,
     image: 'https://loremflickr.com/400/400/creed',
-    createdAt: '6일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6.5).toISOString(),
     location: '서울 도봉구',
   },
   {
@@ -413,7 +413,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '우영미 백로고 반팔 티셔츠',
     price: 190000,
     image: 'https://loremflickr.com/400/400/tshirt',
-    createdAt: '일주일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(), // 일주일 전
     location: '인천 계양구',
   },
   {
@@ -421,7 +421,7 @@ export const MOCK_PRODUCTS: Product[] = [
     title: '메종 마르지엘라 레플리카 향수',
     price: 95000,
     image: 'https://loremflickr.com/400/400/replica',
-    createdAt: '일주일 전',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7.5).toISOString(),
     location: '서울 구로구',
   },
 ];

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { Account, LoginData, SignupData } from '../types/Account';
 
-export const handlers = [
+export const authhandler = [
   // 1. 로그인: wishList 필드 추가 반환
   http.post('/api/auth/login', async ({ request }) => {
     const { email, password } = (await request.json()) as LoginData;
