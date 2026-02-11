@@ -2,7 +2,6 @@ import type { Product } from '../types/Product';
 import type { AdItem } from './ADmock';
 
 export const MOCK_PRODUCTS: Product[] = [
-  // 직접 정의한 상세 데이터 (1~5, 11, 12, 21번)
   {
     id: 1,
     title: '애플워치 SE2 44mm GPS 미개봉',
@@ -478,7 +477,6 @@ export const MOCK_PRODUCTS: Product[] = [
   })),
 ];
 
-// 광고 데이터 (필요 시 사용)
 export const MOCK_ADS: AdItem[] = [
   {
     id: 1,

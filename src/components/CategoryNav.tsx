@@ -1,4 +1,3 @@
-// src/components/CategoryNav.tsx
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 

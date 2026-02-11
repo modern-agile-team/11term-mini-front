@@ -1,14 +1,13 @@
-import { useState, useEffect } from 'react'; // 추가
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import QuickMenu from '../components/QuickMenu';
 import HomeBanner from '../components/Banner/HomeBanner';
-import api from '../api/axios'; // 추가
-import type { Product } from '../types/Product'; // 타입 추가
+import api from '../api/axios';
+import type { Product } from '../types/Product';
 
 const Home = () => {
-  const [products, setProducts] = useState<Product[]>([]); // 상태 관리 추가
+  const [products, setProducts] = useState<Product[]>([]);
 
-  // 컴포넌트 마운트 시 데이터 가져오기
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -44,7 +43,6 @@ const Home = () => {
 
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {/* MOCK_PRODUCTS 대신 상태값 products 사용 */}
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
