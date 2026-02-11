@@ -17,4 +17,16 @@ api.interceptors.request.use(
   },
 );
 
+api.interceptors.response.use(
+  (response) => {
+    if (response.data === undefined || response.data === null) {
+      response.data = [];
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
 export default api;
