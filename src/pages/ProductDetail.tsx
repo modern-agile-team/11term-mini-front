@@ -30,6 +30,7 @@ const ProductDetail = () => {
     if (id) fetchProduct();
   }, [id]);
 
+  // TODO: 리액트 suspense
   if (loading) {
     return (
       <div className="py-40 text-center text-gray-400 font-bold animate-pulse text-xl">
