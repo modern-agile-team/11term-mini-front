@@ -3,21 +3,48 @@ import { SellerFormSection } from './SellerFormSection';
 import { CATEGORIES } from '../../data/categories';
 import { PRODUCT_STATUS } from '../../types/Product';
 import { SellerSubNav } from './SellerNav';
+import api from '../../api/axios';
+import { useNavigate } from 'react-router-dom';
 
 const SellerManager = () => {
+  const navigate = useNavigate();
   const {
-    formData, setFormData, selectedMainId, setSelectedMainId,
-    tagInput, setTagInput, handleImageUpload, removeImage,
-    handleInputChange, handleTagKeyDown,
+    formData,
+    setFormData,
+    selectedMainId,
+    setSelectedMainId,
+    tagInput,
+    setTagInput,
+    handleImageUpload,
+    removeImage,
+    handleInputChange,
+    handleTagKeyDown,
   } = useSellerForm();
 
   const selectedMainCategory = CATEGORIES.find((cat) => cat.id === selectedMainId);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    //  간단한 유효성 검사
+    if (formData.images.length === 0) return alert('상품 이미지를 최소 1장 등록해주세요.');
+    if (!formData.title.trim()) return alert('상품명을 입력해주세요.');
+    if (!formData.category) return alert('카테고리를 선택해주세요.');
+    if (formData.price <= 0) return alert('올바른 가격을 입력해주세요.');
+
+    try {
+      await api.post('/api/products', formData);
+      alert('상품이 성공적으로 등록되었습니다!');
+      navigate('/');
+    } catch (error) {
+      console.error('상품 등록 실패:', error);
+      alert('상품 등록 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen pb-32 text-gray-800 text-sm">
       <SellerSubNav />
-
-      <form className="max-w-[850px] mx-auto px-4 py-8" onSubmit={(e) => e.preventDefault()}>
+      <form className="max-w-[850px] mx-auto px-4 py-8" onSubmit={handleSubmit}>
         <h2 className="text-xl font-bold mb-6 pb-3 border-b-2 border-black">상품정보</h2>
 
         {/* 1. 상품이미지 */}
@@ -44,7 +71,7 @@ const SellerManager = () => {
           maxLength={40}
         />
 
-        {/* 3. 카테고리  */}
+        {/* 3. 카테고리 */}
         <SellerFormSection label="카테고리" required>
           <div className="border border-gray-200 h-60 flex text-[13px] mb-3 bg-white">
             <div className="w-1/3 border-r overflow-y-auto custom-scrollbar">
@@ -74,13 +101,14 @@ const SellerManager = () => {
             </div>
           </div>
           <p className="text-[#ff5058] text-xs font-bold italic">
-            선택한 카테고리 : <span className="text-gray-800 not-italic">
+            선택한 카테고리 :{' '}
+            <span className="text-gray-800 not-italic">
               {selectedMainCategory?.name} {formData.category && `> ${formData.category}`}
             </span>
           </p>
         </SellerFormSection>
 
-        {/* 4. 상품상태  */}
+        {/* 4. 상품상태 */}
         <SellerFormSection label="상품상태">
           <div className="flex flex-col gap-4">
             {PRODUCT_STATUS.map((status) => (
@@ -93,7 +121,9 @@ const SellerManager = () => {
                   onChange={() => setFormData({ ...formData, status: status.id })}
                 />
                 <div className="-mt-0.5">
-                  <div className="text-[13px] font-bold text-gray-700 group-hover:text-black">{status.label}</div>
+                  <div className="text-[13px] font-bold text-gray-700 group-hover:text-black">
+                    {status.label}
+                  </div>
                   <div className="text-[11px] text-gray-400">{status.desc}</div>
                 </div>
               </label>
@@ -101,7 +131,7 @@ const SellerManager = () => {
           </div>
         </SellerFormSection>
 
-        {/* 5. 설명 & 태그  */}
+        {/* 5. 설명 & 태그 */}
         <SellerFormSection
           label="설명"
           type="textarea"
@@ -115,9 +145,23 @@ const SellerManager = () => {
             <div className="mb-2 text-[13px] font-bold">태그 (선택)</div>
             <div className="flex flex-wrap gap-2 border border-gray-200 p-2 min-h-[42px] bg-white">
               {formData.tags.map((tag, i) => (
-                <span key={i} className="bg-gray-100 px-2 py-1 text-xs rounded-sm flex items-center gap-1 font-medium">
-                  #{tag} 
-                  <button type="button" onClick={() => setFormData((prev) => ({ ...prev, tags: prev.tags.filter((_, idx) => idx !== i) }))} className="text-gray-400 hover:text-black">×</button>
+                <span
+                  key={i}
+                  className="bg-gray-100 px-2 py-1 text-xs rounded-sm flex items-center gap-1 font-medium"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        tags: prev.tags.filter((_, idx) => idx !== i),
+                      }))
+                    }
+                    className="text-gray-400 hover:text-black"
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
               <input
@@ -132,7 +176,15 @@ const SellerManager = () => {
         </SellerFormSection>
 
         <h2 className="text-xl font-bold mt-12 mb-6 pb-3 border-b-2 border-black">가격</h2>
-        <SellerFormSection label="가격" type="number" name="price" value={formData.price} onChange={handleInputChange} placeholder="가격을 입력해 주세요." unit="원">
+        <SellerFormSection
+          label="가격"
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleInputChange}
+          placeholder="가격을 입력해 주세요."
+          unit="원"
+        >
           <label className="flex items-center gap-2 text-[13px] mt-4 cursor-pointer select-none">
             <input type="checkbox" className="w-5 h-5 accent-[#ff5058] rounded-full" />
             <span className="text-gray-700">가격제안 받기</span>
@@ -144,7 +196,10 @@ const SellerManager = () => {
           <div className="flex flex-col gap-4">
             <div className="flex gap-6">
               {(['include', 'exclude'] as const).map((fee) => (
-                <label key={fee} className="flex items-center gap-2 text-[13px] cursor-pointer group">
+                <label
+                  key={fee}
+                  className="flex items-center gap-2 text-[13px] cursor-pointer group"
+                >
                   <input
                     type="radio"
                     name="shippingFee"
@@ -152,7 +207,9 @@ const SellerManager = () => {
                     onChange={() => setFormData({ ...formData, shippingFee: fee })}
                     className="w-5 h-5 accent-[#ff5058]"
                   />
-                  <span className="text-gray-700">{fee === 'include' ? '배송비포함' : '배송비별도'}</span>
+                  <span className="text-gray-700">
+                    {fee === 'include' ? '배송비포함' : '배송비별도'}
+                  </span>
                 </label>
               ))}
             </div>
@@ -163,7 +220,10 @@ const SellerManager = () => {
         <SellerFormSection label="직거래">
           <div className="flex gap-6">
             {[true, false].map((isDirect) => (
-              <label key={String(isDirect)} className="flex items-center gap-2 text-[13px] cursor-pointer group">
+              <label
+                key={String(isDirect)}
+                className="flex items-center gap-2 text-[13px] cursor-pointer group"
+              >
                 <input
                   type="radio"
                   name="directTrade"
@@ -177,12 +237,30 @@ const SellerManager = () => {
           </div>
         </SellerFormSection>
 
-        <SellerFormSection label="수량" type="number" name="quantity" value={formData.quantity} onChange={handleInputChange} unit="개" isLast />
+        <SellerFormSection
+          label="수량"
+          type="number"
+          name="quantity"
+          value={formData.quantity}
+          onChange={handleInputChange}
+          unit="개"
+          isLast
+        />
 
         <footer className="fixed bottom-0 left-0 right-0 bg-white border-t p-3.5 z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
           <div className="max-w-[850px] mx-auto flex justify-end gap-3 px-4">
-            <button type="button" className="px-10 py-3 text-sm font-bold bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors">임시저장</button>
-            <button type="submit" className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-lg active:scale-95 transition-all hover:bg-[#e64951]">등록하기</button>
+            <button
+              type="button"
+              className="px-10 py-3 text-sm font-bold bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors"
+            >
+              임시저장
+            </button>
+            <button
+              type="submit"
+              className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-lg active:scale-95 transition-all hover:bg-[#e64951]"
+            >
+              등록하기
+            </button>
           </div>
         </footer>
       </form>

@@ -1,19 +1,33 @@
+import { useState, useEffect } from 'react'; // 추가
 import ProductCard from '../components/ProductCard';
 import QuickMenu from '../components/QuickMenu';
 import HomeBanner from '../components/Banner/HomeBanner';
-import { MOCK_PRODUCTS } from '../data/mock';
+import api from '../api/axios'; // 추가
+import type { Product } from '../types/Product'; // 타입 추가
 
 const Home = () => {
+  const [products, setProducts] = useState<Product[]>([]); // 상태 관리 추가
+
+  // 컴포넌트 마운트 시 데이터 가져오기
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/api/products');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('상품 로딩 실패:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       <QuickMenu />
 
       <main className="max-w-[1024px] mx-auto px-4 py-8">
         <section className="w-full mb-10">
-          {/* 분리된 배너 컴포넌트 */}
           <HomeBanner />
-
-          {/* 앱 다운로드 유도 섹션 */}
           <div className="w-full h-[100px] bg-[#f9f9f9] border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer hover:bg-gray-50 transition-colors">
             <div className="bg-white w-12 h-12 rounded-lg flex items-center justify-center text-xl shadow-sm border border-gray-100 font-bold text-gray-400">
               ⚡
@@ -30,7 +44,8 @@ const Home = () => {
 
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {MOCK_PRODUCTS.map((product) => (
+          {/* MOCK_PRODUCTS 대신 상태값 products 사용 */}
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
