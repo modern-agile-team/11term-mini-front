@@ -56,7 +56,6 @@ export const useAuth = () => {
 
   //  회원 탈퇴
   const withdraw = useCallback(async () => {
-    if (!window.confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.')) return;
     try {
       await api.delete('/api/auth/withdraw');
       localStorage.removeItem('accessToken');
@@ -64,10 +63,10 @@ export const useAuth = () => {
       localStorage.removeItem('wish_list');
       setUserInfo(null);
       window.dispatchEvent(new Event('auth-change'));
-      alert('탈퇴가 완료되었습니다.');
+      alert('탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.');
       navigate('/');
     } catch {
-      alert('탈퇴 처리 중 오류 발생');
+      alert('탈퇴 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
     }
   }, [navigate]);
 

@@ -12,10 +12,13 @@ import SellerCenter from './pages/SellerCenter';
 import MyPage from './pages/Mypage';
 import SettingsPage from './pages/SettingsPage';
 import SellerManager from './components/seller/SellerManeger';
+import WithdrawReasonPage from './pages/WithdrawReasonPage';
+import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
 
 const AppContent = () => {
   const location = useLocation();
   const isSellerCenter = location.pathname === '/seller-center';
+
   const handleLoginClick = () => {
     overlay.open(({ isOpen, close }) => <LoginModal isOpen={isOpen} onClose={close} />);
   };
@@ -23,7 +26,6 @@ const AppContent = () => {
   return (
     <div className="bg-[#f9f9f9] min-h-screen relative">
       <Header onLoginClick={handleLoginClick} />
-
       {!isSellerCenter && <QuickMenu />}
 
       <Routes>
@@ -35,6 +37,8 @@ const AppContent = () => {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/sell" element={<SellerManager />} />
+        <Route path="/settings/withdraw/reason" element={<WithdrawReasonPage />} />
+        <Route path="/settings/withdraw/confirm" element={<WithdrawConfirmPage />} />
       </Routes>
 
       <Footer />
