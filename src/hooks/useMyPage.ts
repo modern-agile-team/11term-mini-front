@@ -1,22 +1,50 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { VALIDATION_PATTERNS } from '../types/Account';
 import { useAuth } from './useAuth';
+import type { Product } from '../types/Product';
+import api from '../api/axios';
 
 export const useMyPage = () => {
   const { userInfo, updateUserInfo, requireAuth } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isInitialRender = useRef(true);
 
   const [activeTab, setActiveTab] = useState('상품');
+  const [myProducts, setMyProducts] = useState<Product[]>([]);
   const [isNicknameEditing, setIsNicknameEditing] = useState(false);
   const [isIntroEditing, setIsIntroEditing] = useState(false);
 
   const [tempNickname, setTempNickname] = useState(userInfo?.nickname || '');
   const [tempIntro, setTempIntro] = useState(userInfo?.shopIntro || '');
 
-  // 페이지 진입 시 로그인 체크
+  const userId = userInfo?.id;
+
+  // 내 상품 조회 로직
+  const fetchMyProducts = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const response = await api.get('/api/products');
+      const data: Product[] = Array.isArray(response.data)
+        ? response.data
+        : response.data.products || [];
+
+      const filtered = data.filter((p) => String(p.sellerId) === String(userId));
+      setMyProducts(filtered);
+    } catch (error) {
+      console.error('내 상품 로딩 실패:', error);
+    }
+  }, [userId]);
+
   useEffect(() => {
-    requireAuth();
-  }, [userInfo]);
+    if (isInitialRender.current) {
+      requireAuth();
+      if (userId) {
+        fetchMyProducts();
+      }
+      isInitialRender.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const getOpenDays = (joinDate: string) => {
     if (!joinDate) return 1;
@@ -59,6 +87,7 @@ export const useMyPage = () => {
     userInfo,
     activeTab,
     setActiveTab,
+    myProducts,
     isNicknameEditing,
     setIsNicknameEditing,
     isIntroEditing,

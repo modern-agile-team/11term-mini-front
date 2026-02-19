@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useMyPage } from '../hooks/useMyPage';
 import { Store, Users, ShoppingBag } from 'lucide-react';
-import { MOCK_PRODUCTS } from '../data/mock';
+import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import type { Product } from '../types/Product';
 
 const MyPage = () => {
   const location = useLocation();
+  const hasLoaded = useRef(false);
+
   const {
     userInfo,
     activeTab,
     setActiveTab,
+    myProducts, // ✅ 커스텀 훅에서 받아온 '내가 등록한 상품'
     isNicknameEditing,
     setIsNicknameEditing,
     isIntroEditing,
@@ -29,6 +32,29 @@ const MyPage = () => {
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
 
+  // 찜 목록 서버 동기화 함수
+  const loadWishes = useCallback(async () => {
+    try {
+      const savedWishesRaw = localStorage.getItem('wish_list');
+      const savedWishes: (number | string)[] = savedWishesRaw ? JSON.parse(savedWishesRaw) : [];
+
+      if (!Array.isArray(savedWishes) || savedWishes.length === 0) {
+        setWishProducts([]);
+        return;
+      }
+
+      const response = await api.get('/api/products');
+      const allProducts: Product[] = Array.isArray(response.data)
+        ? response.data
+        : response.data.products || [];
+
+      const filtered = allProducts.filter((p) => savedWishes.map(String).includes(String(p.id)));
+      setWishProducts(filtered);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
   useEffect(() => {
     if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
@@ -36,22 +62,22 @@ const MyPage = () => {
   }, [location.state, setActiveTab]);
 
   useEffect(() => {
-    const loadWishes = () => {
-      const savedWishes: number[] = JSON.parse(localStorage.getItem('wish_list') || '[]');
-      const filtered = MOCK_PRODUCTS.filter((p) => savedWishes.includes(p.id));
-      setWishProducts(filtered);
-    };
+    if (!hasLoaded.current) {
+      loadWishes();
+      hasLoaded.current = true;
+    }
 
-    loadWishes();
-    window.addEventListener('storage-update', loadWishes);
-    return () => window.removeEventListener('storage-update', loadWishes);
+    const handleUpdate = () => loadWishes();
+    window.addEventListener('storage-update', handleUpdate);
+    return () => window.removeEventListener('storage-update', handleUpdate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!userInfo) return null;
 
   return (
     <div className="max-w-[1024px] mx-auto py-10 px-4">
-      {/* 프로필 상단 영역 */}
+      {/* ... (상단 프로필 영역은 디자인 유지 - 생략 없이 동일) ... */}
       <div className="flex border border-gray-200 h-[310px] mb-12 bg-white shadow-sm">
         <div className="w-[310px] bg-[#fafafa] flex flex-col items-center justify-center border-r border-gray-200">
           <div
@@ -141,7 +167,7 @@ const MyPage = () => {
             <div className="flex items-center gap-2">
               <ShoppingBag size={18} className="text-gray-400" strokeWidth={1.5} />
               <span>상품판매</span>
-              <span className="text-gray-900 font-bold">0 회</span>
+              <span className="text-gray-900 font-bold">{myProducts.length} 회</span>
             </div>
           </div>
 
@@ -193,7 +219,7 @@ const MyPage = () => {
         </div>
       </div>
 
-      {/* 탭 메뉴 */}
+      {/* ✅ 탭 메뉴에 내 상품 개수 연동 */}
       <div className="border-t-2 border-gray-900 flex mb-8">
         {['상품', '상점후기', '찜', '팔로잉', '팔로워'].map((tab) => (
           <button
@@ -203,7 +229,7 @@ const MyPage = () => {
           >
             {tab}{' '}
             <span className="ml-1 text-sm font-normal">
-              {tab === '찜' ? wishProducts.length : '0'}
+              {tab === '찜' ? wishProducts.length : tab === '상품' ? myProducts.length : '0'}
             </span>
           </button>
         ))}
@@ -221,6 +247,18 @@ const MyPage = () => {
           ) : (
             <div className="flex flex-col items-center justify-center py-32 border-b border-gray-100 text-gray-300">
               <p className="text-sm">찜한 상품이 없습니다.</p>
+            </div>
+          )
+        ) : activeTab === '상품' ? (
+          myProducts.length > 0 ? (
+            <div className="grid grid-cols-5 gap-4">
+              {myProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-32 border-b border-gray-100 text-gray-300">
+              <p className="text-sm">등록된 상품이 없습니다.</p>
             </div>
           )
         ) : (

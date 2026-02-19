@@ -1,18 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ProductCard from '../components/ProductCard';
-import QuickMenu from '../components/QuickMenu';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const isFetched = useRef(false);
 
   useEffect(() => {
+    if (isFetched.current) return;
+    isFetched.current = true;
+
     const fetchProducts = async () => {
       try {
         const response = await api.get('/api/products');
-        setProducts(response.data);
+        const data: Product[] = Array.isArray(response.data)
+          ? response.data
+          : response.data.products || [];
+
+        setProducts(data);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
       }
@@ -22,8 +29,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <QuickMenu />
-
       <main className="max-w-[1024px] mx-auto px-4 py-8">
         <section className="w-full mb-10">
           <HomeBanner />
@@ -44,7 +49,7 @@ const Home = () => {
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={`home-product-${product.id}`} product={product} />
           ))}
         </div>
       </main>
