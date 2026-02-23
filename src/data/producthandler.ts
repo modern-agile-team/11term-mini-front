@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { MOCK_PRODUCTS } from './mock';
-import type { Product, CreateProductInput } from '../types/Product';
+import type { Product, CreateProductInput, SaleStatus } from '../types/Product';
 import type { Account } from '../types/Account';
 
 const getStoredProducts = (): Product[] => {
@@ -81,11 +81,30 @@ export const producthandler = [
       category: inputData.category || '기타',
       status: inputData.status || 'NEW',
       tags: inputData.tags || [],
+      saleStatus: 'ON_SALE',
     };
 
-    const updatedProducts = [newProduct, ...products];
-    localStorage.setItem('products', JSON.stringify(updatedProducts));
+    products.push(newProduct);
+    localStorage.setItem('products', JSON.stringify(products));
 
     return HttpResponse.json(newProduct, { status: 201 });
+  }),
+
+  // 4. 상품 판매 상태 변경 API
+  http.patch('/api/products/:id/status', async ({ params, request }) => {
+    const { id } = params;
+    const { saleStatus } = (await request.json()) as { saleStatus: SaleStatus };
+
+    const products = getStoredProducts();
+    const index = products.findIndex((p) => String(p.id) === String(id));
+
+    if (index === -1) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    products[index] = { ...products[index], saleStatus };
+    localStorage.setItem('products', JSON.stringify(products));
+
+    return HttpResponse.json(products[index]);
   }),
 ];

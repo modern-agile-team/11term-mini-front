@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { VALIDATION_PATTERNS } from '../types/Account';
 import { useAuth } from './useAuth';
-import type { Product } from '../types/Product';
+import type { Product, SaleStatus } from '../types/Product';
 import api from '../api/axios';
 
 export const useMyPage = () => {
-  const { userInfo, updateUserInfo, requireAuth } = useAuth();
+  // 에러 원인 해결: 사용하지 않는 requireAuth 제거
+  const { userInfo, updateUserInfo } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isInitialRender = useRef(true);
 
   const [activeTab, setActiveTab] = useState('상품');
   const [myProducts, setMyProducts] = useState<Product[]>([]);
@@ -19,32 +19,53 @@ export const useMyPage = () => {
 
   const userId = userInfo?.id;
 
-  // 내 상품 조회 로직
-  const fetchMyProducts = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const response = await api.get('/api/products');
-      const data: Product[] = Array.isArray(response.data)
-        ? response.data
-        : response.data.products || [];
-
-      const filtered = data.filter((p) => String(p.sellerId) === String(userId));
-      setMyProducts(filtered);
-    } catch (error) {
-      console.error('내 상품 로딩 실패:', error);
-    }
-  }, [userId]);
+  const sortProducts = (products: Product[]) => {
+    return [...products].sort((a, b) => {
+      if (a.saleStatus === 'SOLD_OUT' && b.saleStatus !== 'SOLD_OUT') return 1;
+      if (a.saleStatus !== 'SOLD_OUT' && b.saleStatus === 'SOLD_OUT') return -1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  };
 
   useEffect(() => {
-    if (isInitialRender.current) {
-      requireAuth();
-      if (userId) {
-        fetchMyProducts();
+    let ignore = false;
+
+    const fetchMyProducts = async () => {
+      if (!userId) return;
+      try {
+        const response = await api.get('/api/products');
+        const data: Product[] = Array.isArray(response.data)
+          ? response.data
+          : response.data?.products || [];
+
+        if (!ignore) {
+          const filtered = data.filter((p) => String(p.sellerId) === String(userId));
+          setMyProducts(sortProducts(filtered));
+        }
+      } catch (error) {
+        console.error('내 상품 로딩 실패:', error);
       }
-      isInitialRender.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+
+    fetchMyProducts();
+
+    return () => {
+      ignore = true;
+    };
   }, [userId]);
+
+  const updateProductStatus = async (productId: number, newStatus: SaleStatus) => {
+    try {
+      await api.patch(`/api/products/${productId}/status`, { saleStatus: newStatus });
+      setMyProducts((prev) => {
+        const updated = prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p));
+        return sortProducts(updated);
+      });
+    } catch (error) {
+      console.error('상품 상태 업데이트 실패:', error);
+      alert('상태 변경에 실패했습니다.');
+    }
+  };
 
   const getOpenDays = (joinDate: string) => {
     if (!joinDate) return 1;
@@ -101,5 +122,6 @@ export const useMyPage = () => {
     saveNickname,
     saveIntro,
     handleImageChange,
+    updateProductStatus,
   };
 };

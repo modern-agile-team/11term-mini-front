@@ -15,10 +15,29 @@ const ProductCard = ({ product }: { product: Product }) => {
         <img
           src={product.image}
           alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+            product.saleStatus === 'SOLD_OUT' ? 'grayscale opacity-70' : ''
+          }`}
         />
+
+        {/* 예약중 / 판매완료 오버레이 */}
+        {product.saleStatus === 'RESERVED' && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
+            <span className="text-white font-bold text-lg border-2 border-white px-4 py-1.5 rounded-[4px] shadow-sm tracking-widest">
+              예약중
+            </span>
+          </div>
+        )}
+        {product.saleStatus === 'SOLD_OUT' && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+            <span className="text-gray-300 font-bold text-lg border-2 border-gray-300 px-4 py-1.5 rounded-[4px] shadow-sm tracking-widest">
+              판매완료
+            </span>
+          </div>
+        )}
+
         {product.isThunderPay && (
-          <div className="absolute bottom-2 left-2 bg-yellow-400 text-[10px] font-bold px-1 py-0.5 rounded-sm">
+          <div className="absolute bottom-2 left-2 bg-yellow-400 text-[10px] font-bold px-1 py-0.5 rounded-sm z-20">
             ⚡ 번개페이
           </div>
         )}
