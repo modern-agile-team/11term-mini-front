@@ -25,6 +25,7 @@ export const authhandler = [
       avatar: user.avatar || '',
       shopIntro: user.shopIntro || '',
       wishList: user.wishList || [],
+      createdAt: new Date().toISOString(),
     };
 
     return HttpResponse.json({ accessToken, user: userInfo }, { status: 200 });
