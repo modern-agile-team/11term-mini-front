@@ -16,7 +16,7 @@ import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
 import type { Category } from '../types/Category';
 
-const COLS = 5;
+const CATEGORY_GRID_COLUMNS = 5;
 
 const CategoryDetail = () => {
   const { id } = useParams();
@@ -40,17 +40,17 @@ const CategoryDetail = () => {
 
   const showMegaGrid = children.length > 0;
 
-  const gridItems = useMemo(() => {
+  const gridCardItems = useMemo(() => {
     if (!current) return [];
 
-    const base = [{ id: '__all__', name: '전체보기' } as Category, ...children];
+    const base = [{ id: 'sys:all', name: '전체보기' } as Category, ...children];
 
     // ✅ 5칸 그리드에서 마지막 줄 빈칸도 border가 보이도록 패딩 셀 추가
-    const remainder = base.length % COLS;
-    const padCount = remainder === 0 ? 0 : COLS - remainder;
+    const remainder = base.length % CATEGORY_GRID_COLUMNS;
+    const padCount = remainder === 0 ? 0 : CATEGORY_GRID_COLUMNS - remainder;
 
     const pads = Array.from({ length: padCount }, (_, i) => ({
-      id: `__pad__${i}`,
+      id: `pad:${i}`,
       name: '',
     })) as Category[];
 
@@ -66,14 +66,14 @@ const CategoryDetail = () => {
         {showMegaGrid && current && (
           <section className="mt-4 mb-6 border border-gray-200 bg-white">
             <div className="grid grid-cols-5">
-              {gridItems.map((c) => {
-                const isPad = c.id.startsWith('__pad__');
+              {gridCardItems.map((card) => {
+                const isPad = card.id.startsWith('pad:');
 
                 // ✅ 빈칸 셀: 클릭 안 되고 글자 없음, 대신 border는 유지
                 if (isPad) {
                   return (
                     <div
-                      key={c.id}
+                      key={card.id}
                       className="px-5 py-4 text-sm border-b border-r border-gray-200"
                     />
                   );
@@ -81,16 +81,16 @@ const CategoryDetail = () => {
 
                 return (
                   <Link
-                    key={c.id}
-                    to={c.id === '__all__' ? `/category/${current.id}` : `/category/${c.id}`}
+                    key={card.id}
+                    to={card.id === 'sys:all' ? `/category/${current.id}` : `/category/${card.id}`}
                     className="px-5 py-4 text-sm text-gray-800 hover:bg-gray-50 border-b border-r border-gray-200"
                   >
-                    {c.id === '__all__' ? (
+                    {card.id === 'sys:all' ? (
                       <span className="font-semibold">
                         전체보기 <span className="text-gray-400">{'>'}</span>
                       </span>
                     ) : (
-                      c.name
+                      card.name
                     )}
                   </Link>
                 );
