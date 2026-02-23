@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMyPage } from '../hooks/useMyPage';
 import { Store, Users, ShoppingBag } from 'lucide-react';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import type { Product, SaleStatus } from '../types/Product';
+import { timeAgo } from '../utils/timeAgo';
 
 const MyPage = () => {
+  const navigate = useNavigate();
   const {
     userInfo,
     activeTab,
@@ -29,7 +32,6 @@ const MyPage = () => {
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
 
-  // 에러 원인 해결: useEffect 내부의 비동기 함수 구조 개선
   useEffect(() => {
     let ignore = false;
 
@@ -184,6 +186,7 @@ const MyPage = () => {
         </div>
       </div>
 
+      {/* 탭 네비게이션 */}
       <div className="flex border-b border-gray-200 mb-8">
         {['상품', '찜', '후기'].map((tab) => (
           <button
@@ -204,6 +207,7 @@ const MyPage = () => {
         ))}
       </div>
 
+      {/* 탭 내용 영역 */}
       <div className="min-h-[400px]">
         {activeTab === '찜' ? (
           wishProducts.length > 0 ? (
@@ -219,19 +223,92 @@ const MyPage = () => {
           )
         ) : activeTab === '상품' ? (
           myProducts.length > 0 ? (
-            <div className="grid grid-cols-5 gap-4">
+            <div className="flex flex-col border-t-2 border-black">
               {myProducts.map((product) => (
-                <div key={`manage-${product.id}`} className="flex flex-col gap-2 group">
-                  <ProductCard product={product} />
-                  <select
-                    value={product.saleStatus || 'ON_SALE'}
-                    onChange={(e) => updateProductStatus(product.id, e.target.value as SaleStatus)}
-                    className="w-full border border-gray-200 text-sm text-gray-700 py-1.5 px-2 rounded-sm focus:outline-none focus:border-red-500 transition-colors cursor-pointer"
+                <div key={`manage-${product.id}`} className="flex py-6 border-b border-gray-100">
+                  {/* 1. 이미지 및 딤 처리 영역 */}
+                  <div
+                    className="relative w-[140px] h-[140px] flex-shrink-0 border border-gray-200 cursor-pointer"
+                    onClick={() => navigate(`/product/${product.id}`)}
                   >
-                    <option value="ON_SALE">판매중</option>
-                    <option value="RESERVED">예약중</option>
-                    <option value="SOLD_OUT">판매완료</option>
-                  </select>
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className={`w-full h-full object-cover transition-all ${
+                        product.saleStatus === 'SOLD_OUT' ? 'grayscale opacity-70' : ''
+                      }`}
+                    />
+                    {product.saleStatus === 'RESERVED' && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
+                        <span className="text-white font-bold border-2 border-white px-3 py-1 rounded-[4px] tracking-widest text-sm">
+                          예약중
+                        </span>
+                      </div>
+                    )}
+                    {product.saleStatus === 'SOLD_OUT' && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                        <span className="text-gray-300 font-bold border-2 border-gray-300 px-3 py-1 rounded-[4px] tracking-widest text-sm">
+                          판매완료
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. 상품 상세 정보 영역 */}
+                  <div className="flex-1 px-6 flex flex-col justify-center">
+                    <div className="text-sm font-bold text-gray-500 mb-1">
+                      {product.saleStatus === 'ON_SALE'
+                        ? '판매중'
+                        : product.saleStatus === 'RESERVED'
+                          ? '예약중'
+                          : '판매완료'}
+                    </div>
+                    <h3
+                      className="text-lg text-gray-800 line-clamp-1 mb-2 hover:underline cursor-pointer"
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      {product.title}
+                    </h3>
+                    <div className="font-bold text-xl mb-3">{product.price.toLocaleString()}원</div>
+                    <div className="text-sm text-gray-400 flex items-center gap-2">
+                      <span>{timeAgo(product.createdAt)}</span>
+                      <span>•</span>
+                      <span className="truncate max-w-[200px]">{product.location}</span>
+                    </div>
+                  </div>
+
+                  {/* 3. 우측 컨트롤(관리) 버튼 영역 */}
+                  <div className="flex flex-col gap-2 justify-center w-[160px]">
+                    <select
+                      value={product.saleStatus || 'ON_SALE'}
+                      onChange={(e) =>
+                        updateProductStatus(product.id, e.target.value as SaleStatus)
+                      }
+                      className="w-full border border-gray-300 py-2.5 px-3 text-sm rounded-sm focus:outline-none focus:border-red-500 cursor-pointer font-medium"
+                    >
+                      <option value="ON_SALE">판매중</option>
+                      <option value="RESERVED">예약중</option>
+                      <option value="SOLD_OUT">판매완료</option>
+                    </select>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => navigate(`/edit/${product.id}`)}
+                        className="flex-1 border border-gray-300 py-2.5 text-sm rounded-sm hover:bg-gray-50 font-medium transition-colors"
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="flex-1 border border-gray-300 py-2.5 text-sm rounded-sm hover:bg-gray-50 font-medium transition-colors text-red-500"
+                        onClick={() => alert('삭제 기능은 준비중입니다.')}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                    <button className="w-full border border-gray-300 py-2 text-sm rounded-sm hover:bg-gray-50 font-medium text-gray-600 transition-colors mt-1">
+                      UP 하기
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
