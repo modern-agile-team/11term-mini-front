@@ -19,7 +19,15 @@ const Home = () => {
         const data: Product[] =
           (Array.isArray(response.data) ? response.data : response.data?.products) || [];
 
-        setProducts(data);
+        const onSaleProducts = data.filter(
+          (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+        );
+
+        const sortedProducts = onSaleProducts.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+
+        setProducts(sortedProducts);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
       }
@@ -49,11 +57,9 @@ const Home = () => {
         </section>
 
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
-
-        {/* 상품 그리드 레이아웃 */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {products.map((product) => (
-            <ProductCard key={`homeProduct${product.id}`} product={product} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </main>

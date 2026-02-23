@@ -5,7 +5,6 @@ import type { Product, SaleStatus } from '../types/Product';
 import api from '../api/axios';
 
 export const useMyPage = () => {
-  // 에러 원인 해결: 사용하지 않는 requireAuth 제거
   const { userInfo, updateUserInfo } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +66,17 @@ export const useMyPage = () => {
     }
   };
 
+  const deleteProduct = async (productId: number) => {
+    try {
+      await api.delete(`/api/products/${productId}`);
+      setMyProducts((prev) => prev.filter((p) => p.id !== productId));
+      alert('상품이 삭제되었습니다.');
+    } catch (error) {
+      console.error('상품 삭제 실패:', error);
+      alert('상품 삭제에 실패했습니다.');
+    }
+  };
+
   const getOpenDays = (joinDate: string) => {
     if (!joinDate) return 1;
     const startDate = new Date(joinDate.replace(/\./g, '-'));
@@ -123,5 +133,6 @@ export const useMyPage = () => {
     saveIntro,
     handleImageChange,
     updateProductStatus,
+    deleteProduct,
   };
 };

@@ -28,6 +28,7 @@ const MyPage = () => {
     saveIntro,
     handleImageChange,
     updateProductStatus,
+    deleteProduct,
   } = useMyPage();
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
@@ -52,7 +53,14 @@ const MyPage = () => {
 
         if (!ignore) {
           const wishes = data.filter((p) => savedWishes.includes(String(p.id)));
-          setWishProducts(wishes);
+
+          const sortedWishes = wishes.sort((a, b) => {
+            if (a.saleStatus === 'SOLD_OUT' && b.saleStatus !== 'SOLD_OUT') return 1;
+            if (a.saleStatus !== 'SOLD_OUT' && b.saleStatus === 'SOLD_OUT') return -1;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+
+          setWishProducts(sortedWishes);
         }
       } catch (error) {
         console.error('찜 목록 로딩 실패:', error);
@@ -65,6 +73,12 @@ const MyPage = () => {
       ignore = true;
     };
   }, []);
+
+  const handleDeleteClick = (productId: number) => {
+    if (window.confirm('정말로 이 상품을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.')) {
+      deleteProduct(productId);
+    }
+  };
 
   if (!userInfo) return null;
 
@@ -186,7 +200,6 @@ const MyPage = () => {
         </div>
       </div>
 
-      {/* 탭 네비게이션 */}
       <div className="flex border-b border-gray-200 mb-8">
         {['상품', '찜', '후기'].map((tab) => (
           <button
@@ -207,7 +220,6 @@ const MyPage = () => {
         ))}
       </div>
 
-      {/* 탭 내용 영역 */}
       <div className="min-h-[400px]">
         {activeTab === '찜' ? (
           wishProducts.length > 0 ? (
@@ -226,7 +238,6 @@ const MyPage = () => {
             <div className="flex flex-col border-t-2 border-black">
               {myProducts.map((product) => (
                 <div key={`manage-${product.id}`} className="flex py-6 border-b border-gray-100">
-                  {/* 1. 이미지 및 딤 처리 영역 */}
                   <div
                     className="relative w-[140px] h-[140px] flex-shrink-0 border border-gray-200 cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
@@ -254,7 +265,6 @@ const MyPage = () => {
                     )}
                   </div>
 
-                  {/* 2. 상품 상세 정보 영역 */}
                   <div className="flex-1 px-6 flex flex-col justify-center">
                     <div className="text-sm font-bold text-gray-500 mb-1">
                       {product.saleStatus === 'ON_SALE'
@@ -277,7 +287,6 @@ const MyPage = () => {
                     </div>
                   </div>
 
-                  {/* 3. 우측 컨트롤(관리) 버튼 영역 */}
                   <div className="flex flex-col gap-2 justify-center w-[160px]">
                     <select
                       value={product.saleStatus || 'ON_SALE'}
@@ -299,8 +308,8 @@ const MyPage = () => {
                         수정
                       </button>
                       <button
+                        onClick={() => handleDeleteClick(product.id)}
                         className="flex-1 border border-gray-300 py-2.5 text-sm rounded-sm hover:bg-gray-50 font-medium transition-colors text-red-500"
-                        onClick={() => alert('삭제 기능은 준비중입니다.')}
                       >
                         삭제
                       </button>

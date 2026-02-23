@@ -24,7 +24,6 @@ export const producthandler = [
     return HttpResponse.json(products);
   }),
 
-  // 2. 특정 상품 상세 조회 (조회수 중복 방지 로직 적용)
   http.get('/api/products/:id', ({ params }) => {
     const { id } = params;
     const products = getStoredProducts();
@@ -46,7 +45,6 @@ export const producthandler = [
     return HttpResponse.json(products[index]);
   }),
 
-  // 3. 상품 등록 (유저 ID 자동 주입)
   http.post('/api/products', async ({ request }) => {
     const inputData = (await request.json()) as CreateProductInput;
     const products = getStoredProducts();
@@ -90,7 +88,6 @@ export const producthandler = [
     return HttpResponse.json(newProduct, { status: 201 });
   }),
 
-  // 4. 상품 판매 상태 변경 API
   http.patch('/api/products/:id/status', async ({ params, request }) => {
     const { id } = params;
     const { saleStatus } = (await request.json()) as { saleStatus: SaleStatus };
@@ -106,5 +103,20 @@ export const producthandler = [
     localStorage.setItem('products', JSON.stringify(products));
 
     return HttpResponse.json(products[index]);
+  }),
+
+  http.delete('/api/products/:id', ({ params }) => {
+    const { id } = params;
+    const products = getStoredProducts();
+    const index = products.findIndex((p) => String(p.id) === String(id));
+
+    if (index === -1) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    products.splice(index, 1);
+    localStorage.setItem('products', JSON.stringify(products));
+
+    return new HttpResponse(null, { status: 200 });
   }),
 ];
