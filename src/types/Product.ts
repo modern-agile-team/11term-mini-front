@@ -1,5 +1,6 @@
 export interface Product {
   id: number;
+  sellerId: string;
   title: string; //제목
   price: number; //가격
   location: string; //지역

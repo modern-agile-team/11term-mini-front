@@ -13,6 +13,7 @@ export const useSellerForm = () => {
     }
   >({
     title: '',
+    sellerId: '',
     price: 0,
     location: '전국',
     image: '',
