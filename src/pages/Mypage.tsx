@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useMyPage } from '../hooks/useMyPage';
 import { Store, Users, ShoppingBag } from 'lucide-react';
 import api from '../api/axios';
@@ -7,9 +6,6 @@ import ProductCard from '../components/ProductCard';
 import type { Product, SaleStatus } from '../types/Product';
 
 const MyPage = () => {
-  const location = useLocation();
-  const hasLoaded = useRef(false);
-
   const {
     userInfo,
     activeTab,
@@ -33,33 +29,40 @@ const MyPage = () => {
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
 
-  const loadWishes = useCallback(async () => {
-    try {
-      const savedWishesRaw = localStorage.getItem('wish_list');
-      const savedWishes: (number | string)[] = savedWishesRaw ? JSON.parse(savedWishesRaw) : [];
-
-      if (!Array.isArray(savedWishes) || savedWishes.length === 0) {
-        setWishProducts([]);
-        return;
-      }
-
-      const response = await api.get('/api/products');
-      const data: Product[] = Array.isArray(response.data)
-        ? response.data
-        : response.data.products || [];
-      const wishes = data.filter((p) => savedWishes.includes(String(p.id)));
-      setWishProducts(wishes);
-    } catch (error) {
-      console.error('찜 목록 로딩 실패:', error);
-    }
-  }, []);
-
+  // 에러 원인 해결: useEffect 내부의 비동기 함수 구조 개선
   useEffect(() => {
-    if (!hasLoaded.current) {
-      loadWishes();
-      hasLoaded.current = true;
-    }
-  }, [loadWishes]);
+    let ignore = false;
+
+    const loadWishes = async () => {
+      try {
+        const savedWishesRaw = localStorage.getItem('wish_list');
+        const savedWishes: (number | string)[] = savedWishesRaw ? JSON.parse(savedWishesRaw) : [];
+
+        if (!Array.isArray(savedWishes) || savedWishes.length === 0) {
+          if (!ignore) setWishProducts([]);
+          return;
+        }
+
+        const response = await api.get('/api/products');
+        const data: Product[] = Array.isArray(response.data)
+          ? response.data
+          : response.data?.products || [];
+
+        if (!ignore) {
+          const wishes = data.filter((p) => savedWishes.includes(String(p.id)));
+          setWishProducts(wishes);
+        }
+      } catch (error) {
+        console.error('찜 목록 로딩 실패:', error);
+      }
+    };
+
+    loadWishes();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   if (!userInfo) return null;
 
