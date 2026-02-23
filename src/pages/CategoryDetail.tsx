@@ -11,6 +11,7 @@ import { CATEGORIES } from '../data/categories';
 
 import { sortProducts } from '../utils/sortProducts';
 import { findCategoryPath } from '../utils/findCategoryPath';
+import { makeCategoryGridItems } from '../utils/categoryGrid';
 
 import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
@@ -30,7 +31,6 @@ const CategoryDetail = () => {
   }, [id]);
 
   const current = categoryPath[categoryPath.length - 1] ?? null;
-
   const title = current?.name ?? '카테고리';
 
   const children = useMemo<Category[]>(() => {
@@ -43,18 +43,12 @@ const CategoryDetail = () => {
   const gridCardItems = useMemo(() => {
     if (!current) return [];
 
-    const base = [{ id: 'sys:all', name: '전체보기' } as Category, ...children];
+    const base = [{ id: 'all', name: '전체보기' } as Category, ...children];
 
-    // ✅ 5칸 그리드에서 마지막 줄 빈칸도 border가 보이도록 패딩 셀 추가
-    const remainder = base.length % CATEGORY_GRID_COLUMNS;
-    const padCount = remainder === 0 ? 0 : CATEGORY_GRID_COLUMNS - remainder;
-
-    const pads = Array.from({ length: padCount }, (_, i) => ({
-      id: `pad:${i}`,
-      name: '',
-    })) as Category[];
-
-    return [...base, ...pads];
+    return makeCategoryGridItems({
+      base,
+      columns: CATEGORY_GRID_COLUMNS,
+    });
   }, [current, children]);
 
   return (
@@ -63,9 +57,10 @@ const CategoryDetail = () => {
       <main className="max-w-[1024px] mx-auto px-4 py-8">
         <CategoryNav />
 
-        {showMegaGrid && current && (
-          <section className="mt-4 mb-6 border border-gray-200 bg-white">
-            <div className="grid grid-cols-5">
+        {showMegaGrid && (
+          <section className="mt-4 mb-6 bg-white">
+            {/* ✅ border는 wrapper(부모)에만 주고, 셀은 border-r/b만 유지해서 중첩을 줄임 */}
+            <div className="grid grid-cols-5 border border-gray-200">
               {gridCardItems.map((card) => {
                 const isPad = card.id.startsWith('pad:');
 
@@ -82,10 +77,10 @@ const CategoryDetail = () => {
                 return (
                   <Link
                     key={card.id}
-                    to={card.id === 'sys:all' ? `/category/${current.id}` : `/category/${card.id}`}
+                    to={card.id === 'all' ? `/category/${current?.id}` : `/category/${card.id}`}
                     className="px-5 py-4 text-sm text-gray-800 hover:bg-gray-50 border-b border-r border-gray-200"
                   >
-                    {card.id === 'sys:all' ? (
+                    {card.id === 'all' ? (
                       <span className="font-semibold">
                         전체보기 <span className="text-gray-400">{'>'}</span>
                       </span>
