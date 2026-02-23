@@ -4,6 +4,7 @@ import type { AdItem } from './ADmock';
 const MANUAL_PRODUCTS: Product[] = [
   {
     id: 1,
+    sellerId: '',
     title: '애플워치 SE2 44mm GPS 미개봉',
     price: 320000,
     image: 'https://loremflickr.com/400/400/applewatch',
@@ -19,6 +20,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 2,
+    sellerId: '',
     title: '아이폰 15 프로 128GB 티타늄',
     price: 1150000,
     image: 'https://loremflickr.com/400/400/iphone',
@@ -34,6 +36,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 3,
+    sellerId: '',
     title: '소니 WH-1000XM5 헤드셋',
     price: 380000,
     image: 'https://loremflickr.com/400/400/headphone',
@@ -49,6 +52,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 4,
+    sellerId: '',
     title: '아이패드 에어 5세대 64GB',
     price: 620000,
     image: 'https://loremflickr.com/400/400/ipad',
@@ -64,6 +68,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 5,
+    sellerId: '',
     title: '로지텍 MX Master 3S 마우스',
     price: 95000,
     image: 'https://loremflickr.com/400/400/mouse',
@@ -79,6 +84,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 11,
+    sellerId: '',
     title: '나이키 덩크 로우 범고래 270',
     price: 125000,
     image: 'https://loremflickr.com/400/400/sneakers',
@@ -94,6 +100,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 12,
+    sellerId: '',
     title: '아크테릭스 헬리아드 15 백팩',
     price: 190000,
     image: 'https://loremflickr.com/400/400/backpack',
@@ -109,6 +116,7 @@ const MANUAL_PRODUCTS: Product[] = [
   },
   {
     id: 21,
+    sellerId: '',
     title: '후지필름 X100V 실버 풀박스',
     price: 1850000,
     image: 'https://loremflickr.com/400/400/camera',
@@ -465,6 +473,7 @@ const RAW_LIST = [
 
 const MAPPED_PRODUCTS: Product[] = RAW_LIST.map((p) => ({
   id: p.id,
+  sellerId: '',
   title: p.title,
   price: p.price,
   image: `https://loremflickr.com/400/400/${p.img}`,
