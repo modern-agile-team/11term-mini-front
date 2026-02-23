@@ -4,6 +4,7 @@ import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { PRODUCT_STATUS } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
+import { Heart } from 'lucide-react';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -83,12 +84,23 @@ const ProductDetail = () => {
 
             <div className="flex justify-between items-center py-4 border-t border-gray-100 text-gray-400 text-sm">
               <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <span className={`text-lg ${isWished ? 'text-red-500' : 'text-gray-300'}`}>
-                    {isWished ? '♥' : '♡'}
+                <button
+                  type="button"
+                  className="flex items-center gap-1 group transition-colors"
+                  aria-label="찜하기"
+                >
+                  <Heart
+                    size={18}
+                    className={`transition-all ${
+                      isWished
+                        ? 'text-[#ff5058] fill-[#ff5058]'
+                        : 'text-gray-300 group-hover:text-gray-400'
+                    }`}
+                  />
+                  <span className={`text-sm ${isWished ? 'text-[#ff5058]' : 'text-gray-400'}`}>
+                    {product.wishCount || 0}
                   </span>
-                  {product.wishCount || 0}
-                </span>
+                </button>
                 <span className="flex items-center gap-1">
                   <span className="text-lg">👁</span> {product.views || 0}
                 </span>

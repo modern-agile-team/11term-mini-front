@@ -52,18 +52,19 @@ export const producthandler = [
     const products = getStoredProducts();
 
     const authHeader = request.headers.get('Authorization');
-    let currentSellerId = 'unknown';
+    const currentSellerId = (() => {
+      if (!authHeader) return 'unknown';
 
-    if (authHeader) {
       try {
         const email = atob(authHeader.split('-').pop() || '');
         const users: Account[] = JSON.parse(localStorage.getItem('users') || '[]');
         const user = users.find((u) => u.email === email);
-        if (user) currentSellerId = user.id;
+        return user?.id || 'unknown';
       } catch (e) {
         console.error('유저 정보 추출 실패:', e);
+        return 'unknown';
       }
-    }
+    })();
 
     const newProduct: Product = {
       id: Date.now(),

@@ -15,21 +15,23 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/api/products');
-        const data: Product[] = Array.isArray(response.data)
-          ? response.data
-          : response.data.products || [];
+
+        const data: Product[] =
+          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
 
         setProducts(data);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
       }
     };
+
     fetchProducts();
   }, []);
 
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-[1024px] mx-auto px-4 py-8">
+        {/* 배너 및 앱 다운로드 섹션 */}
         <section className="w-full mb-10">
           <HomeBanner />
           <div className="w-full h-[100px] bg-[#f9f9f9] border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -47,9 +49,11 @@ const Home = () => {
         </section>
 
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
+
+        {/* 상품 그리드 레이아웃 */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {products.map((product) => (
-            <ProductCard key={`home-product-${product.id}`} product={product} />
+            <ProductCard key={`homeProduct${product.id}`} product={product} />
           ))}
         </div>
       </main>
