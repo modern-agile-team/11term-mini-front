@@ -4,7 +4,7 @@ import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { PRODUCT_STATUS } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
-import { Heart } from 'lucide-react';
+import { Heart, Eye, Clock } from 'lucide-react';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,7 +13,6 @@ const ProductDetail = () => {
 
   const fetchedIdRef = useRef<string | null>(null);
 
-  // 데이터가 없으면 훅 내부에서 방어되도록 처리
   const { isWished, toggleWish } = useProductActions(product || undefined);
 
   useEffect(() => {
@@ -25,8 +24,10 @@ const ProductDetail = () => {
       try {
         setLoading(true);
         const response = await api.get(`/api/products/${id}`);
-        if (response && response.data && (response.data as Product).id) {
-          setProduct(response.data as Product);
+        const data = response?.data;
+
+        if (data?.id) {
+          setProduct(data as Product);
         } else {
           setProduct(null);
         }
@@ -52,14 +53,17 @@ const ProductDetail = () => {
     });
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className="py-40 text-center text-gray-400 font-bold animate-pulse text-xl">
         데이터를 불러오는 중...
       </div>
     );
-  if (!product)
+  }
+
+  if (!product) {
     return <div className="py-40 text-center text-gray-400 font-bold">상품 정보가 없습니다.</div>;
+  }
 
   return (
     <div className="max-w-[1024px] mx-auto px-4 py-10">
@@ -86,6 +90,7 @@ const ProductDetail = () => {
               <div className="flex items-center gap-4">
                 <button
                   type="button"
+                  onClick={handleWishClick}
                   className="flex items-center gap-1 group transition-colors"
                   aria-label="찜하기"
                 >
@@ -102,10 +107,10 @@ const ProductDetail = () => {
                   </span>
                 </button>
                 <span className="flex items-center gap-1">
-                  <span className="text-lg">👁</span> {product.views || 0}
+                  <Eye size={18} className="text-gray-300" /> {product.views || 0}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="text-lg">🕒</span> 방금 전
+                  <Clock size={18} className="text-gray-300" /> 방금 전
                 </span>
               </div>
             </div>
@@ -127,9 +132,12 @@ const ProductDetail = () => {
           <div className="flex gap-2 mt-8 relative">
             <button
               onClick={handleWishClick}
-              className={`flex-1 h-14 font-bold rounded flex items-center justify-center gap-2 transition-all ${isWished ? 'bg-red-500 text-white' : 'bg-[#b2b2b2] text-white hover:bg-gray-400'}`}
+              className={`flex-1 h-14 font-bold rounded flex items-center justify-center gap-2 transition-all ${
+                isWished ? 'bg-[#ff5058] text-white' : 'bg-[#b2b2b2] text-white hover:bg-gray-400'
+              }`}
             >
-              <span className="text-xl">{isWished ? '♥' : '♡'}</span> 찜 {product.wishCount || 0}
+              <Heart size={20} className={isWished ? 'fill-white text-white' : 'text-white'} />찜{' '}
+              {product.wishCount || 0}
             </button>
             <button className="flex-1 h-14 bg-[#ffa800] text-white font-bold rounded hover:brightness-95 transition">
               번개톡
