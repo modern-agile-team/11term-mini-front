@@ -7,7 +7,7 @@ const getStoredProducts = (): Product[] => {
   const stored = localStorage.getItem('products');
   if (stored) {
     try {
-      return JSON.parse(stored);
+      return JSON.parse(stored) as Product[];
     } catch (e) {
       console.error('로컬스토리지 파싱 에러:', e);
     }
@@ -34,6 +34,7 @@ export const producthandler = [
     if (index === -1) {
       return new HttpResponse(null, { status: 404 });
     }
+
     const cacheKey = `view_${id}`;
     if (!viewCache.has(cacheKey)) {
       products[index] = {
@@ -58,7 +59,7 @@ export const producthandler = [
     if (authHeader) {
       try {
         const email = atob(authHeader.split('-').pop() || '');
-        const users: Account[] = JSON.parse(localStorage.getItem('users') || '[]');
+        const users = JSON.parse(localStorage.getItem('users') || '[]') as Account[];
         const user = users.find((u) => u.email === email);
         if (user) currentSellerId = user.id;
       } catch (e) {
@@ -99,17 +100,17 @@ export const producthandler = [
     const index = products.findIndex((p) => String(p.id) === String(id));
     if (index === -1) return new HttpResponse(null, { status: 404 });
 
-    // 이미지 배열 중 첫 번째를 대표 이미지로 사용
     const mainImage =
       updateData.images && updateData.images.length > 0
         ? updateData.images[0]
         : products[index].image;
 
-    const updatedProduct = {
+    const updatedProduct: Product = {
       ...products[index],
       ...updateData,
       image: mainImage,
       id: Number(id),
+      sellerId: products[index].sellerId,
     };
 
     products[index] = updatedProduct;
@@ -118,7 +119,7 @@ export const producthandler = [
     return HttpResponse.json(updatedProduct);
   }),
 
-  // 5. 판매 상태 수정
+  // 5. 판매 상태 변경
   http.patch('/api/products/:id/status', async ({ params, request }) => {
     const { id } = params;
     const { saleStatus } = (await request.json()) as { saleStatus: SaleStatus };
@@ -126,9 +127,7 @@ export const producthandler = [
     const products = getStoredProducts();
     const index = products.findIndex((p) => String(p.id) === String(id));
 
-    if (index === -1) {
-      return new HttpResponse(null, { status: 404 });
-    }
+    if (index === -1) return new HttpResponse(null, { status: 404 });
 
     products[index] = { ...products[index], saleStatus };
     localStorage.setItem('products', JSON.stringify(products));
