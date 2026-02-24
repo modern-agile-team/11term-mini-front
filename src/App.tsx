@@ -12,6 +12,7 @@ import SellerCenter from './pages/SellerCenter';
 import MyPage from './pages/Mypage';
 import SettingsPage from './pages/SettingsPage';
 import SellerManager from './components/seller/SellerManeger';
+import ProductEdit from './pages/ProductEdit';
 import WithdrawReasonPage from './pages/WithdrawReasonPage';
 import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
 
@@ -37,6 +38,7 @@ const AppContent = () => {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/sell" element={<SellerManager />} />
+        <Route path="/edit/:id" element={<ProductEdit />} />
         <Route path="/settings/withdraw/reason" element={<WithdrawReasonPage />} />
         <Route path="/settings/withdraw/confirm" element={<WithdrawConfirmPage />} />
       </Routes>

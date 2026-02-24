@@ -1,53 +1,58 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import type { CreateProductInput, Product } from '../types/Product';
+
+const DEFAULT_FORM_DATA: CreateProductInput & {
+  shippingFee: 'include' | 'exclude';
+  directTrade: boolean;
+  quantity: number;
+} = {
+  title: '',
+  sellerId: '',
+  price: 0,
+  location: '전국',
+  image: '',
+  images: [],
+  category: '',
+  description: '',
+  status: 'NEW',
+  isThunderPay: false,
+  tags: [],
+  shippingFee: 'include',
+  directTrade: false,
+  quantity: 1,
+};
+
+const transformProductToForm = (data: Product) => ({
+  title: data.title || '',
+  sellerId: data.sellerId || '',
+  price: data.price || 0,
+  location: data.location || '전국',
+  image: data.image || '',
+  images: data.image ? [data.image] : [],
+  category: data.category || '',
+  description: data.description || '',
+  status: data.status || 'NEW',
+  isThunderPay: data.isThunderPay || false,
+  tags: data.tags || [],
+  shippingFee: 'include' as const,
+  directTrade: false,
+  quantity: 1,
+});
 
 export const useSellerForm = (initialData?: Product | null) => {
   const [selectedMainId, setSelectedMainId] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState<string>('');
-
-  const [formData, setFormData] = useState<
-    CreateProductInput & {
-      shippingFee: 'include' | 'exclude';
-      directTrade: boolean;
-      quantity: number;
-    }
-  >({
-    title: '',
-    sellerId: '',
-    price: 0,
-    location: '전국',
-    image: '',
-    images: [],
-    category: '',
-    description: '',
-    status: 'NEW',
-    isThunderPay: false,
-    tags: [],
-    shippingFee: 'include',
-    directTrade: false,
-    quantity: 1,
+  const [formData, setFormData] = useState(() => {
+    if (initialData) return transformProductToForm(initialData);
+    return DEFAULT_FORM_DATA;
   });
+  const [prevId, setPrevId] = useState<number | null>(initialData?.id || null);
 
-  // ✅ 초기 데이터 주입 로직 (useEffect 경고 방지)
-  useEffect(() => {
-    if (!initialData) return;
-
-    setFormData((prev) => ({
-      ...prev,
-      title: initialData.title || '',
-      price: initialData.price || 0,
-      location: initialData.location || '전국',
-      image: initialData.image || '',
-      // Product에는 단일 image만 있으므로 배열로 변환해서 처리
-      images: initialData.image ? [initialData.image] : [],
-      category: initialData.category || '',
-      description: initialData.description || '',
-      status: initialData.status || 'NEW',
-      isThunderPay: initialData.isThunderPay || false,
-      tags: initialData.tags || [],
-    }));
-  }, [initialData]); // initialData가 변경될 때만 실행됨
+  if (initialData && initialData.id !== prevId) {
+    setPrevId(initialData.id);
+    setFormData(transformProductToForm(initialData));
+  }
 
   const handleImageUpload = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
