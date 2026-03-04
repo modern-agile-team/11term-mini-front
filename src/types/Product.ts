@@ -1,5 +1,8 @@
+export type SaleStatus = 'ON_SALE' | 'RESERVED' | 'SOLD_OUT';
+
 export interface Product {
   id: number;
+  sellerId: string;
   title: string; //제목
   price: number; //가격
   location: string; //지역
@@ -13,6 +16,7 @@ export interface Product {
   category: string; // 카테고리
   status: string; // 상품 상태 코드
   tags: string[]; // 태그 리스트
+  saleStatus?: SaleStatus; // 판매상태
 }
 
 export interface CreateProductInput extends Omit<

@@ -1,22 +1,81 @@
 import { useState, useEffect, useRef } from 'react';
 import { VALIDATION_PATTERNS } from '../types/Account';
 import { useAuth } from './useAuth';
+import type { Product, SaleStatus } from '../types/Product';
+import api from '../api/axios';
 
 export const useMyPage = () => {
-  const { userInfo, updateUserInfo, requireAuth } = useAuth();
+  const { userInfo, updateUserInfo } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState('상품');
+  const [myProducts, setMyProducts] = useState<Product[]>([]);
   const [isNicknameEditing, setIsNicknameEditing] = useState(false);
   const [isIntroEditing, setIsIntroEditing] = useState(false);
 
   const [tempNickname, setTempNickname] = useState(userInfo?.nickname || '');
   const [tempIntro, setTempIntro] = useState(userInfo?.shopIntro || '');
 
-  // 페이지 진입 시 로그인 체크
+  const userId = userInfo?.id;
+
+  const sortProducts = (products: Product[]) => {
+    return [...products].sort((a, b) => {
+      if (a.saleStatus === 'SOLD_OUT' && b.saleStatus !== 'SOLD_OUT') return 1;
+      if (a.saleStatus !== 'SOLD_OUT' && b.saleStatus === 'SOLD_OUT') return -1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  };
+
   useEffect(() => {
-    requireAuth();
-  }, [userInfo]);
+    let ignore = false;
+
+    const fetchMyProducts = async () => {
+      if (!userId) return;
+      try {
+        const response = await api.get('/api/products');
+        const data: Product[] = Array.isArray(response.data)
+          ? response.data
+          : response.data?.products || [];
+
+        if (!ignore) {
+          const filtered = data.filter((p) => String(p.sellerId) === String(userId));
+          setMyProducts(sortProducts(filtered));
+        }
+      } catch (error) {
+        console.error('내 상품 로딩 실패:', error);
+      }
+    };
+
+    fetchMyProducts();
+
+    return () => {
+      ignore = true;
+    };
+  }, [userId]);
+
+  const updateProductStatus = async (productId: number, newStatus: SaleStatus) => {
+    try {
+      await api.patch(`/api/products/${productId}/status`, { saleStatus: newStatus });
+      setMyProducts((prev) => {
+        const updated = prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p));
+        return sortProducts(updated);
+      });
+    } catch (error) {
+      console.error('상품 상태 업데이트 실패:', error);
+      alert('상태 변경에 실패했습니다.');
+    }
+  };
+
+  const deleteProduct = async (productId: number) => {
+    try {
+      await api.delete(`/api/products/${productId}`);
+      setMyProducts((prev) => prev.filter((p) => p.id !== productId));
+      alert('상품이 삭제되었습니다.');
+    } catch (error) {
+      console.error('상품 삭제 실패:', error);
+      alert('상품 삭제에 실패했습니다.');
+    }
+  };
 
   const getOpenDays = (joinDate: string) => {
     if (!joinDate) return 1;
@@ -59,6 +118,7 @@ export const useMyPage = () => {
     userInfo,
     activeTab,
     setActiveTab,
+    myProducts,
     isNicknameEditing,
     setIsNicknameEditing,
     isIntroEditing,
@@ -72,5 +132,7 @@ export const useMyPage = () => {
     saveNickname,
     saveIntro,
     handleImageChange,
+    updateProductStatus,
+    deleteProduct,
   };
 };

@@ -9,27 +9,30 @@ export interface Account {
   nickname: string;
   shopIntro?: string;
   wishList: string;
+  createdAt: string;
 }
 
-export type SignupData = Omit<Account, 'id' | 'joinDate'> & { password: string };
+export type SignupData = Omit<Account, 'id' | 'joinDate' | 'createdAt' | 'wishList'> & {
+  password: string;
+};
 
 export interface LoginData {
   email: string;
   password: string;
 }
 
-//  정규표현식 및 검사 로직 수정
 export const VALIDATION_PATTERNS = {
-  // 한글 또는 영문 2자 이상
-  name: /^[가-힣a-zA-Z]{2,}$/,
-  // 일반적인 이메일 형식
+  // 이름: 한글 또는 영문 2자 이상 (중간 공백 및 하이픈 허용)
+  name: /^[가-힣a-zA-Z]{1,}[가-힣a-zA-Z\s-]{1,}$/,
+  // 이메일: 표준적인 이메일 형식
   email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-  // 영문,숫자,특수문자 조합 8자이상
-  password: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-  // 하이픈 제외 숫자 11자리
+  // 비밀번호: 영문, 숫자, 특수문자 조합 8자 이상
+  password:
+    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+|~=`{}[\]:";'<>?,./])[A-Za-z\d!@#$%^&*()_+|~=`{}[\]:";'<>?,./]{8,}$/,
+  // 전화번호: 하이픈 제외 숫자 11자리 (010으로 시작)
   phone: /^010\d{8}$/,
-  // 생년월일 8자리 (YYYYMMDD)
+  // 생년월일: 8자리 숫자 (YYYYMMDD)
   birth: /^(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])$/,
-  //닉네임 한글, 영문, 숫자 2~10자
+  // 닉네임: 한글, 영문, 숫자 2~10자 (특수문자 및 공백 금지)
   nickname: /^[가-힣a-zA-Z0-9]{2,10}$/,
 };

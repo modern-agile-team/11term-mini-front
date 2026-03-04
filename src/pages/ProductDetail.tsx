@@ -1,36 +1,58 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { PRODUCT_STATUS } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
+import { Heart, Eye, Clock } from 'lucide-react';
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // 찜 액션 훅 (데이터가 없을 때를 대비해 undefined 처리)
+  const fetchedIdRef = useRef<string | null>(null);
+
   const { isWished, toggleWish } = useProductActions(product || undefined);
 
   useEffect(() => {
+    if (!id) return;
+    if (fetchedIdRef.current === id) return;
+    fetchedIdRef.current = id;
+
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        // 1. MSW 핸들러의 '/api/products/:id' 경로를 호출하여 조회수를 증가시킨 데이터를 가져옵니다.
         const response = await api.get(`/api/products/${id}`);
-        setProduct(response.data);
+        const data = response?.data;
+
+        if (data?.id) {
+          setProduct(data as Product);
+        } else {
+          setProduct(null);
+        }
       } catch (error) {
         console.error('상품 상세 정보 로딩 실패:', error);
+        setProduct(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchProduct();
+    fetchProduct();
   }, [id]);
 
-  // TODO: 리액트 suspense
+  const handleWishClick = () => {
+    toggleWish();
+    setProduct((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        wishCount: isWished ? Math.max(0, prev.wishCount - 1) : prev.wishCount + 1,
+      };
+    });
+  };
+
   if (loading) {
     return (
       <div className="py-40 text-center text-gray-400 font-bold animate-pulse text-xl">
@@ -46,67 +68,76 @@ const ProductDetail = () => {
   return (
     <div className="max-w-[1024px] mx-auto px-4 py-10">
       <div className="flex gap-10 mb-16 bg-white">
-        {/* 1. 왼쪽 상품 이미지 */}
-        <div className="w-[428px] h-[428px] overflow-hidden border border-gray-100 shadow-sm">
-          <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+        <div className="w-[428px] h-[428px] overflow-hidden border border-gray-100 shadow-sm flex-shrink-0">
+          <img
+            src={product.image || ''}
+            alt={product.title || '상품 이미지'}
+            className="w-full h-full object-cover"
+          />
         </div>
 
-        {/* 2. 오른쪽 상품 정보 */}
         <div className="flex-1 flex flex-col justify-between">
           <div>
-            <h1 className="text-2xl font-bold mb-4 text-gray-900">{product.title}</h1>
+            <h1 className="text-2xl font-bold mb-4 text-gray-900">
+              {product.title || '제목 없음'}
+            </h1>
             <div className="flex items-center gap-2 mb-6">
-              <span className="text-4xl font-bold">{product.price.toLocaleString()}</span>
+              <span className="text-4xl font-bold">{(product.price || 0).toLocaleString()}</span>
               <span className="text-2xl font-normal">원</span>
             </div>
 
-            {/* 통계 정보 섹션 (조회수 실시간 반영) */}
             <div className="flex justify-between items-center py-4 border-t border-gray-100 text-gray-400 text-sm">
               <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={handleWishClick}
+                  className="flex items-center gap-1 group transition-colors"
+                  aria-label="찜하기"
+                >
+                  <Heart
+                    size={18}
+                    className={`transition-all ${
+                      isWished
+                        ? 'text-[#ff5058] fill-[#ff5058]'
+                        : 'text-gray-300 group-hover:text-gray-400'
+                    }`}
+                  />
+                  <span className={`text-sm ${isWished ? 'text-[#ff5058]' : 'text-gray-400'}`}>
+                    {product.wishCount || 0}
+                  </span>
+                </button>
                 <span className="flex items-center gap-1">
-                  <span className="text-lg">♥</span> {product.wishCount || 0}
+                  <Eye size={18} className="text-gray-300" /> {product.views || 0}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="text-lg">👁</span> {product.views || 0}
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="text-lg">🕒</span> 방금 전
+                  <Clock size={18} className="text-gray-300" /> 방금 전
                 </span>
               </div>
-              <button className="flex items-center gap-1 hover:text-gray-600 transition-colors">
-                🚩{' '}
-                <span className="underline decoration-gray-300 underline-offset-4">신고하기</span>
-              </button>
             </div>
 
-            {/* 상품 상세 정보 리스트 */}
             <div className="border-t border-gray-100 pt-6 space-y-4">
               <div className="flex text-[14px]">
                 <span className="text-gray-400 w-24">• 상품상태</span>
                 <span className="text-gray-800 font-medium">
-                  {PRODUCT_STATUS.find((s) => s.id === product.status)?.label || '사용감 없음'}
+                  {PRODUCT_STATUS.find((s) => s.id === product.status)?.label || '알 수 없음'}
                 </span>
               </div>
               <div className="flex text-[14px]">
-                <span className="text-gray-400 w-24">• 배송비</span>
-                <span className="text-gray-800 font-medium">배송비 별도</span>
-              </div>
-              <div className="flex text-[14px]">
                 <span className="text-gray-400 w-24">• 거래지역</span>
-                <span className="text-gray-800 font-medium">📍 {product.location}</span>
+                <span className="text-gray-800 font-medium">📍 {product.location || '전국'}</span>
               </div>
             </div>
           </div>
 
-          {/* 액션 버튼 그룹 */}
           <div className="flex gap-2 mt-8 relative">
             <button
-              onClick={toggleWish}
+              onClick={handleWishClick}
               className={`flex-1 h-14 font-bold rounded flex items-center justify-center gap-2 transition-all ${
-                isWished ? 'bg-red-500 text-white' : 'bg-[#b2b2b2] text-white hover:bg-gray-400'
+                isWished ? 'bg-[#ff5058] text-white' : 'bg-[#b2b2b2] text-white hover:bg-gray-400'
               }`}
             >
-              <span className="text-xl">{isWished ? '♥' : '♡'}</span> 찜 {product.wishCount || 0}
+              <Heart size={20} className={isWished ? 'fill-white text-white' : 'text-white'} />찜{' '}
+              {product.wishCount || 0}
             </button>
             <button className="flex-1 h-14 bg-[#ffa800] text-white font-bold rounded hover:brightness-95 transition">
               번개톡
@@ -115,36 +146,16 @@ const ProductDetail = () => {
               <button className="w-full h-14 bg-[#ff5058] text-white font-bold rounded hover:brightness-95 transition">
                 바로구매
               </button>
-              {/* 안전결제 툴팁 */}
-              <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-max bg-[#616ca1] text-white text-[11px] px-3 py-1.5 rounded-sm opacity-0 group-hover:opacity-100 transition-all">
-                안전결제 수수료 없이 구매하세요
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#616ca1] rotate-45"></div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 상품 상세 설명 추가 섹션 */}
       <div className="border-t border-gray-200 pt-12">
         <h2 className="text-xl font-bold mb-8">상품정보</h2>
         <div className="text-gray-800 leading-relaxed whitespace-pre-wrap min-h-[200px]">
           {product.description || '등록된 상세 설명이 없습니다.'}
         </div>
-
-        {/* 태그 영역 */}
-        {product.tags && product.tags.length > 0 && (
-          <div className="flex gap-2 mt-10">
-            {product.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-gray-100 text-gray-500 text-sm rounded-full"
-              >
-                # {tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

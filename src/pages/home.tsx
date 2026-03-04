@@ -1,16 +1,24 @@
+<<<<<<< HEAD
 import { useEffect, useState } from 'react';
+=======
+import { useState, useEffect, useRef } from 'react';
+>>>>>>> develop
 import ProductCard from '../components/ProductCard';
-import QuickMenu from '../components/QuickMenu';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const isFetched = useRef(false);
 
   useEffect(() => {
+    if (isFetched.current) return;
+    isFetched.current = true;
+
     const fetchProducts = async () => {
       try {
+<<<<<<< HEAD
         // ✅ 여기만 바뀜: '/api/products' -> '/products'
         const response = await api.get('/products');
 
@@ -23,6 +31,22 @@ const Home = () => {
 
         // ✅ 안전장치(선택): 배열 아니면 빈 배열
         setProducts(Array.isArray(response.data) ? response.data : []);
+=======
+        const response = await api.get('/api/products');
+
+        const data: Product[] =
+          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
+
+        const onSaleProducts = data.filter(
+          (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+        );
+
+        const sortedProducts = onSaleProducts.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+
+        setProducts(sortedProducts);
+>>>>>>> develop
       } catch (error) {
         console.error('상품 로딩 실패:', error);
         setProducts([]); // 실패 시도 안전하게
@@ -34,9 +58,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <QuickMenu />
-
       <main className="max-w-[1024px] mx-auto px-4 py-8">
+        {/* 배너 및 앱 다운로드 섹션 */}
         <section className="w-full mb-10">
           <HomeBanner />
           <div className="w-full h-[100px] bg-[#f9f9f9] border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer hover:bg-gray-50 transition-colors">
