@@ -2,8 +2,8 @@ import { http, HttpResponse } from 'msw';
 import type { Account, LoginData, SignupData } from '../types/Account';
 
 export const authhandler = [
-  // 1. 로그인: wishList 필드 추가 반환
-  http.post('/api/auth/login', async ({ request }) => {
+  // 1. 로그인
+  http.post('/auth/login', async ({ request }) => {
     const { email, password } = (await request.json()) as LoginData;
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const user = users.find((u: LoginData) => u.email === email && u.password === password);
@@ -30,8 +30,8 @@ export const authhandler = [
     return HttpResponse.json({ accessToken, user: userInfo }, { status: 200 });
   }),
 
-  // 2. 회원가입: 기본 wishList 배열 초기화
-  http.post('/api/auth/signup', async ({ request }) => {
+  // 2. 회원가입
+  http.post('/auth/signup', async ({ request }) => {
     const formData = (await request.json()) as SignupData;
     const users = JSON.parse(localStorage.getItem('users') || '[]');
 
@@ -53,7 +53,7 @@ export const authhandler = [
   }),
 
   // 3. 닉네임 중복 검사
-  http.get('/api/auth/check-nickname', ({ request }) => {
+  http.get('/auth/check-nickname', ({ request }) => {
     const url = new URL(request.url);
     const nickname = url.searchParams.get('nickname');
     const users = JSON.parse(localStorage.getItem('users') || '[]');
@@ -62,7 +62,7 @@ export const authhandler = [
   }),
 
   // 4. 회원 정보 수정
-  http.patch('/api/auth/update', async ({ request }) => {
+  http.patch('/auth/update', async ({ request }) => {
     const updateData = (await request.json()) as Partial<Account>;
     const authHeader = request.headers.get('Authorization');
     const email = authHeader?.split('-').pop() ? atob(authHeader.split('-').pop()!) : null;
@@ -80,8 +80,8 @@ export const authhandler = [
     return HttpResponse.json(updatedUser);
   }),
 
-  // 5.  찜하기 토글 API
-  http.post('/api/auth/wish', async ({ request }) => {
+  // 5. 찜하기 토글
+  http.post('/auth/wish', async ({ request }) => {
     const { productId } = (await request.json()) as { productId: number };
     const authHeader = request.headers.get('Authorization');
     const email = authHeader?.split('-').pop() ? atob(authHeader.split('-').pop()!) : null;
@@ -97,12 +97,8 @@ export const authhandler = [
     const wishList: number[] = user.wishList || [];
     const isExisting = wishList.includes(productId);
 
-    // 찜 목록 토글 로직
-    const updatedWishList = isExisting
-      ? wishList.filter((id) => id !== productId)
-      : [...wishList, productId];
+    const updatedWishList = isExisting ? wishList.filter((id) => id !== productId) : [...wishList, productId];
 
-    // 데이터베이스(LocalStorage) 동기화
     users[userIndex] = { ...user, wishList: updatedWishList };
     localStorage.setItem('users', JSON.stringify(users));
 
@@ -110,7 +106,7 @@ export const authhandler = [
   }),
 
   // 6. 회원 탈퇴
-  http.delete('/api/auth/withdraw', async ({ request }) => {
+  http.delete('/auth/withdraw', async ({ request }) => {
     const authHeader = request.headers.get('Authorization');
     const email = authHeader?.split('-').pop() ? atob(authHeader.split('-').pop()!) : null;
     if (!email) return new HttpResponse(null, { status: 401 });

@@ -82,7 +82,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const onSignup = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/api/auth/signup', formData);
+      await api.post('/auth/signup', formData);
       alert('가입 완료!');
       setStep('LOGIN');
     } catch {

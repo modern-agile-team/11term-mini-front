@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import QuickMenu from '../components/QuickMenu';
 import HomeBanner from '../components/Banner/HomeBanner';
@@ -11,12 +11,24 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/api/products');
-        setProducts(response.data);
+        // ✅ 여기만 바뀜: '/api/products' -> '/products'
+        const response = await api.get('/products');
+
+        console.log(
+          'products response.data =',
+          response.data,
+          'isArray?',
+          Array.isArray(response.data),
+        );
+
+        // ✅ 안전장치(선택): 배열 아니면 빈 배열
+        setProducts(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
+        setProducts([]); // 실패 시도 안전하게
       }
     };
+
     fetchProducts();
   }, []);
 
