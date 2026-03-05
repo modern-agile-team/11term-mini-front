@@ -38,7 +38,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <main className="max-w-[1024px] mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-4 py-8">
         {/* 배너 및 앱 다운로드 섹션 */}
         <section className="w-full mb-10">
           <HomeBanner />

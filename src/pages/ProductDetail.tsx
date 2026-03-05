@@ -4,6 +4,10 @@ import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { PRODUCT_STATUS } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
+import { useFollow } from '../hooks/useFollow';
+import { useFollowList } from '../hooks/useFollowList';
+import SellerProfileCard from '../components/seller/SellerProfileCard';
+import FollowListModal from '../components/seller/FollowListModal';
 import { Heart, Eye, Clock } from 'lucide-react';
 
 const ProductDetail = () => {
@@ -14,6 +18,17 @@ const ProductDetail = () => {
   const fetchedIdRef = useRef<string | null>(null);
 
   const { isWished, toggleWish } = useProductActions(product || undefined);
+  const { sellerProfile, canFollow, isFollowPending, toggleSellerFollow } = useFollow(
+    product?.sellerId,
+  );
+  const {
+    isModalOpen,
+    isListLoading,
+    listType,
+    followUsers,
+    openFollowListModal,
+    closeFollowListModal,
+  } = useFollowList();
 
   useEffect(() => {
     if (!id) return;
@@ -53,6 +68,24 @@ const ProductDetail = () => {
     });
   };
 
+  const handleFollowClick = async () => {
+    try {
+      await toggleSellerFollow();
+    } catch {
+      alert('팔로우 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleOpenFollowers = async () => {
+    if (!sellerProfile?.id) return;
+    await openFollowListModal(sellerProfile.id, 'followers');
+  };
+
+  const handleOpenFollowing = async () => {
+    if (!sellerProfile?.id) return;
+    await openFollowListModal(sellerProfile.id, 'following');
+  };
+
   if (loading) {
     return (
       <div className="py-40 text-center text-gray-400 font-bold animate-pulse text-xl">
@@ -66,9 +99,9 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="max-w-[1024px] mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex gap-10 mb-16 bg-white">
-        <div className="w-[428px] h-[428px] overflow-hidden border border-gray-100 shadow-sm flex-shrink-0">
+        <div className="w-107 h-107 overflow-hidden border border-gray-100 shadow-sm shrink-0">
           <img
             src={product.image || ''}
             alt={product.title || '상품 이미지'}
@@ -153,10 +186,29 @@ const ProductDetail = () => {
 
       <div className="border-t border-gray-200 pt-12">
         <h2 className="text-xl font-bold mb-8">상품정보</h2>
-        <div className="text-gray-800 leading-relaxed whitespace-pre-wrap min-h-[200px]">
+        <div className="text-gray-800 leading-relaxed whitespace-pre-wrap min-h-50">
           {product.description || '등록된 상세 설명이 없습니다.'}
         </div>
       </div>
+
+      {sellerProfile && (
+        <SellerProfileCard
+          sellerProfile={sellerProfile}
+          canFollow={canFollow}
+          isFollowPending={isFollowPending}
+          onOpenFollowers={handleOpenFollowers}
+          onOpenFollowing={handleOpenFollowing}
+          onFollowClick={handleFollowClick}
+        />
+      )}
+
+      <FollowListModal
+        isOpen={isModalOpen}
+        listType={listType}
+        isLoading={isListLoading}
+        followUsers={followUsers}
+        onClose={closeFollowListModal}
+      />
     </div>
   );
 };

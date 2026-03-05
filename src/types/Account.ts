@@ -8,13 +8,35 @@ export interface Account {
   birth: string;
   nickname: string;
   shopIntro?: string;
-  wishList: string;
+  wishList: (string | number)[];
+  followers: string[];
+  following: string[];
   createdAt: string;
 }
 
-export type SignupData = Omit<Account, 'id' | 'joinDate' | 'createdAt' | 'wishList'> & {
+export type SignupData = Omit<
+  Account,
+  'id' | 'joinDate' | 'createdAt' | 'wishList' | 'followers' | 'following'
+> & {
   password: string;
 };
+
+export interface UserProfile {
+  id: string;
+  nickname: string;
+  avatar?: string;
+  shopIntro?: string;
+  followerCount: number;
+  followingCount: number;
+  isFollowing: boolean;
+}
+
+export interface FollowUserItem {
+  id: string;
+  nickname: string;
+  avatar?: string;
+  shopIntro?: string;
+}
 
 export interface LoginData {
   email: string;
