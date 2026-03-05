@@ -13,7 +13,7 @@ const WithdrawConfirmPage = () => {
   };
 
   return (
-    <div className="max-w-[1024px] mx-auto min-h-screen bg-white flex flex-col">
+    <div className="max-w-5xl mx-auto min-h-screen bg-white flex flex-col">
       {/* 헤더 */}
       <div className="flex items-center px-4 py-4 border-b border-gray-50">
         <button onClick={() => navigate(-1)}>

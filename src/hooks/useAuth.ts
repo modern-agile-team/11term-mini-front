@@ -5,13 +5,27 @@ import type { Account, LoginData } from '../types/Account';
 
 let isAlerting = false;
 
+const normalizeUser = (user: Account | null): Account | null => {
+  if (!user) return null;
+
+  return {
+    ...user,
+    avatar: user.avatar || '',
+    shopIntro: user.shopIntro || '',
+    wishList: Array.isArray(user.wishList) ? user.wishList : [],
+    followers: Array.isArray(user.followers) ? user.followers : [],
+    following: Array.isArray(user.following) ? user.following : [],
+    createdAt: user.createdAt || new Date().toISOString(),
+  };
+};
+
 export const useAuth = () => {
   const navigate = useNavigate();
 
   const getStoredUser = () => {
     const saved = localStorage.getItem('currentUser');
     try {
-      return saved ? JSON.parse(saved) : null;
+      return saved ? (normalizeUser(JSON.parse(saved) as Account) as Account) : null;
     } catch {
       return null;
     }
@@ -20,7 +34,7 @@ export const useAuth = () => {
   const [userInfo, setUserInfo] = useState<Account | null>(getStoredUser);
 
   const refreshAuth = useCallback(() => {
-    setUserInfo(getStoredUser());
+    setUserInfo(normalizeUser(getStoredUser()));
   }, []);
 
   useEffect(() => {
@@ -35,9 +49,10 @@ export const useAuth = () => {
   //  로그인
   const login = async (credentials: LoginData) => {
     const { data } = await api.post('/api/auth/login', credentials);
+    const normalizedUser = normalizeUser(data.user as Account);
     localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('currentUser', JSON.stringify(data.user));
-    setUserInfo(data.user);
+    localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
+    setUserInfo(normalizedUser);
     window.dispatchEvent(new Event('auth-change'));
     navigate('/');
   };
@@ -74,8 +89,9 @@ export const useAuth = () => {
   const updateUserInfo = async (updateData: Partial<Account>) => {
     try {
       const { data } = await api.patch('/api/auth/update', updateData);
-      localStorage.setItem('currentUser', JSON.stringify(data));
-      setUserInfo(data);
+      const normalizedUser = normalizeUser(data as Account);
+      localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
+      setUserInfo(normalizedUser);
       window.dispatchEvent(new Event('auth-change'));
     } catch {
       alert('정보 수정 실패');

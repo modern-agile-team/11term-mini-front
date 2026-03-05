@@ -45,7 +45,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="border-b border-gray-100">
-        <div className="flex justify-end max-w-[1024px] mx-auto py-2 px-4 text-xs text-gray-500 gap-4 items-center h-10">
+        <div className="flex justify-end max-w-5xl mx-auto py-2 px-4 text-xs text-gray-500 gap-4 items-center h-10">
           {user ? (
             <>
               <div
@@ -131,9 +131,9 @@ const Header = ({ onLoginClick }: HeaderProps) => {
         </div>
       </div>
 
-      <div className="max-w-[1024px] mx-auto flex items-center justify-between py-6 px-4 gap-8">
+      <div className="max-w-5xl mx-auto flex items-center justify-between py-6 px-4 gap-8">
         <Link to="/">
-          <h1 className="text-3xl font-bold text-[#ff5058] cursor-pointer flex-shrink-0">
+          <h1 className="text-3xl font-bold text-[#ff5058] cursor-pointer shrink-0">
             {HEADER_TEXT.LOGO_TITLE}
           </h1>
         </Link>
@@ -157,7 +157,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
             <SearchDropdown onClose={() => setIsSearchOpen(false)} onSearch={executeSearch} />
           )}
         </div>
-        <div className="flex items-center gap-4 text-[14px] font-medium flex-shrink-0">
+        <div className="flex items-center gap-4 text-[14px] font-medium shrink-0">
           {HEADER_ACTIONS.map((action, index) => (
             <Fragment key={action.id}>
               <div
@@ -176,7 +176,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
       </div>
 
       <div className="border-t border-gray-100">
-        <div className="max-w-[1024px] mx-auto px-4 flex items-center gap-6">
+        <div className="max-w-5xl mx-auto px-4 flex items-center gap-6">
           <CategoryMenu />
           <div className="h-4 w-[1px] bg-gray-200"></div>
           <button

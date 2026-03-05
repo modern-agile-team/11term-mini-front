@@ -23,15 +23,15 @@ export const useProductActions = (product: Product | undefined) => {
 
   // ✅ 최근 본 상품 업데이트 (데이터 유효성 검사 강화)
   useEffect(() => {
-    if (!product || !product.id) return;
+      if (!product || !product.id) return;
     try {
       const savedRecent = localStorage.getItem('recently_viewed');
-      let recentArr = savedRecent ? JSON.parse(savedRecent) : [];
+      let recentArr: Product[] = savedRecent ? (JSON.parse(savedRecent) as Product[]) : [];
       if (!Array.isArray(recentArr)) recentArr = [];
 
       // 불완전한 데이터 필터링 및 중복 제거
       recentArr = recentArr.filter(
-        (item: any) => item && item.id && String(item.id) !== String(product.id),
+        (item) => item && item.id && String(item.id) !== String(product.id),
       );
       recentArr.unshift(product);
 
@@ -46,12 +46,12 @@ export const useProductActions = (product: Product | undefined) => {
     if (!product?.id) return;
     try {
       const savedWishes = localStorage.getItem('wish_list');
-      let wishArr = savedWishes ? JSON.parse(savedWishes) : [];
+      let wishArr: string[] = savedWishes ? (JSON.parse(savedWishes) as string[]) : [];
       if (!Array.isArray(wishArr)) wishArr = [];
 
       const productIdStr = String(product.id);
       if (wishArr.map(String).includes(productIdStr)) {
-        wishArr = wishArr.filter((id: any) => String(id) !== productIdStr);
+        wishArr = wishArr.filter((id) => String(id) !== productIdStr);
         setIsWished(false);
       } else {
         wishArr.push(productIdStr);
@@ -62,7 +62,7 @@ export const useProductActions = (product: Product | undefined) => {
     } catch (e) {
       console.error(e);
     }
-  }, [product, isWished]);
+  }, [product]);
 
   return { isWished, toggleWish };
 };
