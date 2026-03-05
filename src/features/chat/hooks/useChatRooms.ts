@@ -1,6 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ChatRoom, ChatTab } from '../types';
 import { MOCK_ROOMS } from '../mock';
+import { fetchTalkRooms } from '../api/chatApi';
+
+const CHAT_ROOMS_STORAGE_KEY = 'chat_rooms_state';
+
+const getInitialRooms = (): ChatRoom[] => {
+  if (typeof window === 'undefined') return MOCK_ROOMS;
+
+  const raw = window.localStorage.getItem(CHAT_ROOMS_STORAGE_KEY);
+  if (!raw) return MOCK_ROOMS;
+
+  try {
+    const parsed = JSON.parse(raw) as ChatRoom[];
+    return Array.isArray(parsed) ? parsed : MOCK_ROOMS;
+  } catch {
+    return MOCK_ROOMS;
+  }
+};
 
 /**
  * useChatRooms
@@ -11,14 +28,50 @@ import { MOCK_ROOMS } from '../mock';
  */
 export function useChatRooms() {
   const [activeTab, setActiveTab] = useState<ChatTab>('ALL');
+  const [rooms, setRooms] = useState<ChatRoom[]>(() => getInitialRooms());
 
   // 첫 화면에서 첫 방을 기본 선택(없으면 null)
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(
-    MOCK_ROOMS[0]?.id ?? null
+    () => getInitialRooms()[0]?.id ?? null
   );
 
-  // 지금은 mock, 나중에 API 붙이면 여기서 받아오게 바뀜
-  const rooms: ChatRoom[] = MOCK_ROOMS;
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(CHAT_ROOMS_STORAGE_KEY, JSON.stringify(rooms));
+  }, [rooms]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRooms = async () => {
+      try {
+        const serverRooms = await fetchTalkRooms();
+        if (cancelled) return;
+
+        setRooms(serverRooms);
+        if (serverRooms.length > 0) {
+          setSelectedRoomId((prev) => prev ?? serverRooms[0].id);
+        }
+      } catch {
+        // 서버 실패 시 기존 mock/localStorage 데이터 사용
+      }
+    };
+
+    loadRooms();
+    const timer = window.setInterval(loadRooms, 5000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const selectRoom = (id: string) => {
+    setSelectedRoomId(id);
+    setRooms((prev) =>
+      prev.map((room) => (room.id === id ? { ...room, unreadCount: 0 } : room))
+    );
+  };
 
   // 탭 필터링 결과(rooms가 커지면 매 렌더마다 필터링하지 않게 useMemo)
   const filteredRooms = useMemo(() => {
@@ -36,7 +89,7 @@ export function useChatRooms() {
     setActiveTab,
     rooms: filteredRooms,
     selectedRoomId,
-    setSelectedRoomId,
+    setSelectedRoomId: selectRoom,
     selectedRoom,
   };
 }

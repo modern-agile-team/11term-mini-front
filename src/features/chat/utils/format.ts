@@ -16,7 +16,7 @@ export const CHAT_TAB_LABEL: Record<ChatTab, string> = {
   CONTACTING: '연락중',
 };
 
-export function formatRoomTime(iso: string): string {
+export const formatRoomTime = (iso: string): string => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
 
@@ -33,4 +33,4 @@ export function formatRoomTime(iso: string): string {
 
   // 예: 2월 23일
   return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
-}
+};

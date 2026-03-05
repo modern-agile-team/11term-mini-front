@@ -7,13 +7,13 @@ import { CHAT_TAB_LABEL } from '../utils/format';
  * ✅ 원리: "탭 UI"는 재사용 가능한 작은 컴포넌트로 분리
  * - 상태는 부모(ChatPageView)에서 관리
  */
-export default function ChatTabBar({
+const ChatTabBar = ({
   activeTab,
   onChange,
 }: {
   activeTab: ChatTab;
   onChange: (tab: ChatTab) => void;
-}) {
+}) => {
   const tabs: ChatTab[] = ['ALL', 'WAITING', 'IN_PROGRESS', 'CLOSED', 'CONTACTING'];
 
   return (
@@ -36,4 +36,6 @@ export default function ChatTabBar({
       })}
     </div>
   );
-}
+};
+
+export default ChatTabBar;

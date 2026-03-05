@@ -18,7 +18,7 @@ import ChatComposer from './ChatComposer';
  * - UI 디자인 바꿀 때: components만 수정
  * - 데이터/API 붙일 때: hooks만 수정
  */
-export default function ChatPageView() {
+const ChatPageView = () => {
   const {
     activeTab,
     setActiveTab,
@@ -84,4 +84,6 @@ export default function ChatPageView() {
       </section>
     </div>
   );
-}
+};
+
+export default ChatPageView;

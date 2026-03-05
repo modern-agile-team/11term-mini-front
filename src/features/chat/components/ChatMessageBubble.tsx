@@ -6,7 +6,7 @@ import type { ChatMessage } from '../types';
  * ✅ 원리: "말풍선"은 좌/우 정렬만 신경 쓰면 됨
  * - senderType으로 me/other 구분
  */
-export default function ChatMessageBubble({ message }: { message: ChatMessage }) {
+const ChatMessageBubble = ({ message }: { message: ChatMessage }) => {
   const isMe = message.senderType === 'me';
 
   return (
@@ -23,4 +23,6 @@ export default function ChatMessageBubble({ message }: { message: ChatMessage })
       </div>
     </div>
   );
-}
+};
+
+export default ChatMessageBubble;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ChatMessage } from '../types';
 import { MOCK_MESSAGES } from '../mock';
+import { fetchRoomMessages, sendRoomMessage } from '../api/chatApi';
 
 /**
  * useChatMessages
@@ -23,21 +24,39 @@ export function useChatMessages(roomId: string | null) {
 
   // roomId가 바뀌면(다른 방 클릭) 해당 방의 메시지로 교체
   useEffect(() => {
+    let cancelled = false;
+
     if (!roomId) {
       setMessages([]);
       setDraft('');
       return;
     }
 
-    // 지금은 mock에서 필터링해서 세팅
-    const initial = MOCK_MESSAGES.filter((m) => m.roomId === roomId);
-    setMessages(initial);
+    const loadMessages = async () => {
+      try {
+        const serverMessages = await fetchRoomMessages(roomId);
+        if (cancelled) return;
+        setMessages(serverMessages);
+      } catch {
+        // 서버 실패 시 mock으로 fallback
+        const initial = MOCK_MESSAGES.filter((m) => m.roomId === roomId);
+        setMessages(initial);
+      }
+    };
+
+    loadMessages();
+    const timer = window.setInterval(loadMessages, 2000);
 
     // 다른 방으로 이동하면 입력창을 비워주는 UX가 보통 자연스러움
     setDraft('');
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, [roomId]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = draft.trim();
     if (!text || !roomId) return;
 
@@ -55,9 +74,14 @@ export function useChatMessages(roomId: string | null) {
     // ✅ 2) 입력창 비우기
     setDraft('');
 
-    // ✅ 3) 나중에 서버/소켓 붙일 자리
-    // - REST: await api.sendMessage({ roomId, content: text })
-    // - Socket: socket.emit('send_message', { roomId, content: text, ... })
+    // ✅ 3) 서버 전송 시도 후 최신 메시지 동기화
+    try {
+      await sendRoomMessage(roomId, text);
+      const latest = await fetchRoomMessages(roomId);
+      setMessages(latest);
+    } catch {
+      // 전송 실패 시 optimistic만 남겨 사용자 입력 유실 방지
+    }
   };
 
   return {

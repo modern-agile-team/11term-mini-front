@@ -7,7 +7,7 @@ import ChatRoomListItem from './ChatRoomListItem';
  * ✅ 원리: "목록 컨테이너"는 스크롤/배치만 담당
  * - 아이템 렌더링은 ChatRoomListItem로 분리
  */
-export default function ChatRoomList({
+const ChatRoomList = ({
   rooms,
   selectedRoomId,
   onSelectRoom,
@@ -15,7 +15,7 @@ export default function ChatRoomList({
   rooms: ChatRoom[];
   selectedRoomId: string | null;
   onSelectRoom: (id: string) => void;
-}) {
+}) => {
   return (
     <div className="flex-1 overflow-y-auto">
       {rooms.map((room) => (
@@ -32,4 +32,6 @@ export default function ChatRoomList({
       )}
     </div>
   );
-}
+};
+
+export default ChatRoomList;
