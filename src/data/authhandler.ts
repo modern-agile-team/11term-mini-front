@@ -1,7 +1,9 @@
 import { http, HttpResponse } from 'msw';
 import type { Account, FollowUserItem, LoginData, SignupData, UserProfile } from '../types/Account';
 
-type StoredUser = Account & { password?: string };
+interface StoredUser extends Account {
+  password?: string;
+}
 
 const parseUsers = (): StoredUser[] => {
   const raw = localStorage.getItem('users');
