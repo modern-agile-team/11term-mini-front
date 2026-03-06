@@ -12,4 +12,13 @@ export default defineConfig({
     }),
     tailwindcss(), // 2. react() 바깥, plugins 배열의 요소로 배치!
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.samgakmarket.shop',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 })

@@ -32,7 +32,7 @@ const SellerManager = () => {
     if (formData.price <= 0) return alert('올바른 가격을 입력해주세요.');
 
     try {
-      await api.post('/api/products', formData);
+      await api.post('/products', formData);
       alert('상품이 성공적으로 등록되었습니다!');
       navigate('/');
     } catch (error) {

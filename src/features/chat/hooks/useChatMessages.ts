@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ChatMessage } from '../types';
 import { MOCK_MESSAGES } from '../mock';
 import { fetchRoomMessages, sendRoomMessage } from '../api/chatApi';
@@ -31,35 +31,49 @@ export function useChatMessages(roomId: string | null) {
     }));
   };
 
-  const reconcileMessages = (
-    prevMessages: ChatMessage[],
-    serverMessages: ChatMessage[]
-  ): ChatMessage[] => {
-    const pendingLocals = prevMessages.filter(
-      (msg) => msg.id.startsWith('local-') && msg.roomId === roomId
-    );
+  const reconcileMessages = useCallback(
+    (prevMessages: ChatMessage[], serverMessages: ChatMessage[]): ChatMessage[] => {
+      const pendingLocals = prevMessages.filter(
+        (msg) => msg.id.startsWith('local-') && msg.roomId === roomId
+      );
 
-    const unresolvedLocals = pendingLocals.filter((local) => {
-      const localTs = new Date(local.createdAt).getTime();
-      return !serverMessages.some((server) => {
-        const serverTs = new Date(server.createdAt).getTime();
-        return (
-          server.senderType === 'me' &&
-          server.content === local.content &&
-          Math.abs(serverTs - localTs) < 15000
-        );
+      const unresolvedLocals = pendingLocals.filter((local) => {
+        const localTs = new Date(local.createdAt).getTime();
+        return !serverMessages.some((server) => {
+          const serverTs = new Date(server.createdAt).getTime();
+          return (
+            server.senderType === 'me' &&
+            server.content === local.content &&
+            Math.abs(serverTs - localTs) < 15000
+          );
+        });
       });
-    });
 
-    return [...serverMessages, ...unresolvedLocals].sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-  };
+      return [...serverMessages, ...unresolvedLocals].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    },
+    [roomId]
+  );
+
+  const isMockRoom = roomId?.startsWith('room-') ?? false;
 
   // roomId가 바뀌면(다른 방 클릭) 해당 방의 메시지로 교체
   useEffect(() => {
     let cancelled = false;
     if (!roomId) return;
+    if (isMockRoom) {
+      const timer = window.setTimeout(() => {
+        if (cancelled) return;
+        const initial = MOCK_MESSAGES.filter((m) => m.roomId === roomId);
+        setMessages(initial);
+      }, 0);
+
+      return () => {
+        cancelled = true;
+        window.clearTimeout(timer);
+      };
+    }
 
     const loadMessages = async () => {
       try {
@@ -78,13 +92,11 @@ export function useChatMessages(roomId: string | null) {
     };
 
     loadMessages();
-    const timer = window.setInterval(loadMessages, 2000);
 
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
     };
-  }, [roomId]);
+  }, [isMockRoom, reconcileMessages, roomId]);
 
   const sendMessage = async () => {
     const text = draft.trim();
@@ -108,6 +120,8 @@ export function useChatMessages(roomId: string | null) {
     }));
 
     // ✅ 3) 서버 전송 시도 후 최신 메시지 동기화
+    if (isMockRoom) return;
+
     try {
       await sendRoomMessage(roomId, text);
       const latest = await fetchRoomMessages(roomId);

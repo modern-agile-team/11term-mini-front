@@ -23,7 +23,7 @@ const ProductEdit = () => {
     const fetchOriginal = async () => {
       try {
         setIsLoading(true);
-        const res = await api.get(`/api/products/${id}`);
+        const res = await api.get(`/products/${id}`);
         // 타입 안전하게 처리
         if (res.data && (res.data as Product).id) {
           setOriginalData(res.data as Product);
@@ -60,7 +60,7 @@ const ProductEdit = () => {
     if (formData.price <= 0) return alert('올바른 가격을 입력해주세요.');
 
     try {
-      await api.patch(`/api/products/${id}`, formData);
+      await api.patch(`/products/${id}`, formData);
       alert('상품이 수정되었습니다!');
       navigate(`/product/${id}`);
     } catch (error) {
@@ -182,7 +182,9 @@ const ProductEdit = () => {
               >
                 #{tag}
                 <button
+                  type="button"
                   onClick={() => removeTag(tag)}
+                  aria-label={`${tag} 태그 삭제`}
                   className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
                 >
                   <X size={12} />
@@ -201,12 +203,14 @@ const ProductEdit = () => {
 
         <div className="flex justify-end gap-3 mt-10 pt-6 border-t">
           <button
+            type="button"
             onClick={() => navigate(-1)}
             className="px-10 py-3 text-sm font-bold bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition-colors"
           >
             취소
           </button>
           <button
+            type="button"
             onClick={handleUpdate}
             className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-md hover:bg-[#ff3038] transition-colors"
           >

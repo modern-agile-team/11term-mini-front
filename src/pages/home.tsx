@@ -14,7 +14,7 @@ const Home = () => {
 
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/api/products');
+        const response = await api.get('/products');
 
         const data: Product[] =
           (Array.isArray(response.data) ? response.data : response.data?.products) || [];

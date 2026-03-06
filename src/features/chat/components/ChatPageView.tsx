@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { MoreHorizontal, Search } from 'lucide-react';
 
 import { useChatRooms } from '../hooks/useChatRooms';
@@ -26,9 +27,21 @@ const ChatPageView = () => {
     selectedRoomId,
     setSelectedRoomId,
     selectedRoom,
+    syncRoomPreview,
+    markRoomAsRead,
   } = useChatRooms();
 
   const { messages, draft, setDraft, sendMessage } = useChatMessages(selectedRoomId);
+
+  useEffect(() => {
+    if (!selectedRoomId || messages.length === 0) return;
+    const latest = messages[messages.length - 1];
+    syncRoomPreview(selectedRoomId, {
+      lastMessage: latest.content,
+      lastMessageAt: latest.createdAt,
+    });
+    markRoomAsRead(selectedRoomId);
+  }, [markRoomAsRead, messages, selectedRoomId, syncRoomPreview]);
 
   return (
     // App.tsx에서 Header가 위에 있으니, 여기서는 화면 높이에서 Footer와 겹치지 않게

@@ -32,7 +32,7 @@ export const useMyPage = () => {
     const fetchMyProducts = async () => {
       if (!userId) return;
       try {
-        const response = await api.get('/api/products');
+        const response = await api.get('/products');
         const data: Product[] = Array.isArray(response.data)
           ? response.data
           : response.data?.products || [];
@@ -55,7 +55,7 @@ export const useMyPage = () => {
 
   const updateProductStatus = async (productId: number, newStatus: SaleStatus) => {
     try {
-      await api.patch(`/api/products/${productId}/status`, { saleStatus: newStatus });
+      await api.patch(`/products/${productId}/status`, { saleStatus: newStatus });
       setMyProducts((prev) => {
         const updated = prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p));
         return sortProducts(updated);
@@ -68,7 +68,7 @@ export const useMyPage = () => {
 
   const deleteProduct = async (productId: number) => {
     try {
-      await api.delete(`/api/products/${productId}`);
+      await api.delete(`/products/${productId}`);
       setMyProducts((prev) => prev.filter((p) => p.id !== productId));
       alert('상품이 삭제되었습니다.');
     } catch (error) {

@@ -1,19 +1,7 @@
-import axios from 'axios';
 import type { ChatMessage, ChatRoom, ChatTab, SenderType } from '../types';
+import api from '../../../api/axios';
 
-const chatApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'https://api.samgakmarket.shop',
-});
-
-chatApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-type TalkRoomResponse = {
+interface TalkRoomResponse {
   id: number;
   productId: number;
   buyerId: number;
@@ -25,27 +13,79 @@ type TalkRoomResponse = {
   unreadCount: number;
 };
 
-type TalkMessageResponse = {
+interface TalkMessageResponse  {
   id: string;
   uid: number;
   content: string;
   createdAt: string;
 };
 
-type TalkMessageListResponse = {
+interface TalkMessageListResponse  {
   data: TalkMessageResponse[];
   cursor: string | null;
 };
 
+interface ApiEnvelope<T> {
+  data: T;
+}
+
+const ANON_CHAT_USER_KEY = 'anonChatUserId';
+
+const unwrapApiData = <T>(payload: T | ApiEnvelope<T>): T => {
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    'data' in payload &&
+    (payload as ApiEnvelope<T>).data !== undefined
+  ) {
+    return (payload as ApiEnvelope<T>).data;
+  }
+  return payload as T;
+};
+
+const normalizeMessageList = (
+  payload: TalkMessageListResponse | ApiEnvelope<TalkMessageListResponse>
+): TalkMessageListResponse => {
+  if (Array.isArray((payload as TalkMessageListResponse).data)) {
+    return payload as TalkMessageListResponse;
+  }
+
+  const wrapped = payload as ApiEnvelope<TalkMessageListResponse>;
+  if (wrapped.data && Array.isArray(wrapped.data.data)) {
+    return wrapped.data;
+  }
+
+  return { data: [], cursor: null };
+};
+
+const parseUserId = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+};
+
+const getOrCreateAnonymousUserId = (): number => {
+  const existing = localStorage.getItem(ANON_CHAT_USER_KEY);
+  const parsedExisting = parseUserId(existing);
+  if (parsedExisting !== null) return parsedExisting;
+
+  const generated = Date.now();
+  localStorage.setItem(ANON_CHAT_USER_KEY, String(generated));
+  return generated;
+};
+
 const getCurrentUserId = (): number | null => {
   const raw = localStorage.getItem('currentUser');
-  if (!raw) return null;
+  if (!raw) return getOrCreateAnonymousUserId();
 
   try {
-    const parsed = JSON.parse(raw) as { id?: number; userId?: number };
-    return parsed.id ?? parsed.userId ?? null;
+    const parsed = JSON.parse(raw) as { id?: unknown; userId?: unknown };
+    return parseUserId(parsed.id) ?? parseUserId(parsed.userId) ?? getOrCreateAnonymousUserId();
   } catch {
-    return null;
+    return getOrCreateAnonymousUserId();
   }
 };
 
@@ -61,9 +101,12 @@ const mapSenderType = (uid: number): SenderType => {
 };
 
 export const fetchTalkRooms = async (): Promise<ChatRoom[]> => {
-  const { data } = await chatApi.get<TalkRoomResponse[]>('/talks/rooms');
+  const { data } = await api.get<TalkRoomResponse[] | ApiEnvelope<TalkRoomResponse[]>>(
+    '/talks/rooms'
+  );
+  const rooms = unwrapApiData<TalkRoomResponse[]>(data);
 
-  return data.map((room) => ({
+  return rooms.map((room) => ({
     id: String(room.id),
     channel: 'BUNGGAETALK',
     title: room.productTitle,
@@ -75,8 +118,11 @@ export const fetchTalkRooms = async (): Promise<ChatRoom[]> => {
 };
 
 export const fetchRoomMessages = async (roomId: string): Promise<ChatMessage[]> => {
-  const { data } = await chatApi.get<TalkMessageListResponse>(`/talks/rooms/${roomId}/messages`);
-  const messages = Array.isArray(data?.data) ? data.data : [];
+  const { data } = await api.get<
+    TalkMessageListResponse | ApiEnvelope<TalkMessageListResponse>
+  >(`/talks/rooms/${roomId}/messages`);
+  const normalized = normalizeMessageList(data);
+  const messages = Array.isArray(normalized?.data) ? normalized.data : [];
 
   return messages.map((message) => ({
     id: message.id,
@@ -88,7 +134,7 @@ export const fetchRoomMessages = async (roomId: string): Promise<ChatMessage[]> 
 };
 
 export const sendRoomMessage = async (roomId: string, content: string): Promise<void> => {
-  await chatApi.post(`/talks/rooms/${roomId}/messages`, {
+  await api.post(`/talks/rooms/${roomId}/messages`, {
     content,
     messageType: 0,
     extra: '{}',

@@ -46,7 +46,7 @@ const MyPage = () => {
           return;
         }
 
-        const response = await api.get('/api/products');
+        const response = await api.get('/products');
         const data: Product[] = Array.isArray(response.data)
           ? response.data
           : response.data?.products || [];
@@ -104,6 +104,7 @@ const MyPage = () => {
             onChange={handleImageChange}
             className="hidden"
             accept="image/*"
+            aria-label="프로필 이미지 업로드"
           />
         </div>
 
@@ -117,6 +118,7 @@ const MyPage = () => {
                     value={tempNickname}
                     onChange={(e) => setTempNickname(e.target.value)}
                     className="text-2xl font-bold border-b-2 border-red-500 focus:outline-none px-1"
+                    aria-label="닉네임 입력"
                   />
                   <button
                     onClick={saveNickname}
@@ -294,6 +296,7 @@ const MyPage = () => {
                         updateProductStatus(product.id, e.target.value as SaleStatus)
                       }
                       className="w-full border border-gray-300 py-2.5 px-3 text-sm rounded-sm focus:outline-none focus:border-red-500 cursor-pointer font-medium"
+                      aria-label="판매 상태 변경"
                     >
                       <option value="ON_SALE">판매중</option>
                       <option value="RESERVED">예약중</option>
