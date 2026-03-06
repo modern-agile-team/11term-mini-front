@@ -7,7 +7,7 @@ import { formatRoomTime } from '../utils/format';
  * ✅ 원리: "채팅방 1줄" UI만 담당
  * - 클릭/선택 상태는 props로 받음
  */
-export default function ChatRoomListItem({
+const ChatRoomListItem = ({
   room,
   isSelected,
   onClick,
@@ -15,7 +15,7 @@ export default function ChatRoomListItem({
   room: ChatRoom;
   isSelected: boolean;
   onClick: () => void;
-}) {
+}) => {
   return (
     <div
       onClick={onClick}
@@ -44,4 +44,6 @@ export default function ChatRoomListItem({
       )}
     </div>
   );
-}
+};
+
+export default ChatRoomListItem;

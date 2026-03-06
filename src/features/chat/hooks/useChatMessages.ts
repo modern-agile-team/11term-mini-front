@@ -16,39 +16,69 @@ import { fetchRoomMessages, sendRoomMessage } from '../api/chatApi';
  */
 export function useChatMessages(roomId: string | null) {
   // 입력창(제어 컴포넌트) 상태
-  const [draft, setDraft] = useState('');
+  const [draftsByRoom, setDraftsByRoom] = useState<Record<string, string>>({});
 
   // ✅ "화면에 보여줄 메시지 목록"은 state로 관리해야,
   //    전송했을 때 즉시 UI에 append(낙관적 업데이트)할 수 있다.
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const draft = roomId ? (draftsByRoom[roomId] ?? '') : '';
+
+  const setDraft = (value: string) => {
+    if (!roomId) return;
+    setDraftsByRoom((prev) => ({
+      ...prev,
+      [roomId]: value,
+    }));
+  };
+
+  const reconcileMessages = (
+    prevMessages: ChatMessage[],
+    serverMessages: ChatMessage[]
+  ): ChatMessage[] => {
+    const pendingLocals = prevMessages.filter(
+      (msg) => msg.id.startsWith('local-') && msg.roomId === roomId
+    );
+
+    const unresolvedLocals = pendingLocals.filter((local) => {
+      const localTs = new Date(local.createdAt).getTime();
+      return !serverMessages.some((server) => {
+        const serverTs = new Date(server.createdAt).getTime();
+        return (
+          server.senderType === 'me' &&
+          server.content === local.content &&
+          Math.abs(serverTs - localTs) < 15000
+        );
+      });
+    });
+
+    return [...serverMessages, ...unresolvedLocals].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  };
 
   // roomId가 바뀌면(다른 방 클릭) 해당 방의 메시지로 교체
   useEffect(() => {
     let cancelled = false;
-
-    if (!roomId) {
-      setMessages([]);
-      setDraft('');
-      return;
-    }
+    if (!roomId) return;
 
     const loadMessages = async () => {
       try {
         const serverMessages = await fetchRoomMessages(roomId);
         if (cancelled) return;
-        setMessages(serverMessages);
+        setMessages((prev) => reconcileMessages(prev, serverMessages));
       } catch {
-        // 서버 실패 시 mock으로 fallback
-        const initial = MOCK_MESSAGES.filter((m) => m.roomId === roomId);
-        setMessages(initial);
+        // 폴링 실패 시 화면 메시지를 유지(입력 직후 메시지 유실 방지)
+        setMessages((prev) => {
+          const currentRoomMessages = prev.filter((m) => m.roomId === roomId);
+          if (currentRoomMessages.length > 0) return currentRoomMessages;
+          const initial = MOCK_MESSAGES.filter((m) => m.roomId === roomId);
+          return initial;
+        });
       }
     };
 
     loadMessages();
     const timer = window.setInterval(loadMessages, 2000);
-
-    // 다른 방으로 이동하면 입력창을 비워주는 UX가 보통 자연스러움
-    setDraft('');
 
     return () => {
       cancelled = true;
@@ -72,20 +102,23 @@ export function useChatMessages(roomId: string | null) {
     setMessages((prev) => [...prev, optimistic]);
 
     // ✅ 2) 입력창 비우기
-    setDraft('');
+    setDraftsByRoom((prev) => ({
+      ...prev,
+      [roomId]: '',
+    }));
 
     // ✅ 3) 서버 전송 시도 후 최신 메시지 동기화
     try {
       await sendRoomMessage(roomId, text);
       const latest = await fetchRoomMessages(roomId);
-      setMessages(latest);
+      setMessages((prev) => reconcileMessages(prev, latest));
     } catch {
       // 전송 실패 시 optimistic만 남겨 사용자 입력 유실 방지
     }
   };
 
   return {
-    messages,
+    messages: roomId ? messages.filter((m) => m.roomId === roomId) : [],
     draft,
     setDraft,
     sendMessage,

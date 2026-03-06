@@ -26,8 +26,12 @@ export default function ChatComposer({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          // Enter로 전송(Shift+Enter는 줄바꿈 같은 확장은 나중에)
-          if (e.key === 'Enter') onSend();
+          // 한글 조합 중 Enter 처리 시 초성 입력이 끼는 현상 방지
+          if (e.nativeEvent.isComposing) return;
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            onSend();
+          }
         }}
         disabled={disabled}
       />

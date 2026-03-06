@@ -66,6 +66,7 @@ const ChatPageView = () => {
 
             {/* 입력 영역 */}
             <ChatComposer
+              key={selectedRoomId ?? 'no-room'}
               value={draft}
               onChange={setDraft}
               onSend={sendMessage}
