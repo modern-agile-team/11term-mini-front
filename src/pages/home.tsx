@@ -16,8 +16,14 @@ const Home = () => {
       try {
         const response = await api.get('/products');
 
-        const data: Product[] =
-          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
+        const payload = response.data;
+        const data: Product[] = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.products)
+            ? payload.products
+            : Array.isArray(payload?.data)
+              ? payload.data
+              : [];
 
         const onSaleProducts = data.filter(
           (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
