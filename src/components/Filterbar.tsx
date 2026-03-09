@@ -1,5 +1,15 @@
 // src/components/Filterbar.tsx
-import type { FilterbarProps, ProductCondition } from '../types/sort';
+import type { ProductCondition, ProductFilterState, SortKey } from '../types/sort';
+
+interface FilterbarProps {
+  title: string;
+  countText: string;
+  sort: SortKey;
+  onChangeSort: (next: SortKey) => void;
+  filters: ProductFilterState;
+  onChangeFilter: (next: Partial<ProductFilterState>) => void;
+  onResetFilter: () => void;
+}
 
 const Filterbar = ({
   title,
