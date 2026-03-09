@@ -9,13 +9,3 @@ export interface ProductFilterState {
   condition: ProductCondition;
   thunderPayOnly: boolean;
 }
-
-export type FilterbarProps = {
-  title: string;
-  countText: string;
-  sort: SortKey;
-  onChangeSort: (next: SortKey) => void;
-  filters: ProductFilterState;
-  onChangeFilter: (next: Partial<ProductFilterState>) => void;
-  onResetFilter: () => void;
-};
