@@ -1,25 +1,24 @@
 import { useParams, Link } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
-
 import CategoryNav from '../components/CategoryNav';
 import ProductCard from '../components/ProductCard';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import QuickMenu from '../components/QuickMenu';
 import Filterbar from '../components/Filterbar';
-
 import { CATEGORIES } from '../data/categories';
 import { sortProducts } from '../utils/sortProducts';
 import { findCategoryPath } from '../utils/findCategoryPath';
 import api from '../api/axios';
 import { makeCategoryGridItems } from '../utils/categoryGrid';
 import { useInfiniteList } from '../hooks/useInfiniteList';
-
-import type { SortKey } from '../types/sort';
+import { useProductListFilters } from '../hooks/useProductListFilters';
+import { filterProducts } from '../utils/filterProducts';
 import type { Product } from '../types/Product';
 import type { Category } from '../types/Category';
 
 const CATEGORY_GRID_COLUMNS = 5;
 const PAGE_SIZE = 20;
+const INITIAL_SKELETON_COUNT = 10;
 const FETCHING_SKELETON_COUNT = 5;
 
 interface ProductsResponse {
@@ -29,37 +28,43 @@ interface ProductsResponse {
 
 const CategoryDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [sort, setSort] = useState<SortKey>('latest');
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const { sort, filters, onChangeSort, onChangeFilter, onResetFilter } = useProductListFilters();
 
   useEffect(() => {
     const fetchCategoryProducts = async () => {
       try {
-        setLoading(true);
+        setIsInitialLoading(true);
         const response = await api.get<Product[] | ProductsResponse>('/products');
         const responseData = response.data;
-        const data: Product[] = Array.isArray(responseData)
+        const productList: Product[] = Array.isArray(responseData)
           ? responseData
-          : responseData.products || responseData.data || [];
+          : responseData?.products || responseData?.data || [];
 
-        const filtered = data.filter((p) => {
-          if (!id) return true;
-          return p.category === id;
+        const categoryProducts = productList.filter((product) => {
+          if (!id) {
+            return true;
+          }
+
+          return product.category === id;
         });
 
-        setProducts(filtered);
+        setProducts(categoryProducts);
       } catch (error) {
         console.error('카테고리 상품 로딩 실패:', error);
       } finally {
-        setLoading(false);
+        setIsInitialLoading(false);
       }
     };
 
     fetchCategoryProducts();
   }, [id]);
 
-  const sortedProducts = useMemo(() => sortProducts(products, sort), [products, sort]);
+  const sortedProducts = useMemo(() => {
+    const filteredProducts = filterProducts(products, filters);
+    return sortProducts(filteredProducts, sort);
+  }, [filters, products, sort]);
 
   const categoryPath = useMemo(() => {
     if (!id) return [];
@@ -108,7 +113,7 @@ const CategoryDetail = () => {
                   return (
                     <div
                       key={card.id}
-                      className="px-5 py-4 text-sm border-b border-r border-gray-200"
+                      className="border-b border-r border-gray-200 px-5 py-4 text-sm"
                     />
                   );
                 }
@@ -117,7 +122,7 @@ const CategoryDetail = () => {
                   <Link
                     key={card.id}
                     to={card.id === 'all' ? `/category/${current?.id}` : `/category/${card.id}`}
-                    className="px-5 py-4 text-sm text-gray-800 hover:bg-gray-50 border-b border-r border-gray-200"
+                    className="border-b border-r border-gray-200 px-5 py-4 text-sm text-gray-800 hover:bg-gray-50"
                   >
                     {card.id === 'all' ? (
                       <span className="font-semibold">
@@ -137,18 +142,21 @@ const CategoryDetail = () => {
           title={title}
           countText={`${sortedProducts.length}개`}
           sort={sort}
-          onChangeSort={setSort}
+          onChangeSort={onChangeSort}
+          filters={filters}
+          onChangeFilter={onChangeFilter}
+          onResetFilter={onResetFilter}
         />
 
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 mt-6">
-            {Array.from({ length: 10 }).map((_, index) => (
+        {isInitialLoading ? (
+          <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {Array.from({ length: INITIAL_SKELETON_COUNT }).map((_, index) => (
               <ProductCardSkeleton key={`categoryInitialSkeleton-${index}`} />
             ))}
           </div>
         ) : sortedProducts.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 mt-6">
+            <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {visibleItems.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
