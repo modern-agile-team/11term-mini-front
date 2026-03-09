@@ -15,10 +15,12 @@ import SellerManager from './components/seller/SellerManeger';
 import ProductEdit from './pages/ProductEdit';
 import WithdrawReasonPage from './pages/WithdrawReasonPage';
 import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
+import { useScrollToTop } from './hooks/useScrollToTop';
 
 const AppContent = () => {
   const location = useLocation();
   const isSellerCenter = location.pathname === '/seller-center';
+  useScrollToTop();
 
   const handleLoginClick = () => {
     overlay.open(({ isOpen, close }) => <LoginModal isOpen={isOpen} onClose={close} />);
