@@ -6,15 +6,16 @@ import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { useInfiniteList } from '../hooks/useInfiniteList';
 
-const PAGE_SIZE = 20;
-const SKELETON_COUNT = 10;
+const pageSize = 20;
+const skeletonCount = 10;
+const fetchingSkeletonCount = 5;
 
 const Home = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
     items: allProducts,
-    pageSize: PAGE_SIZE,
+    pageSize,
   });
 
   useEffect(() => {
@@ -68,15 +69,15 @@ const Home = () => {
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {isInitialLoading
-            ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-                <ProductCardSkeleton key={`home-skeleton-${index}`} />
+            ? Array.from({ length: skeletonCount }).map((_, index) => (
+                <ProductCardSkeleton key={`homeSkeleton-${index}`} />
               ))
             : visibleItems.map((product) => <ProductCard key={product.id} product={product} />)}
 
           {!isInitialLoading &&
             isFetchingMore &&
-            Array.from({ length: 5 }).map((_, index) => (
-              <ProductCardSkeleton key={`home-fetching-${index}`} />
+            Array.from({ length: fetchingSkeletonCount }).map((_, index) => (
+              <ProductCardSkeleton key={`homeFetching-${index}`} />
             ))}
         </div>
 

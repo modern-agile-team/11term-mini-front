@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-const LOAD_MORE_DELAY_MS = 250;
+const loadMoreDelayMs = 250;
 
 interface UseInfiniteListOptions<T> {
   items: T[];
@@ -34,7 +34,7 @@ export const useInfiniteList = <T,>({ items, pageSize = 20 }: UseInfiniteListOpt
     loadTimerRef.current = window.setTimeout(() => {
       setVisibleCount((prev) => Math.min(prev + pageSize, items.length));
       setIsFetchingMore(false);
-    }, LOAD_MORE_DELAY_MS);
+    }, loadMoreDelayMs);
   }, [hasNextPage, isFetchingMore, items.length, pageSize]);
 
   const setSentinelRef = useCallback(

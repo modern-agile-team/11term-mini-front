@@ -19,8 +19,9 @@ import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
 import type { Category } from '../types/Category';
 
-const CATEGORY_GRID_COLUMNS = 5;
-const PAGE_SIZE = 20;
+const categoryGridColumns = 5;
+const pageSize = 20;
+const fetchingSkeletonCount = 5;
 
 const CategoryDetail = () => {
   const { id } = useParams();
@@ -50,13 +51,13 @@ const CategoryDetail = () => {
 
     return makeCategoryGridItems({
       base,
-      columns: CATEGORY_GRID_COLUMNS,
+      columns: categoryGridColumns,
     });
   }, [current, children]);
 
   const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
     items: sortedProducts,
-    pageSize: PAGE_SIZE,
+    pageSize,
   });
 
   return (
@@ -115,8 +116,8 @@ const CategoryDetail = () => {
           ))}
 
           {isFetchingMore &&
-            Array.from({ length: 5 }).map((_, index) => (
-              <ProductCardSkeleton key={`category-fetching-${index}`} />
+            Array.from({ length: fetchingSkeletonCount }).map((_, index) => (
+              <ProductCardSkeleton key={`categoryFetching-${index}`} />
             ))}
         </div>
 
