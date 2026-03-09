@@ -7,9 +7,9 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { useInfiniteList } from '../hooks/useInfiniteList';
 
 type SortType = 'accuracy' | 'recent' | 'lowPrice' | 'highPrice';
-const pageSize = 20;
-const initialSkeletonCount = 10;
-const fetchingSkeletonCount = 5;
+const PAGE_SIZE = 20;
+const INITIAL_SKELETON_COUNT = 10;
+const FETCHING_SKELETON_COUNT = 5;
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
@@ -59,7 +59,7 @@ const SearchPage = () => {
 
   const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
     items: sortedProducts,
-    pageSize,
+    pageSize: PAGE_SIZE,
   });
 
   return (
@@ -94,14 +94,14 @@ const SearchPage = () => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-10">
         {isInitialLoading
-          ? Array.from({ length: initialSkeletonCount }).map((_, index) => (
+          ? Array.from({ length: INITIAL_SKELETON_COUNT }).map((_, index) => (
               <ProductCardSkeleton key={`searchSkeleton-${index}`} />
             ))
           : visibleItems.map((product) => <ProductCard key={product.id} product={product} />)}
 
         {!isInitialLoading &&
           isFetchingMore &&
-          Array.from({ length: fetchingSkeletonCount }).map((_, index) => (
+          Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
             <ProductCardSkeleton key={`searchFetching-${index}`} />
           ))}
       </div>
