@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 
 import CategoryNav from '../components/CategoryNav';
 import ProductCard from '../components/ProductCard';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import QuickMenu from '../components/QuickMenu';
 import Filterbar from '../components/Filterbar';
 
@@ -12,12 +13,14 @@ import { CATEGORIES } from '../data/categories';
 import { sortProducts } from '../utils/sortProducts';
 import { findCategoryPath } from '../utils/findCategoryPath';
 import { makeCategoryGridItems } from '../utils/categoryGrid';
+import { useInfiniteList } from '../hooks/useInfiniteList';
 
 import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
 import type { Category } from '../types/Category';
 
 const CATEGORY_GRID_COLUMNS = 5;
+const PAGE_SIZE = 20;
 
 const CategoryDetail = () => {
   const { id } = useParams();
@@ -50,6 +53,11 @@ const CategoryDetail = () => {
       columns: CATEGORY_GRID_COLUMNS,
     });
   }, [current, children]);
+
+  const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
+    items: sortedProducts,
+    pageSize: PAGE_SIZE,
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -102,10 +110,17 @@ const CategoryDetail = () => {
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {sortedProducts.map((product) => (
+          {visibleItems.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
+
+          {isFetchingMore &&
+            Array.from({ length: 5 }).map((_, index) => (
+              <ProductCardSkeleton key={`category-fetching-${index}`} />
+            ))}
         </div>
+
+        {hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
       </main>
     </div>
   );
