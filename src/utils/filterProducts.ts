@@ -7,6 +7,7 @@ const toNumberOrNull = (value: string): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+// 상품 목록에 가격/상태/번개페이 필터를 순차 적용해 조건에 맞는 데이터만 반환한다.
 export const filterProducts = (products: Product[], filters: ProductFilterState): Product[] => {
   const min = toNumberOrNull(filters.minPrice);
   const max = toNumberOrNull(filters.maxPrice);
