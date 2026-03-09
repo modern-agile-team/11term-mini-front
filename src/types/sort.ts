@@ -3,12 +3,12 @@ export type SortKey = 'latest' | 'popular' | 'low' | 'high';
 
 export type ProductCondition = '' | 'NEW' | 'LIKE_NEW' | 'USED_GOOD' | 'USED_FAIR' | 'BROKEN';
 
-export type ProductFilterState = {
+export interface ProductFilterState {
   minPrice: string;
   maxPrice: string;
   condition: ProductCondition;
   thunderPayOnly: boolean;
-};
+}
 
 export type FilterbarProps = {
   title: string;
