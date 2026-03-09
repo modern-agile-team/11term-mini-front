@@ -1,7 +1,25 @@
 // src/components/Filterbar.tsx
-import type { FilterbarProps } from '../types/sort';
+import type { ProductCondition, ProductFilterState, SortKey } from '../types/sort';
 
-const Filterbar = ({ title, countText, sort, onChangeSort }: FilterbarProps) => {
+interface FilterbarProps {
+  title: string;
+  countText: string;
+  sort: SortKey;
+  onChangeSort: (next: SortKey) => void;
+  filters: ProductFilterState;
+  onChangeFilter: (next: Partial<ProductFilterState>) => void;
+  onResetFilter: () => void;
+}
+
+const Filterbar = ({
+  title,
+  countText,
+  sort,
+  onChangeSort,
+  filters,
+  onChangeFilter,
+  onResetFilter,
+}: FilterbarProps) => {
   const active = 'text-[#ff5058] font-bold';
   const normal = 'hover:text-black';
 
@@ -36,6 +54,56 @@ const Filterbar = ({ title, countText, sort, onChangeSort }: FilterbarProps) => 
             고가순
           </button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="number"
+          min={0}
+          value={filters.minPrice}
+          onChange={(e) => onChangeFilter({ minPrice: e.target.value })}
+          placeholder="최소가격"
+          className="h-9 w-28 border border-gray-200 px-2 text-sm outline-none focus:border-gray-400"
+        />
+        <span className="text-gray-400 text-sm">~</span>
+        <input
+          type="number"
+          min={0}
+          value={filters.maxPrice}
+          onChange={(e) => onChangeFilter({ maxPrice: e.target.value })}
+          placeholder="최대가격"
+          className="h-9 w-28 border border-gray-200 px-2 text-sm outline-none focus:border-gray-400"
+        />
+
+        <select
+          value={filters.condition}
+          onChange={(e) => onChangeFilter({ condition: e.target.value as ProductCondition })}
+          className="h-9 border border-gray-200 px-2 text-sm outline-none focus:border-gray-400"
+        >
+          <option value="">상품상태 전체</option>
+          <option value="NEW">새상품</option>
+          <option value="LIKE_NEW">사용감 없음</option>
+          <option value="USED_GOOD">사용감 적음</option>
+          <option value="USED_FAIR">사용감 많음</option>
+          <option value="BROKEN">고장/파손</option>
+        </select>
+
+        <label className="h-9 px-3 border border-gray-200 text-sm flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={filters.thunderPayOnly}
+            onChange={(e) => onChangeFilter({ thunderPayOnly: e.target.checked })}
+          />
+          번개페이
+        </label>
+
+        <button
+          type="button"
+          onClick={onResetFilter}
+          className="h-9 px-3 border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+        >
+          초기화
+        </button>
       </div>
 
       <div className="border-b border-gray-100"></div>

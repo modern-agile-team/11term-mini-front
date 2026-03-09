@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import CategoryNav from '../components/CategoryNav';
 import ProductCard from '../components/ProductCard';
@@ -12,8 +12,9 @@ import { CATEGORIES } from '../data/categories';
 import { sortProducts } from '../utils/sortProducts';
 import { findCategoryPath } from '../utils/findCategoryPath';
 import { makeCategoryGridItems } from '../utils/categoryGrid';
+import { useProductListFilters } from '../hooks/useProductListFilters';
+import { filterProducts } from '../utils/filterProducts';
 
-import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
 import type { Category } from '../types/Category';
 
@@ -21,9 +22,12 @@ const CATEGORY_GRID_COLUMNS = 5;
 
 const CategoryDetail = () => {
   const { id } = useParams();
-  const [sort, setSort] = useState<SortKey>('latest');
+  const { sort, filters, onChangeSort, onChangeFilter, onResetFilter } = useProductListFilters();
 
-  const sortedProducts = useMemo(() => sortProducts(MOCK_PRODUCTS as Product[], sort), [sort]);
+  const sortedProducts = useMemo(() => {
+    const filtered = filterProducts(MOCK_PRODUCTS as Product[], filters);
+    return sortProducts(filtered, sort);
+  }, [filters, sort]);
 
   const categoryPath = useMemo(() => {
     if (!id) return [];
@@ -98,7 +102,10 @@ const CategoryDetail = () => {
           title={title}
           countText={`${sortedProducts.length}개`}
           sort={sort}
-          onChangeSort={setSort}
+          onChangeSort={onChangeSort}
+          filters={filters}
+          onChangeFilter={onChangeFilter}
+          onResetFilter={onResetFilter}
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">

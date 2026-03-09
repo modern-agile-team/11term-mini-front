@@ -1,17 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ProductCard from '../components/ProductCard';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
+import Filterbar from '../components/Filterbar';
+import { useProductListFilters } from '../hooks/useProductListFilters';
+import { filterProducts } from '../utils/filterProducts';
+import { sortProducts } from '../utils/sortProducts';
 
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const isFetched = useRef(false);
+  const { sort, filters, onChangeSort, onChangeFilter, onResetFilter } = useProductListFilters();
 
   useEffect(() => {
-    if (isFetched.current) return;
-    isFetched.current = true;
-
     const fetchProducts = async () => {
       try {
         const response = await api.get('/api/products');
@@ -36,6 +37,14 @@ const Home = () => {
     fetchProducts();
   }, []);
 
+  const visibleProducts = useMemo(() => {
+    const onSaleProducts = products.filter(
+      (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+    );
+    const filtered = filterProducts(onSaleProducts, filters);
+    return sortProducts(filtered, sort);
+  }, [filters, products, sort]);
+
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-5xl mx-auto px-4 py-8">
@@ -56,9 +65,18 @@ const Home = () => {
           </div>
         </section>
 
-        <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
+        <Filterbar
+          title="오늘의 상품 추천"
+          countText={`${visibleProducts.length}개`}
+          sort={sort}
+          onChangeSort={onChangeSort}
+          filters={filters}
+          onChangeFilter={onChangeFilter}
+          onResetFilter={onResetFilter}
+        />
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {products.map((product) => (
+          {visibleProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
