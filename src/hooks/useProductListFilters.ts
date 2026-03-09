@@ -18,11 +18,11 @@ export const useProductListFilters = () => {
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
   const condition = toValidCondition(searchParams.get('condition'));
-  const thunderPayOnly = searchParams.get('pay') === 'thunder';
+  const isThunderPay = searchParams.get('pay') === 'thunder';
 
   const filters = useMemo<ProductFilterState>(
-    () => ({ minPrice, maxPrice, condition, thunderPayOnly }),
-    [condition, maxPrice, minPrice, thunderPayOnly],
+    () => ({ minPrice, maxPrice, condition, thunderPayOnly: isThunderPay }),
+    [condition, isThunderPay, maxPrice, minPrice],
   );
 
   const patchParams = useCallback(
@@ -65,12 +65,12 @@ export const useProductListFilters = () => {
             ? nextFilter.thunderPayOnly
               ? 'thunder'
               : null
-            : thunderPayOnly
+            : isThunderPay
               ? 'thunder'
               : null,
       });
     },
-    [condition, maxPrice, minPrice, patchParams, thunderPayOnly],
+    [condition, isThunderPay, maxPrice, minPrice, patchParams],
   );
 
   const onResetFilter = useCallback(() => {
