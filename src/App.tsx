@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { OverlayProvider, overlay } from 'overlay-kit';
 import Header from './components/Header';
@@ -16,28 +15,12 @@ import SellerManager from './components/seller/SellerManeger';
 import ProductEdit from './pages/ProductEdit';
 import WithdrawReasonPage from './pages/WithdrawReasonPage';
 import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
-
-const ScrollToTop = () => {
-  const { pathname, search } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [pathname, search]);
-
-  useEffect(() => {
-    const prevScrollRestoration = window.history.scrollRestoration;
-    window.history.scrollRestoration = 'manual';
-    return () => {
-      window.history.scrollRestoration = prevScrollRestoration;
-    };
-  }, []);
-
-  return null;
-};
+import { useScrollToTop } from './hooks/useScrollToTop';
 
 const AppContent = () => {
   const location = useLocation();
   const isSellerCenter = location.pathname === '/seller-center';
+  useScrollToTop();
 
   const handleLoginClick = () => {
     overlay.open(({ isOpen, close }) => <LoginModal isOpen={isOpen} onClose={close} />);
@@ -45,7 +28,6 @@ const AppContent = () => {
 
   return (
     <div className="bg-[#f9f9f9] min-h-screen relative">
-      <ScrollToTop />
       <Header onLoginClick={handleLoginClick} />
       {!isSellerCenter && <QuickMenu />}
 
