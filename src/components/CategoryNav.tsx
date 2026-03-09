@@ -44,7 +44,7 @@ const CategoryNav = () => {
 
   return (
     <section className="w-full border-b border-gray-200 bg-white">
-      <div className="max-w-[1024px] mx-auto py-4 px-4 flex items-center text-sm text-gray-600 gap-2">
+      <div className="max-w-5xl mx-auto py-4 px-4 flex items-center text-sm text-gray-600 gap-2">
         <Link to="/" className="cursor-pointer hover:text-black flex items-center gap-1">
           🏠 홈
         </Link>

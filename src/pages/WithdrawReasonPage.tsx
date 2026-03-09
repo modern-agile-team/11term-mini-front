@@ -14,7 +14,7 @@ const WithdrawReasonPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-[1024px] mx-auto min-h-screen bg-white">
+    <div className="max-w-5xl mx-auto min-h-screen bg-white">
       <div className="flex items-center px-4 py-4 border-b border-gray-50">
         <button onClick={() => navigate(-1)} className="p-1">
           <ChevronLeft size={24} />
