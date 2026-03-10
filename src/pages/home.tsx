@@ -1,19 +1,27 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
+import { useInfiniteList } from '../hooks/useInfiniteList';
+
+const PAGE_SIZE = 20;
+const SKELETON_COUNT = 10;
+const FETCHING_SKELETON_COUNT = 5;
 
 const Home = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const isFetched = useRef(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
+    items: allProducts,
+    pageSize: PAGE_SIZE,
+  });
 
   useEffect(() => {
-    if (isFetched.current) return;
-    isFetched.current = true;
-
     const fetchProducts = async () => {
       try {
+        setIsInitialLoading(true);
         const response = await api.get('/api/products');
 
         const data: Product[] =
@@ -27,9 +35,11 @@ const Home = () => {
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
 
-        setProducts(sortedProducts);
+        setAllProducts(sortedProducts);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -58,10 +68,20 @@ const Home = () => {
 
         <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {isInitialLoading
+            ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                <ProductCardSkeleton key={`homeSkeleton-${index}`} />
+              ))
+            : visibleItems.map((product) => <ProductCard key={product.id} product={product} />)}
+
+          {!isInitialLoading &&
+            isFetchingMore &&
+            Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
+              <ProductCardSkeleton key={`homeFetching-${index}`} />
+            ))}
         </div>
+
+        {!isInitialLoading && hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
       </main>
     </div>
   );
