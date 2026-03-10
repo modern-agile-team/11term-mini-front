@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { MOCK_PRODUCTS } from './mock';
 import type { Product, CreateProductInput, SaleStatus } from '../types/Product';
 import type { Account } from '../types/Account';
+import { SEARCH_CONFIG } from '../constants/header';
 
 const getStoredProducts = (): Product[] => {
   const stored = localStorage.getItem('products');
@@ -23,6 +24,56 @@ export const producthandler = [
   http.get('/api/products', () => {
     const products = getStoredProducts();
     return HttpResponse.json(products);
+  }),
+
+  // 1-1. 검색 자동완성 조회
+  http.get('/api/search/suggestions', ({ request }) => {
+    const requestUrl = new URL(request.url);
+    const query = requestUrl.searchParams.get('q')?.trim().toLowerCase() || '';
+
+    if (!query) {
+      return HttpResponse.json([]);
+    }
+
+    const products = getStoredProducts();
+    const suggestionMap = new Map<
+      string,
+      { keyword: string; matchedBy: 'title' | 'tag' | 'category' }
+    >();
+
+    products.forEach((product) => {
+      const searchableFields = [
+        { keyword: product.title, matchedBy: 'title' as const },
+        { keyword: product.category, matchedBy: 'category' as const },
+        ...product.tags.map((tag) => ({ keyword: tag, matchedBy: 'tag' as const })),
+      ];
+
+      searchableFields.forEach(({ keyword, matchedBy }) => {
+        if (!keyword.toLowerCase().includes(query)) {
+          return;
+        }
+
+        const normalizedKeyword = keyword.toLowerCase();
+        if (!suggestionMap.has(normalizedKeyword)) {
+          suggestionMap.set(normalizedKeyword, { keyword, matchedBy });
+        }
+      });
+    });
+
+    const suggestions = Array.from(suggestionMap.values())
+      .sort((firstSuggestion, secondSuggestion) => {
+        const firstStartsWithQuery = firstSuggestion.keyword.toLowerCase().startsWith(query);
+        const secondStartsWithQuery = secondSuggestion.keyword.toLowerCase().startsWith(query);
+
+        if (firstStartsWithQuery !== secondStartsWithQuery) {
+          return firstStartsWithQuery ? -1 : 1;
+        }
+
+        return firstSuggestion.keyword.localeCompare(secondSuggestion.keyword, 'ko');
+      })
+      .slice(0, SEARCH_CONFIG.MAX_AUTOCOMPLETE_SUGGESTIONS);
+
+    return HttpResponse.json(suggestions);
   }),
 
   // 2. 상세 조회
