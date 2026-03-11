@@ -6,13 +6,27 @@ import type { Account, LoginData, LoginResponse } from '../types/Account';
 
 let isAlerting = false;
 
+const normalizeUser = (user: Account | null): Account | null => {
+  if (!user) return null;
+
+  return {
+    ...user,
+    avatar: user.avatar || '',
+    shopIntro: user.shopIntro || '',
+    wishList: Array.isArray(user.wishList) ? user.wishList : [],
+    followers: Array.isArray(user.followers) ? user.followers : [],
+    following: Array.isArray(user.following) ? user.following : [],
+    createdAt: user.createdAt || new Date().toISOString(),
+  };
+};
+
 export const useAuth = () => {
   const navigate = useNavigate();
 
   const getStoredUser = (): Account | null => {
     const saved = localStorage.getItem('currentUser');
     try {
-      return saved ? JSON.parse(saved) : null;
+      return saved ? (normalizeUser(JSON.parse(saved) as Account) as Account) : null;
     } catch {
       return null;
     }
@@ -21,7 +35,7 @@ export const useAuth = () => {
   const [userInfo, setUserInfo] = useState<Account | null>(getStoredUser);
 
   const refreshAuth = useCallback(() => {
-    setUserInfo(getStoredUser());
+    setUserInfo(normalizeUser(getStoredUser()));
   }, []);
 
   useEffect(() => {
@@ -95,7 +109,7 @@ export const useAuth = () => {
       const updatedUser = data.user || data;
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       setUserInfo(updatedUser);
-
+      
       window.dispatchEvent(new Event('auth-change'));
       return true;
     } catch (error: unknown) {

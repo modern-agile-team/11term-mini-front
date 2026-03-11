@@ -6,7 +6,7 @@ const Filterbar = ({ title, countText, sort, onChangeSort }: FilterbarProps) => 
   const normal = 'hover:text-black';
 
   return (
-    <div className="max-w-[1024px] mx-auto px-4 pt-8 pb-4">
+    <div className="max-w-5xl mx-auto px-4 pt-8 pb-4">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-[18px] font-bold">{title}</h2>

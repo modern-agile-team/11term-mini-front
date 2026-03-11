@@ -87,7 +87,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 py-10 px-4">
       <div className="absolute inset-0" onClick={onClose} />
-      <div className="relative w-full max-w-[428px] bg-white p-6 md:p-10 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-107 bg-white p-6 md:p-10 shadow-2xl z-10 animate-in fade-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
           className="absolute right-6 top-6 text-2xl text-gray-400 hover:text-black transition-colors"

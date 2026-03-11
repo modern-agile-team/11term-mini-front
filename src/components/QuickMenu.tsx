@@ -91,7 +91,7 @@ const QuickMenu = () => {
                           {(item.price || 0).toLocaleString()}원
                         </p>
                       </div>
-                      <div className="w-16 h-16 flex-shrink-0 border border-gray-100">
+                      <div className="w-16 h-16 shrink-0 border border-gray-100">
                         <img src={item.image || ''} alt="" className="w-full h-full object-cover" />
                       </div>
                     </Link>

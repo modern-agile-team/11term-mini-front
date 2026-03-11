@@ -1,0 +1,18 @@
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+export const useScrollToTop = () => {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname, search]);
+
+  useEffect(() => {
+    const prevScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    return () => {
+      window.history.scrollRestoration = prevScrollRestoration;
+    };
+  }, []);
+};

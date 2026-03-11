@@ -10,7 +10,7 @@ const SellerCenter = () => {
     <div className="min-h-screen bg-[#f9fafb]">
       {/* 헤더 섹션 */}
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-300 mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
               <span className="text-2xl">📊</span> 판매자센터
@@ -31,7 +31,7 @@ const SellerCenter = () => {
         </div>
       </header>
 
-      <main className="max-w-[1200px] mx-auto p-8">
+      <main className="max-w-300 mx-auto p-8">
         <h2 className="text-2xl font-bold mb-8">홈</h2>
 
         {/* 대시보드 그리드 */}
