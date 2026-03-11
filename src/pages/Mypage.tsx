@@ -6,6 +6,8 @@ import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import type { Product, SaleStatus } from '../types/Product';
 import { timeAgo } from '../utils/timeAgo';
+import { useFollowList } from '../hooks/useFollowList';
+import FollowListModal from '../components/seller/FollowListModal';
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -32,6 +34,14 @@ const MyPage = () => {
   } = useMyPage();
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
+  const {
+    isModalOpen,
+    isListLoading,
+    listType,
+    followUsers,
+    openFollowListModal,
+    closeFollowListModal,
+  } = useFollowList();
 
   useEffect(() => {
     let ignore = false;
@@ -82,12 +92,20 @@ const MyPage = () => {
 
   if (!userInfo) return null;
 
+  const handleOpenFollowers = async () => {
+    await openFollowListModal(userInfo.id, 'followers');
+  };
+
+  const handleOpenFollowing = async () => {
+    await openFollowListModal(userInfo.id, 'following');
+  };
+
   return (
-    <div className="max-w-[1024px] mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       {/* 프로필 섹션 */}
       <div className="flex gap-8 mb-8 bg-white p-8 border border-gray-100 shadow-sm rounded-sm">
         <div
-          className="relative group cursor-pointer w-[150px] h-[150px] flex-shrink-0"
+          className="relative group cursor-pointer w-37.5 h-37.5 shrink-0"
           onClick={() => fileInputRef.current?.click()}
         >
           <img
@@ -152,6 +170,12 @@ const MyPage = () => {
                 <span className="flex items-center gap-1">
                   <Users size={16} /> 상점방문 0명
                 </span>
+                <button type="button" onClick={handleOpenFollowers} className="hover:text-gray-700">
+                  팔로워 {userInfo.followers?.length || 0}
+                </button>
+                <button type="button" onClick={handleOpenFollowing} className="hover:text-gray-700">
+                  팔로잉 {userInfo.following?.length || 0}
+                </button>
                 <span className="flex items-center gap-1">
                   <ShoppingBag size={16} /> 상품판매 0회
                 </span>
@@ -169,7 +193,7 @@ const MyPage = () => {
                 <textarea
                   value={tempIntro}
                   onChange={(e) => setTempIntro(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-red-500 min-h-[100px] resize-none"
+                  className="w-full p-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-red-500 min-h-25 resize-none"
                   placeholder="상점 소개글을 입력해주세요."
                 />
                 <div className="flex justify-end gap-2">
@@ -189,7 +213,7 @@ const MyPage = () => {
               </div>
             ) : (
               <div
-                className="bg-gray-50 p-4 rounded text-sm text-gray-600 min-h-[100px] whitespace-pre-wrap flex justify-between items-start cursor-pointer hover:bg-gray-100 transition-colors"
+                className="bg-gray-50 p-4 rounded text-sm text-gray-600 min-h-25 whitespace-pre-wrap flex justify-between items-start cursor-pointer hover:bg-gray-100 transition-colors"
                 onClick={() => setIsIntroEditing(true)}
               >
                 <span>{userInfo.shopIntro || '상점 소개글을 입력해주세요.'}</span>
@@ -213,7 +237,7 @@ const MyPage = () => {
           >
             {tab}
             {activeTab === tab && (
-              <div className="absolute bottom-0 left-0 w-full h-[3px] bg-gray-900" />
+              <div className="absolute bottom-0 left-0 w-full h-0.75 bg-gray-900" />
             )}
             <span className="ml-1 text-sm font-normal">
               {tab === '찜' ? wishProducts.length : tab === '상품' ? myProducts.length : '0'}
@@ -222,7 +246,7 @@ const MyPage = () => {
         ))}
       </div>
 
-      <div className="min-h-[400px]">
+      <div className="min-h-100">
         {activeTab === '찜' ? (
           wishProducts.length > 0 ? (
             <div className="grid grid-cols-5 gap-4">
@@ -241,7 +265,7 @@ const MyPage = () => {
               {myProducts.map((product) => (
                 <div key={`manage-${product.id}`} className="flex py-6 border-b border-gray-100">
                   <div
-                    className="relative w-[140px] h-[140px] flex-shrink-0 border border-gray-200 cursor-pointer"
+                    className="relative w-35 h-35 shrink-0 border border-gray-200 cursor-pointer"
                     onClick={() => navigate(`/product/${product.id}`)}
                   >
                     <img
@@ -253,14 +277,14 @@ const MyPage = () => {
                     />
                     {product.saleStatus === 'RESERVED' && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
-                        <span className="text-white font-bold border-2 border-white px-3 py-1 rounded-[4px] tracking-widest text-sm">
+                        <span className="text-white font-bold border-2 border-white px-3 py-1 rounded-sm tracking-widest text-sm">
                           예약중
                         </span>
                       </div>
                     )}
                     {product.saleStatus === 'SOLD_OUT' && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
-                        <span className="text-gray-300 font-bold border-2 border-gray-300 px-3 py-1 rounded-[4px] tracking-widest text-sm">
+                        <span className="text-gray-300 font-bold border-2 border-gray-300 px-3 py-1 rounded-sm tracking-widest text-sm">
                           판매완료
                         </span>
                       </div>
@@ -289,7 +313,7 @@ const MyPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 justify-center w-[160px]">
+                  <div className="flex flex-col gap-2 justify-center w-40">
                     <select
                       value={product.saleStatus || 'ON_SALE'}
                       onChange={(e) =>
@@ -335,6 +359,14 @@ const MyPage = () => {
           </div>
         )}
       </div>
+
+      <FollowListModal
+        isOpen={isModalOpen}
+        listType={listType}
+        isLoading={isListLoading}
+        followUsers={followUsers}
+        onClose={closeFollowListModal}
+      />
     </div>
   );
 };

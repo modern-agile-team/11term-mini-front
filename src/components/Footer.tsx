@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="w-full bg-white border-t border-gray-200 pt-10 pb-20">
-      <div className="max-w-[1024px] mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4">
         {/* 1. 상단 정책 링크 */}
         <div className="flex gap-6 text-[14px] text-gray-800 mb-10 pb-6 border-b border-gray-100">
           <button className="hover:underline">회사소개</button>
@@ -55,7 +55,7 @@ const Footer = () => {
 
         {/* 3. 하단 법적 고지 및 ISMS */}
         <div className="flex flex-col md:flex-row gap-6 pt-8 border-t border-gray-100 items-start">
-          <div className="flex gap-4 items-center flex-shrink-0">
+          <div className="flex gap-4 items-center shrink-0">
             <div className="p-2 border border-gray-200 text-[10px] text-center leading-3 font-bold">
               ISMS
             </div>
