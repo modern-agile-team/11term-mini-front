@@ -21,6 +21,11 @@ export interface LoginData {
   password: string;
 }
 
+export interface LoginResponse {
+  accessToken: string;
+  user: Account;
+}
+
 export const VALIDATION_PATTERNS = {
   // 이름: 한글 또는 영문 2자 이상 (중간 공백 및 하이픈 허용)
   name: /^[가-힣a-zA-Z]{1,}[가-힣a-zA-Z\s-]{1,}$/,
@@ -31,8 +36,8 @@ export const VALIDATION_PATTERNS = {
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+|~=`{}[\]:";'<>?,./])[A-Za-z\d!@#$%^&*()_+|~=`{}[\]:";'<>?,./]{8,}$/,
   // 전화번호: 하이픈 제외 숫자 11자리 (010으로 시작)
   phone: /^010\d{8}$/,
-  // 생년월일: 8자리 숫자 (YYYYMMDD)
+  // 생년월일: YYYYMMDD 형식 8자리
   birth: /^(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])$/,
-  // 닉네임: 한글, 영문, 숫자 2~10자 (특수문자 및 공백 금지)
+  // 닉네임: 한글, 영문, 숫자 조합 2~10자
   nickname: /^[가-힣a-zA-Z0-9]{2,10}$/,
 };
