@@ -8,64 +8,8 @@ import {
   subscribeRoomMessages,
 } from '../api/chatApi';
 
-const CHAT_MESSAGES_STORAGE_KEY = 'chatMessagesByRoom';
-const CHAT_DRAFTS_STORAGE_KEY = 'chatDraftsByRoom';
-
-const isPersistableRoomId = (roomId: string): boolean => !roomId.startsWith('room-');
-
-const isChatMessage = (value: unknown): value is ChatMessage => {
-  if (!value || typeof value !== 'object') return false;
-  const candidate = value as Partial<ChatMessage>;
-  return (
-    typeof candidate.id === 'string' &&
-    typeof candidate.roomId === 'string' &&
-    (candidate.senderType === 'me' || candidate.senderType === 'other') &&
-    typeof candidate.content === 'string' &&
-    typeof candidate.createdAt === 'string'
-  );
-};
-
-const readStoredDrafts = (): Record<string, string> => {
-  const raw = localStorage.getItem(CHAT_DRAFTS_STORAGE_KEY);
-  if (!raw) return {};
-
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-    return Object.fromEntries(
-      Object.entries(parsed as Record<string, unknown>)
-        .filter(([key]) => isPersistableRoomId(key))
-        .filter(([, value]) => typeof value === 'string')
-        .map(([key, value]) => [key, String(value)])
-    ) as Record<string, string>;
-  } catch {
-    return {};
-  }
-};
-
-const readStoredMessages = (): Record<string, ChatMessage[]> => {
-  const raw = localStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
-  if (!raw) return {};
-
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
-
-    return Object.fromEntries(
-      Object.entries(parsed as Record<string, unknown>)
-        .filter(([roomKey]) => isPersistableRoomId(roomKey))
-        .map(([roomKey, value]) => {
-          const messages = Array.isArray(value) ? value.filter(isChatMessage) : [];
-          return [
-            roomKey,
-            messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
-          ];
-        })
-    );
-  } catch {
-    return {};
-  }
-};
+const messageDraftCache: Record<string, string> = {};
+const roomMessageCache: Record<string, ChatMessage[]> = {};
 
 /**
  * useChatMessages
@@ -75,9 +19,10 @@ const readStoredMessages = (): Record<string, ChatMessage[]> => {
  * - 메시지 로드, 소켓 구독, 전송 동기화를 여기서 관리한다.
  */
 export function useChatMessages(roomId: string | null) {
-  // 입력창(제어 컴포넌트) 상태
-  const [draftsByRoom, setDraftsByRoom] = useState<Record<string, string>>(() => readStoredDrafts());
-  const [messagesByRoom, setMessagesByRoom] = useState<Record<string, ChatMessage[]>>(() => readStoredMessages());
+  const [draftsByRoom, setDraftsByRoom] = useState<Record<string, string>>(() => messageDraftCache);
+  const [messagesByRoom, setMessagesByRoom] = useState<Record<string, ChatMessage[]>>(
+    () => roomMessageCache
+  );
 
   const draft = roomId ? (draftsByRoom[roomId] ?? '') : '';
   const messages = roomId ? (messagesByRoom[roomId] ?? []) : [];
@@ -116,11 +61,17 @@ export function useChatMessages(roomId: string | null) {
   );
 
   useEffect(() => {
-    localStorage.setItem(CHAT_DRAFTS_STORAGE_KEY, JSON.stringify(draftsByRoom));
+    Object.assign(messageDraftCache, draftsByRoom);
+    Object.keys(messageDraftCache).forEach((key) => {
+      if (!(key in draftsByRoom)) delete messageDraftCache[key];
+    });
   }, [draftsByRoom]);
 
   useEffect(() => {
-    localStorage.setItem(CHAT_MESSAGES_STORAGE_KEY, JSON.stringify(messagesByRoom));
+    Object.assign(roomMessageCache, messagesByRoom);
+    Object.keys(roomMessageCache).forEach((key) => {
+      if (!(key in messagesByRoom)) delete roomMessageCache[key];
+    });
   }, [messagesByRoom]);
 
   useEffect(() => {
