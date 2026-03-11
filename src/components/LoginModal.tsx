@@ -40,6 +40,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     };
   }, [isOpen]);
 
+  // 회원가입 유효성 검사 (에러 없고, 필수값 다 채우고, 약관 동의했는지)
   const isSignupValid = useMemo(
     () =>
       isAllChecked &&
@@ -48,8 +49,10 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     [isAllChecked, errors, formData],
   );
 
+  // 로그인 핸들러
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
+    // useAuth 내부에서 /auth/login API를 호출하도록 설계되어 있음
     const isSuccess = await login({ email: formData.email, password: formData.password });
     if (isSuccess) {
       onClose();
@@ -57,17 +60,21 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     }
   };
 
+  // 회원가입 핸들러
   const onSignup = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/api/auth/signup', formData);
-      alert('가입 완료!');
+      // ✅ 명세서와 동일한 엔드포인트: /auth/signup
+      await api.post('/auth/signup', formData);
+      alert('가입 완료! 로그인 해주세요.');
 
+      // 가입 성공 시 폼 초기화 및 로그인 창으로 전환
       setFormData({ email: '', password: '', name: '', nickname: '', phone: '', birth: '' });
       setIsAllChecked(false);
       setStep('LOGIN');
     } catch (error: unknown) {
       if (isAxiosError(error)) {
+        // 서버에서 전달해 주는 에러 메시지(예: "중복된 닉네임입니다")를 바로 띄움
         alert(error.response?.data?.message || '이미 가입된 이메일이거나 중복된 닉네임입니다.');
       } else {
         alert('회원가입 중 알 수 없는 오류가 발생했습니다.');
@@ -88,6 +95,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           ✕
         </button>
 
+        {/* --- 1. 로그인 수단 선택 화면 --- */}
         {step === 'SELECT' && (
           <div className="text-center">
             <div className="mb-10 flex flex-col items-center">
@@ -116,12 +124,13 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 className={`${STYLES.socialBtn} hover:bg-gray-100 mt-2`}
               >
                 <span className="w-8 text-xl">📱</span>
-                <span className="flex-1 text-center mr-8">본인인증으로 이용하기</span>
+                <span className="flex-1 text-center mr-8">이메일/본인인증으로 이용하기</span>
               </button>
             </div>
           </div>
         )}
 
+        {/* --- 2. 이메일 로그인 화면 --- */}
         {step === 'LOGIN' && (
           <form onSubmit={onLogin}>
             <button
@@ -135,6 +144,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <div className="flex flex-col gap-4">
               <input
                 name="email"
+                type="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="이메일"
@@ -164,6 +174,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           </form>
         )}
 
+        {/* --- 3. 회원가입 화면 --- */}
         {step === 'SIGNUP' && (
           <form onSubmit={onSignup} className="flex flex-col gap-5">
             <button

@@ -36,7 +36,7 @@ export const useAuth = () => {
   // 1. 로그인
   const login = async (credentials: LoginData): Promise<boolean> => {
     try {
-      const { data } = await api.post<LoginResponse>('/api/auth/login', credentials);
+      const { data } = await api.post<LoginResponse>('/auth/login', credentials);
 
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('currentUser', JSON.stringify(data.user));
@@ -68,7 +68,7 @@ export const useAuth = () => {
   // 3. 회원 탈퇴
   const withdraw = useCallback(async () => {
     try {
-      await api.delete('/api/auth/withdraw');
+      await api.delete('/auth/withdraw');
 
       localStorage.removeItem('accessToken');
       localStorage.removeItem('currentUser');
@@ -90,7 +90,7 @@ export const useAuth = () => {
   // 4. 정보 수정
   const updateUserInfo = async (updateData: Partial<Account>): Promise<boolean> => {
     try {
-      const { data } = await api.patch<{ user: Account }>('/api/auth/update', updateData);
+      const { data } = await api.patch<{ user: Account }>('/auth/update', updateData);
 
       const updatedUser = data.user || data;
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
