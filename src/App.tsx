@@ -15,7 +15,6 @@ import SellerManager from './components/seller/SellerManeger';
 import ProductEdit from './pages/ProductEdit';
 import WithdrawReasonPage from './pages/WithdrawReasonPage';
 import WithdrawConfirmPage from './pages/WithdrawConfirmPage';
-import ChatPage from './pages/Chatpage';
 
 const AppContent = () => {
   const location = useLocation();
@@ -42,7 +41,6 @@ const AppContent = () => {
         <Route path="/edit/:id" element={<ProductEdit />} />
         <Route path="/settings/withdraw/reason" element={<WithdrawReasonPage />} />
         <Route path="/settings/withdraw/confirm" element={<WithdrawConfirmPage />} />
-        <Route path="/chat" element={<ChatPage />} />
       </Routes>
 
       <Footer />
