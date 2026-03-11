@@ -22,7 +22,6 @@ const Home = () => {
         const response = await api.get<Product[] | ProductsResponse>('/products');
         const responseData = response.data;
 
-        // any 없이 안전하게 배열 추출
         const data: Product[] = Array.isArray(responseData)
           ? responseData
           : responseData.products || responseData.data || [];
@@ -67,7 +66,7 @@ const Home = () => {
         {products.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {products.map((product) => (
-              <ProductCard key={product.id} {...product} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
