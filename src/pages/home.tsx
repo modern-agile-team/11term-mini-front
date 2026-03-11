@@ -3,9 +3,32 @@ import ProductCard from '../components/ProductCard';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
+import { MOCK_PRODUCTS } from '../data/mock';
+
+const normalizeProducts = (payload: unknown): Product[] => {
+  const data: Product[] = Array.isArray(payload)
+    ? payload
+    : Array.isArray((payload as { products?: Product[] })?.products)
+      ? (payload as { products: Product[] }).products
+      : Array.isArray((payload as { data?: Product[] })?.data)
+        ? (payload as { data: Product[] }).data
+        : [];
+
+  const onSaleProducts = data.filter(
+    (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+  );
+
+  const fallbackProducts = MOCK_PRODUCTS.filter(
+    (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+  );
+
+  return (onSaleProducts.length > 0 ? onSaleProducts : fallbackProducts).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+};
 
 const Home = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(() => normalizeProducts(MOCK_PRODUCTS));
   const isFetched = useRef(false);
 
   useEffect(() => {
@@ -15,27 +38,10 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/products');
-
-        const payload = response.data;
-        const data: Product[] = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.products)
-            ? payload.products
-            : Array.isArray(payload?.data)
-              ? payload.data
-              : [];
-
-        const onSaleProducts = data.filter(
-          (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
-        );
-
-        const sortedProducts = onSaleProducts.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-
-        setProducts(sortedProducts);
+        setProducts(normalizeProducts(response.data));
       } catch (error) {
         console.error('상품 로딩 실패:', error);
+        setProducts(normalizeProducts(MOCK_PRODUCTS));
       }
     };
 

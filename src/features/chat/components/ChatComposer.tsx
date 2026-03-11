@@ -18,11 +18,11 @@ export default function ChatComposer({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex gap-2 border-t bg-white p-4">
+    <div className="flex gap-2 border-t bg-white p-3">
       <input
         type="text"
         placeholder={disabled ? '대화방을 선택해주세요' : '메시지를 입력하세요'}
-        className="flex-1 rounded-md border px-3 py-2 outline-none focus:border-red-500"
+        className="flex-1 rounded border px-3 py-1.5 text-sm outline-none focus:border-red-500"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
@@ -37,12 +37,12 @@ export default function ChatComposer({
       />
       <button
         type="button"
-        className="rounded-md bg-red-500 p-2 text-white hover:bg-red-600 disabled:opacity-50"
+        className="rounded bg-red-500 p-1.5 text-white hover:bg-red-600 disabled:opacity-50"
         onClick={onSend}
         disabled={disabled || value.trim().length === 0}
         aria-label="send"
       >
-        <Send size={20} />
+        <Send size={18} />
       </button>
     </div>
   );

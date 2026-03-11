@@ -28,7 +28,11 @@ export interface ChatRoom {
   channel: ChatChannel;
   title: string; // 상대/방 이름
   tab: ChatTab;  // 이 방이 어떤 탭에 속하는지
-  
+  productId?: number;
+  productPrice?: number;
+  buyerId?: number;
+  sellerId?: number;
+
   lastMessage: string;
   lastMessageAt: string; // ISO string (서버/클라 공용)
   unreadCount: number;
@@ -46,4 +50,9 @@ export interface ChatMessage {
   senderType: SenderType;
   content: string;
   createdAt: string; // ISO string
+  uid?: number;
+  extra?: string;
+  messageType?: number;
+  additionalInfo?: unknown;
+  visibility?: 'ALL' | 'ME' | 'OTHER';
 }

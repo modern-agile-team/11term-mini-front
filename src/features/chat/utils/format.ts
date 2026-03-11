@@ -13,7 +13,7 @@ export const CHAT_TAB_LABEL: Record<ChatTab, string> = {
   WAITING: '대기',
   IN_PROGRESS: '진행중',
   CLOSED: '대화종료',
-  CONTACTING: '연락중',
+  CONTACTING: '보관함',
 };
 
 export const formatRoomTime = (iso: string): string => {

@@ -20,28 +20,27 @@ const ChatRoomListItem = ({
     <div
       onClick={onClick}
       className={
-        'flex cursor-pointer items-center gap-3 p-4 hover:bg-gray-50 ' +
-        (isSelected ? 'bg-gray-100' : '')
+        'flex cursor-pointer items-center gap-2.5 px-4 py-2.5 hover:bg-[#fafafa] ' +
+        (isSelected ? 'bg-[#f3f3f3]' : '')
       }
     >
-      {/* 프로필 이미지가 없으니 우선 placeholder */}
-      <div className="h-12 w-12 flex-shrink-0 rounded-full bg-gray-200" />
+      <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gray-200" />
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <span className="truncate font-bold">{room.title}</span>
-          <span className="flex-shrink-0 text-xs text-gray-400">
-            {formatRoomTime(room.lastMessageAt)}
-          </span>
-        </div>
-        <p className="truncate text-sm text-gray-500">{room.lastMessage}</p>
+        <div className="mb-0.5 truncate text-[15px] font-bold leading-tight text-[#222]">{room.title}</div>
+        <p className="truncate text-[12px] text-gray-500">
+          {room.lastMessage} · {formatRoomTime(room.lastMessageAt)}
+        </p>
       </div>
 
-      {room.unreadCount > 0 && (
-        <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] text-white">
-          {room.unreadCount}
-        </span>
-      )}
+      <div className="ml-2 flex flex-col items-end gap-1.5">
+        {room.unreadCount > 0 && (
+          <span className="rounded-full bg-[#d6001c] px-1.5 py-0.5 text-[10px] font-semibold text-white">
+            {room.unreadCount}
+          </span>
+        )}
+        <div className="h-6 w-6 rounded bg-gray-300" />
+      </div>
     </div>
   );
 };

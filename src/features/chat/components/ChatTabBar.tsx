@@ -17,7 +17,7 @@ const ChatTabBar = ({
   const tabs: ChatTab[] = ['ALL', 'WAITING', 'IN_PROGRESS', 'CLOSED', 'CONTACTING'];
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 text-sm">
+    <div className="flex gap-1.5 overflow-x-auto pb-1 text-xs">
       {tabs.map((tab) => {
         const isActive = tab === activeTab;
         return (
@@ -26,8 +26,10 @@ const ChatTabBar = ({
             type="button"
             onClick={() => onChange(tab)}
             className={
-              'whitespace-nowrap rounded-full border px-3 py-1 hover:bg-gray-100 ' +
-              (isActive ? 'bg-gray-100 font-semibold' : '')
+              'whitespace-nowrap rounded-full border px-3 py-1 text-[13px] transition-colors ' +
+              (isActive
+                ? 'border-[#1f1f1f] bg-[#1f1f1f] font-semibold text-white'
+                : 'border-[#dddddd] bg-white text-[#555] hover:bg-gray-50')
             }
           >
             {CHAT_TAB_LABEL[tab]}
