@@ -6,6 +6,7 @@ import { useAuthForm } from '../hooks/useAuthForm';
 import { useAuth } from '../hooks/useAuth';
 import type { FormEvent } from 'react';
 import api from '../api/axios';
+import { isAxiosError } from 'axios';
 
 const STYLES = {
   input: 'w-full h-12 px-4 border border-gray-200 outline-none focus:border-black transition-all',
@@ -27,8 +28,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const { login } = useAuth();
   const [step, setStep] = useState<'SELECT' | 'LOGIN' | 'SIGNUP'>('SELECT');
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
-  const { formData, errors, handleChange } = useAuthForm();
+  const { formData, errors, handleChange, setFormData } = useAuthForm();
 
   // 스크롤 제어
   useEffect(() => {
@@ -40,55 +40,49 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     };
   }, [isOpen]);
 
-  // 회원가입 버튼 활성화 여부 계산
+  // 회원가입 유효성 검사 (에러 없고, 필수값 다 채우고, 약관 동의했는지)
   const isSignupValid = useMemo(
     () =>
       isAllChecked &&
-      isNicknameChecked &&
       !Object.values(errors).some((e) => e) &&
       !!(formData.email && formData.password && formData.nickname && formData.name),
-    [isAllChecked, isNicknameChecked, errors, formData],
+    [isAllChecked, errors, formData],
   );
 
-  if (!isOpen) return null;
-  // 핸들러 함수들
-  const handleNicknameCheck = async () => {
-    if (!formData.nickname || errors.nickname) return alert('올바른 닉네임을 입력해주세요.');
-    try {
-      const { data } = await api.get(`/api/auth/check?nickname=${formData.nickname}`);
-      if (data.isDuplicate) {
-        alert('이미 사용 중인 닉네임입니다.');
-        setIsNicknameChecked(false);
-      } else {
-        alert('사용 가능한 닉네임입니다.');
-        setIsNicknameChecked(true);
-      }
-    } catch {
-      alert('중복 체크 중 오류가 발생했습니다.');
-    }
-  };
-
+  // 로그인 핸들러
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
-    try {
-      await login({ email: formData.email, password: formData.password });
+    // useAuth 내부에서 /auth/login API를 호출하도록 설계되어 있음
+    const isSuccess = await login({ email: formData.email, password: formData.password });
+    if (isSuccess) {
       onClose();
       navigate('/mypage');
-    } catch {
-      alert('정보가 일치하지 않습니다.');
     }
   };
 
+  // 회원가입 핸들러
   const onSignup = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/api/auth/signup', formData);
-      alert('가입 완료!');
+      // ✅ 명세서와 동일한 엔드포인트: /auth/signup
+      await api.post('/auth/signup', formData);
+      alert('가입 완료! 로그인 해주세요.');
+
+      // 가입 성공 시 폼 초기화 및 로그인 창으로 전환
+      setFormData({ email: '', password: '', name: '', nickname: '', phone: '', birth: '' });
+      setIsAllChecked(false);
       setStep('LOGIN');
-    } catch {
-      alert('이미 가입된 이메일입니다.');
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        // 서버에서 전달해 주는 에러 메시지(예: "중복된 닉네임입니다")를 바로 띄움
+        alert(error.response?.data?.message || '이미 가입된 이메일이거나 중복된 닉네임입니다.');
+      } else {
+        alert('회원가입 중 알 수 없는 오류가 발생했습니다.');
+      }
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 py-10 px-4">
@@ -101,6 +95,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           ✕
         </button>
 
+        {/* --- 1. 로그인 수단 선택 화면 --- */}
         {step === 'SELECT' && (
           <div className="text-center">
             <div className="mb-10 flex flex-col items-center">
@@ -111,13 +106,17 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             </div>
             <div className="flex flex-col gap-3">
               {SOCIAL_PROVIDERS.map((p) => (
-                <button key={p.id} className={`${STYLES.socialBtn} ${p.color}`}>
+                <button
+                  key={p.id}
+                  onClick={() => alert('준비중입니다.')}
+                  className={`${STYLES.socialBtn} ${p.color}`}
+                >
                   <span
-                    className={`w-8 text-xl ${p.textColor} group-hover:invert group-hover:brightness-0`}
+                    className={`w-8 text-xl ${p.textColor || ''} group-hover:invert group-hover:brightness-0`}
                   >
                     {p.icon}
                   </span>
-                  <span className={`flex-1 text-center mr-8 ${p.hoverText}`}>{p.label}</span>
+                  <span className={`flex-1 text-center mr-8 ${p.hoverText || ''}`}>{p.label}</span>
                 </button>
               ))}
               <button
@@ -125,12 +124,13 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 className={`${STYLES.socialBtn} hover:bg-gray-100 mt-2`}
               >
                 <span className="w-8 text-xl">📱</span>
-                <span className="flex-1 text-center mr-8">본인인증으로 이용하기</span>
+                <span className="flex-1 text-center mr-8">이메일/본인인증으로 이용하기</span>
               </button>
             </div>
           </div>
         )}
 
+        {/* --- 2. 이메일 로그인 화면 --- */}
         {step === 'LOGIN' && (
           <form onSubmit={onLogin}>
             <button
@@ -144,6 +144,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <div className="flex flex-col gap-4">
               <input
                 name="email"
+                type="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="이메일"
@@ -173,6 +174,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           </form>
         )}
 
+        {/* --- 3. 회원가입 화면 --- */}
         {step === 'SIGNUP' && (
           <form onSubmit={onSignup} className="flex flex-col gap-5">
             <button
@@ -185,44 +187,40 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <h2 className="text-2xl font-bold mb-4">정보를 입력해주세요</h2>
 
             <AuthField label="닉네임" error={errors.nickname}>
-              <div className="flex items-center gap-2">
-                <input
-                  name="nickname"
-                  value={formData.nickname}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setIsNicknameChecked(false);
-                  }}
-                  placeholder="닉네임 입력 (2~10자)"
-                  className="w-full outline-none text-lg"
-                />
-                <button
-                  type="button"
-                  onClick={handleNicknameCheck}
-                  className={`${STYLES.checkBtn} ${isNicknameChecked ? 'bg-blue-500 border-blue-500 text-white' : 'border-black hover:bg-black hover:text-white'}`}
-                >
-                  {isNicknameChecked ? '확인됨' : '중복확인'}
-                </button>
-              </div>
+              <input
+                name="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
+                placeholder="닉네임 입력 (2~10자)"
+                className="w-full outline-none text-lg"
+              />
             </AuthField>
 
-            {SIGNUP_FIELDS.map((f) => (
-              <AuthField key={f.name} label={f.label} error={errors[f.name as keyof typeof errors]}>
-                <input
-                  {...f}
-                  value={formData[f.name as keyof typeof formData]}
-                  onChange={handleChange}
-                  className="w-full outline-none text-lg"
-                />
-              </AuthField>
-            ))}
+            {SIGNUP_FIELDS.map((f) => {
+              const fieldName = f.name as keyof typeof formData;
+              const fieldError = errors[fieldName as keyof typeof errors];
+
+              return (
+                <AuthField key={f.name} label={f.label} error={fieldError}>
+                  <input
+                    {...f}
+                    name={fieldName}
+                    value={formData[fieldName]}
+                    onChange={handleChange}
+                    className="w-full outline-none text-lg"
+                  />
+                </AuthField>
+              );
+            })}
 
             <div
               onClick={() => setIsAllChecked(!isAllChecked)}
               className="flex items-center gap-3 p-4 bg-gray-50 border cursor-pointer hover:bg-gray-100 transition-colors"
             >
               <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center border ${isAllChecked ? 'bg-[#ff5058] border-[#ff5058]' : 'bg-white'}`}
+                className={`w-5 h-5 rounded-full flex items-center justify-center border ${
+                  isAllChecked ? 'bg-[#ff5058] border-[#ff5058]' : 'bg-white'
+                }`}
               >
                 <span className="text-white text-[10px]">✓</span>
               </div>
@@ -232,7 +230,9 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <button
               type="submit"
               disabled={!isSignupValid}
-              className={`${STYLES.submitBtn} ${isSignupValid ? STYLES.activeBtn : STYLES.inactiveBtn}`}
+              className={`${STYLES.submitBtn} ${
+                isSignupValid ? STYLES.activeBtn : STYLES.inactiveBtn
+              }`}
             >
               회원가입 완료
             </button>

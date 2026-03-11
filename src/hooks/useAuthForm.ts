@@ -10,6 +10,7 @@ export const useAuthForm = () => {
     phone: '',
     birth: '',
   });
+
   const [errors, setErrors] = useState({
     email: '',
     password: '',
@@ -23,7 +24,9 @@ export const useAuthForm = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    const pattern = VALIDATION_PATTERNS[name as keyof typeof VALIDATION_PATTERNS];
+    // ✅ keyof typeof를 사용하여 안전하게 타입 추론
+    const patternName = name as keyof typeof VALIDATION_PATTERNS;
+    const pattern = VALIDATION_PATTERNS[patternName];
     let error = '';
 
     if (pattern && !pattern.test(value)) {
@@ -33,9 +36,11 @@ export const useAuthForm = () => {
         name: '이름을 2자 이상 입력해주세요.',
         nickname: '2~10자 한글, 영문, 숫자만 가능합니다.',
         phone: '010으로 시작하는 11자리 숫자를 입력해주세요.',
+        birth: 'YYYYMMDD 형식의 8자리 생년월일을 입력해주세요.',
       };
       error = messages[name] || '';
     }
+
     setErrors((prev) => ({ ...prev, [name]: error }));
   }, []);
 
