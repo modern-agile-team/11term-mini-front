@@ -4,6 +4,11 @@ import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
 
+interface ProductsResponse {
+  products?: Product[];
+  data?: Product[];
+}
+
 const Home = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const isFetched = useRef(false);
@@ -14,10 +19,13 @@ const Home = () => {
 
     const fetchProducts = async () => {
       try {
-        const response = await api.get('/api/products');
+        const response = await api.get<Product[] | ProductsResponse>('/products');
+        const responseData = response.data;
 
-        const data: Product[] =
-          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
+        // any 없이 안전하게 배열 추출
+        const data: Product[] = Array.isArray(responseData)
+          ? responseData
+          : responseData.products || responseData.data || [];
 
         const onSaleProducts = data.filter(
           (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
@@ -28,7 +36,7 @@ const Home = () => {
         );
 
         setProducts(sortedProducts);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('상품 로딩 실패:', error);
       }
     };
@@ -39,7 +47,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-[1024px] mx-auto px-4 py-8">
-        {/* 배너 및 앱 다운로드 섹션 */}
         <section className="w-full mb-10">
           <HomeBanner />
           <div className="w-full h-[100px] bg-[#f9f9f9] border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -56,12 +63,18 @@ const Home = () => {
           </div>
         </section>
 
-        <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <h2 className="text-xl font-bold mb-6">오늘의 추천 상품</h2>
+        {products.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} {...product} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-center items-center py-20 text-gray-400">
+            상품을 불러오는 중이거나 등록된 상품이 없습니다.
+          </div>
+        )}
       </main>
     </div>
   );

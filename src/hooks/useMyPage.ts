@@ -4,19 +4,25 @@ import { useAuth } from './useAuth';
 import type { Product, SaleStatus } from '../types/Product';
 import api from '../api/axios';
 
+interface ProductsResponse {
+  products?: Product[];
+  data?: Product[];
+}
+
 export const useMyPage = () => {
   const { userInfo, updateUserInfo } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState('상품');
   const [myProducts, setMyProducts] = useState<Product[]>([]);
+
   const [isNicknameEditing, setIsNicknameEditing] = useState(false);
   const [isIntroEditing, setIsIntroEditing] = useState(false);
 
-  const [tempNickname, setTempNickname] = useState(userInfo?.nickname || '');
-  const [tempIntro, setTempIntro] = useState(userInfo?.shopIntro || '');
+  const [tempNickname, setTempNickname] = useState('');
+  const [tempIntro, setTempIntro] = useState('');
 
-  const userId = userInfo?.id;
+  const userId = userInfo?.userId;
 
   const sortProducts = (products: Product[]) => {
     return [...products].sort((a, b) => {
@@ -26,22 +32,35 @@ export const useMyPage = () => {
     });
   };
 
+  const startEditingNickname = () => {
+    setTempNickname(userInfo?.nickname || '');
+    setIsNicknameEditing(true);
+  };
+
+  const startEditingIntro = () => {
+    setTempIntro(userInfo?.shopIntro || '');
+    setIsIntroEditing(true);
+  };
+
   useEffect(() => {
     let ignore = false;
 
     const fetchMyProducts = async () => {
       if (!userId) return;
       try {
-        const response = await api.get('/api/products');
-        const data: Product[] = Array.isArray(response.data)
-          ? response.data
-          : response.data?.products || [];
+        const response = await api.get<Product[] | ProductsResponse>('/products');
+        const responseData = response.data;
+
+        const data: Product[] = Array.isArray(responseData)
+          ? responseData
+          : responseData.products || responseData.data || [];
+
+        const my = data.filter((product) => String(product.sellerId) === String(userId));
 
         if (!ignore) {
-          const filtered = data.filter((p) => String(p.sellerId) === String(userId));
-          setMyProducts(sortProducts(filtered));
+          setMyProducts(sortProducts(my));
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('내 상품 로딩 실패:', error);
       }
     };
@@ -55,29 +74,30 @@ export const useMyPage = () => {
 
   const updateProductStatus = async (productId: number, newStatus: SaleStatus) => {
     try {
-      await api.patch(`/api/products/${productId}/status`, { saleStatus: newStatus });
-      setMyProducts((prev) => {
-        const updated = prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p));
-        return sortProducts(updated);
-      });
-    } catch (error) {
-      console.error('상품 상태 업데이트 실패:', error);
+      await api.patch(`/products/${productId}/status`, { saleStatus: newStatus });
+      setMyProducts((prev) =>
+        sortProducts(prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p))),
+      );
+    } catch (error: unknown) {
+      console.error('상태 변경 실패:', error);
       alert('상태 변경에 실패했습니다.');
     }
   };
 
   const deleteProduct = async (productId: number) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+
     try {
-      await api.delete(`/api/products/${productId}`);
+      await api.delete(`/products/${productId}`);
       setMyProducts((prev) => prev.filter((p) => p.id !== productId));
       alert('상품이 삭제되었습니다.');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('상품 삭제 실패:', error);
       alert('상품 삭제에 실패했습니다.');
     }
   };
 
-  const getOpenDays = (joinDate: string) => {
+  const getOpenDays = (joinDate?: string) => {
     if (!joinDate) return 1;
     const startDate = new Date(joinDate.replace(/\./g, '-'));
     const today = new Date();
@@ -108,7 +128,7 @@ export const useMyPage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        updateUserInfo({ avatar: reader.result as string });
+        updateUserInfo({ imageUrl: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
@@ -134,5 +154,7 @@ export const useMyPage = () => {
     handleImageChange,
     updateProductStatus,
     deleteProduct,
+    startEditingNickname,
+    startEditingIntro,
   };
 };
