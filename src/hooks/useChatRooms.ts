@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ChatRoom, ChatTab } from '../types';
+import type { ChatRoom, ChatTab } from '../types/chat';
 import { fetchTalkRooms, markTalkRoomAsRead } from '../api/chatApi';
 
 const READ_ROOM_STATE_KEY = 'chatReadRoomState';

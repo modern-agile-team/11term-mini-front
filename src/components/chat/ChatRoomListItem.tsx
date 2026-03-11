@@ -1,5 +1,5 @@
-import type { ChatRoom } from '../types';
-import { formatRoomTime } from '../utils/format';
+import type { ChatRoom } from '../../types/chat';
+import { formatRoomTime } from '../../utils/chatFormat';
 
 /**
  * ChatRoomListItem

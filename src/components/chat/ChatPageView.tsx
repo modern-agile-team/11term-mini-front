@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { ChevronDown, CircleHelp, MessageCircle, MoreHorizontal } from 'lucide-react';
 
-import { useChatRooms } from '../hooks/useChatRooms';
-import { useChatMessages } from '../hooks/useChatMessages';
+import { useChatRooms } from '../../hooks/useChatRooms';
+import { useChatMessages } from '../../hooks/useChatMessages';
 import ChatTabBar from './ChatTabBar';
 import ChatRoomList from './ChatRoomList';
 import ChatThread from './ChatThread';

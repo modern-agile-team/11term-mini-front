@@ -1,5 +1,5 @@
-import type { ChatTab } from '../types';
-import { CHAT_TAB_LABEL } from '../utils/format';
+import type { ChatTab } from '../../types/chat';
+import { CHAT_TAB_LABEL } from '../../utils/chatFormat';
 
 /**
  * ChatTabBar

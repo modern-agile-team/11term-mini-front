@@ -6,7 +6,7 @@
  * - 나중에 포맷 바꾸기도 쉬움
  */
 
-import type { ChatTab } from '../types';
+import type { ChatTab } from '../types/chat';
 
 export const CHAT_TAB_LABEL: Record<ChatTab, string> = {
   ALL: '전체',

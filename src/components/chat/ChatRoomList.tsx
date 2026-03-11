@@ -1,4 +1,4 @@
-import type { ChatRoom } from '../types';
+import type { ChatRoom } from '../../types/chat';
 import ChatRoomListItem from './ChatRoomListItem';
 
 /**

@@ -1,5 +1,5 @@
-import type { ChatMessage, ChatRoom, ChatTab, SenderType } from '../types';
-import api from '../../../api/axios';
+import type { ChatMessage, ChatRoom, ChatTab, SenderType } from '../types/chat';
+import api from './axios';
 
 export interface TalkRoomResponse {
   id: number;

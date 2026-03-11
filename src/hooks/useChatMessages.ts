@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ChatMessage } from '../types';
+import type { ChatMessage } from '../types/chat';
 import {
   fetchRoomMessages,
   joinTalkRoom,
