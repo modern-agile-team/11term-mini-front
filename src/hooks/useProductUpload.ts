@@ -30,6 +30,7 @@ export const useProductUpload = () => {
         response.data.urls || (response.data.imageUrl ? [response.data.imageUrl] : []);
       setImages((prev) => [...prev, ...newUrls]);
     } catch (error) {
+      console.error('이미지 업로드 오류:', error);
       alert('이미지 업로드에 실패했습니다.');
     } finally {
       setIsUploading(false);
@@ -52,6 +53,7 @@ export const useProductUpload = () => {
         navigate('/');
       }
     } catch (error) {
+      console.error('상품 등록 오류:', error);
       alert('상품 등록 중 오류가 발생했습니다.');
     }
   };

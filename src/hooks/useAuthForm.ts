@@ -3,7 +3,7 @@ import { VALIDATION_PATTERNS } from '../types/Account';
 
 export const useAuthForm = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    userId: '',
     password: '',
     name: '',
     nickname: '',
@@ -12,7 +12,7 @@ export const useAuthForm = () => {
   });
 
   const [errors, setErrors] = useState({
-    email: '',
+    userId: '',
     password: '',
     name: '',
     nickname: '',
@@ -23,8 +23,6 @@ export const useAuthForm = () => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // ✅ keyof typeof를 사용하여 안전하게 타입 추론
     const patternName = name as keyof typeof VALIDATION_PATTERNS;
     const pattern = VALIDATION_PATTERNS[patternName];
     let error = '';

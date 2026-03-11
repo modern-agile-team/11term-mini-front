@@ -1,13 +1,17 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../api/axios';
 import { useSellerForm } from '../../hooks/useSellerForm';
+import { useProductUpload } from '../../hooks/useProductUpload';
 import { SellerFormSection } from './SellerFormSection';
 import { CATEGORIES } from '../../data/categories';
 import { PRODUCT_STATUS } from '../../types/Product';
 import { SellerSubNav } from './SellerNav';
-import api from '../../api/axios';
-import { useNavigate } from 'react-router-dom';
 
 const SellerManager = () => {
   const navigate = useNavigate();
+
+  // 텍스트, 태그, 카테고리 폼 상태 관리 훅
   const {
     formData,
     setFormData,
@@ -15,24 +19,25 @@ const SellerManager = () => {
     setSelectedMainId,
     tagInput,
     setTagInput,
-    handleImageUpload,
-    removeImage,
     handleInputChange,
     handleTagKeyDown,
   } = useSellerForm();
 
+  const { images, isUploading, handleImageUpload, removeImage } = useProductUpload();
   const selectedMainCategory = CATEGORIES.find((cat) => cat.id === selectedMainId);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    //  간단한 유효성 검사
-    if (formData.images.length === 0) return alert('상품 이미지를 최소 1장 등록해주세요.');
+    if (images.length === 0) return alert('상품 이미지를 최소 1장 등록해주세요.');
     if (!formData.title.trim()) return alert('상품명을 입력해주세요.');
     if (!formData.category) return alert('카테고리를 선택해주세요.');
     if (formData.price <= 0) return alert('올바른 가격을 입력해주세요.');
 
     try {
-      await api.post('/api/products', formData);
+      const payload = { ...formData, images };
+
+      await api.post('/products', payload);
+
       alert('상품이 성공적으로 등록되었습니다!');
       navigate('/');
     } catch (error) {
@@ -52,8 +57,8 @@ const SellerManager = () => {
           label="상품이미지"
           type="image"
           required
-          count={`${formData.images.length}/12`}
-          images={formData.images}
+          count={`${images.length}/12`}
+          images={images}
           onImageUpload={handleImageUpload}
           onRemoveImage={removeImage}
           description="* 상품 이미지는 PC 1:1, 모바일 1:1.23 비율로 보여져요."
@@ -78,7 +83,9 @@ const SellerManager = () => {
               {CATEGORIES.map((cat) => (
                 <div
                   key={cat.id}
-                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${selectedMainId === cat.id ? 'bg-gray-50 text-[#ff5058] font-bold' : ''}`}
+                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${
+                    selectedMainId === cat.id ? 'bg-gray-50 text-[#ff5058] font-bold' : ''
+                  }`}
                   onClick={() => setSelectedMainId(cat.id)}
                 >
                   {cat.name}
@@ -89,7 +96,9 @@ const SellerManager = () => {
               {selectedMainCategory?.subCategories?.map((sub) => (
                 <div
                   key={sub.id}
-                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${formData.category === sub.name ? 'text-[#ff5058] font-bold bg-white' : ''}`}
+                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${
+                    formData.category === sub.name ? 'text-[#ff5058] font-bold bg-white' : ''
+                  }`}
                   onClick={() => setFormData((prev) => ({ ...prev, category: sub.name }))}
                 >
                   {sub.name}
@@ -118,7 +127,7 @@ const SellerManager = () => {
                   name="status"
                   className="w-4 h-4 accent-[#ff5058] mt-0.5"
                   checked={formData.status === status.id}
-                  onChange={() => setFormData({ ...formData, status: status.id })}
+                  onChange={() => setFormData((prev) => ({ ...prev, status: status.id }))}
                 />
                 <div className="-mt-0.5">
                   <div className="text-[13px] font-bold text-gray-700 group-hover:text-black">
@@ -180,7 +189,7 @@ const SellerManager = () => {
           label="가격"
           type="number"
           name="price"
-          value={formData.price}
+          value={formData.price || ''}
           onChange={handleInputChange}
           placeholder="가격을 입력해 주세요."
           unit="원"
@@ -204,7 +213,7 @@ const SellerManager = () => {
                     type="radio"
                     name="shippingFee"
                     checked={formData.shippingFee === fee}
-                    onChange={() => setFormData({ ...formData, shippingFee: fee })}
+                    onChange={() => setFormData((prev) => ({ ...prev, shippingFee: fee }))}
                     className="w-5 h-5 accent-[#ff5058]"
                   />
                   <span className="text-gray-700">
@@ -228,7 +237,7 @@ const SellerManager = () => {
                   type="radio"
                   name="directTrade"
                   checked={formData.directTrade === isDirect}
-                  onChange={() => setFormData({ ...formData, directTrade: isDirect })}
+                  onChange={() => setFormData((prev) => ({ ...prev, directTrade: isDirect }))}
                   className="w-5 h-5 accent-[#ff5058]"
                 />
                 <span className="text-gray-700">{isDirect ? '가능' : '불가'}</span>
@@ -241,7 +250,7 @@ const SellerManager = () => {
           label="수량"
           type="number"
           name="quantity"
-          value={formData.quantity}
+          value={formData.quantity || 1}
           onChange={handleInputChange}
           unit="개"
           isLast
@@ -257,9 +266,14 @@ const SellerManager = () => {
             </button>
             <button
               type="submit"
-              className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-lg active:scale-95 transition-all hover:bg-[#e64951]"
+              disabled={isUploading}
+              className={`px-10 py-3 text-sm font-bold text-white shadow-lg transition-all ${
+                isUploading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#ff5058] active:scale-95 hover:bg-[#e64951]'
+              }`}
             >
-              등록하기
+              {isUploading ? '업로드 중...' : '등록하기'}
             </button>
           </div>
         </footer>
