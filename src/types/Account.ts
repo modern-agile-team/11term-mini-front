@@ -10,6 +10,7 @@ export interface Account {
   shopIntro?: string;
   wishList: string;
   createdAt: string;
+  imageUrl: string;
 }
 
 export type SignupData = Omit<Account, 'id' | 'joinDate' | 'createdAt' | 'wishList'> & {
