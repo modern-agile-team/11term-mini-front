@@ -6,13 +6,17 @@ import type { Account, LoginData, LoginResponse } from '../types/Account';
 
 let isAlerting = false;
 
+interface AuthMeResponse {
+  data?: Account;
+}
+
 export const useAuth = () => {
   const navigate = useNavigate();
 
   const getStoredUser = (): Account | null => {
     const saved = localStorage.getItem('currentUser');
     try {
-      return saved ? JSON.parse(saved) : null;
+      return saved ? (JSON.parse(saved) as Account) : null;
     } catch {
       return null;
     }
@@ -20,6 +24,7 @@ export const useAuth = () => {
 
   const [userInfo, setUserInfo] = useState<Account | null>(getStoredUser);
 
+  // 내 정보 갱신
   const fetchMe = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
@@ -28,14 +33,15 @@ export const useAuth = () => {
     }
 
     try {
-      const response = await api.get('/auth/me');
-      // 백엔드가 객체를 한 번 더 감싸서 보낼 경우를 대비
-      const userData = response.data?.data || response.data;
+      const response = await api.get<Account & AuthMeResponse>('/auth/me');
+      const userData: Account = response.data.data ? response.data.data : response.data;
 
-      const mergedUser = { ...getStoredUser(), ...userData };
+      const storedUser = getStoredUser();
+      const mergedUser: Account = { ...storedUser, ...userData };
+
       localStorage.setItem('currentUser', JSON.stringify(mergedUser));
       setUserInfo(mergedUser);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('사용자 최신 정보 갱신 실패:', error);
     }
   }, []);
@@ -53,17 +59,23 @@ export const useAuth = () => {
   const login = async (credentials: LoginData): Promise<boolean> => {
     try {
       const response = await api.post<LoginResponse>('/auth/login', credentials);
-      const data = response.data;
+      const responseData = response.data;
 
-      // 혹시 데이터 포맷이 깊을 경우를 대비
-      const userData = (data as any).data?.user || data.user || data;
+      const actualUser = responseData.data?.user || responseData.user;
+      const actualToken =
+        responseData.data?.accessToken ||
+        responseData.data?.token ||
+        responseData.accessToken ||
+        responseData.token;
 
-      localStorage.setItem('accessToken', data.accessToken || (data as any).token);
-      localStorage.setItem('currentUser', JSON.stringify(userData));
-      setUserInfo(userData);
-
-      window.dispatchEvent(new Event('auth-change'));
-      return true;
+      if (actualToken && actualUser) {
+        localStorage.setItem('accessToken', actualToken);
+        localStorage.setItem('currentUser', JSON.stringify(actualUser));
+        setUserInfo(actualUser);
+        window.dispatchEvent(new Event('auth-change'));
+        return true;
+      }
+      throw new Error('응답에 유저 정보나 토큰이 없습니다.');
     } catch (error: unknown) {
       if (isAxiosError(error)) {
         alert(error.response?.data?.message || '이메일 또는 비밀번호를 확인해주세요.');
@@ -107,9 +119,12 @@ export const useAuth = () => {
 
   const updateUserInfo = async (updateData: Partial<Account>): Promise<boolean> => {
     try {
-      const response = await api.patch('/auth/update', updateData);
+      const response = await api.patch<{ data?: { user?: Account }; user?: Account }>(
+        '/auth/update',
+        updateData,
+      );
       const data = response.data;
-      const updatedUser = data.data?.user || data.user || data;
+      const updatedUser = data.data?.user || data.user || (data as Account);
 
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       setUserInfo(updatedUser);
