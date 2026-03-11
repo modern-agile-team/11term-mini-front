@@ -1,0 +1,49 @@
+import { Send } from 'lucide-react';
+
+/**
+ * ChatComposer
+ *
+ * ✅ 원리: 입력창은 "제어 컴포넌트"(value/onChange)로 만들기
+ * - 나중에 Enter 전송, 금칙어, 길이 제한 같은 기능을 넣기 쉬움
+ */
+export default function ChatComposer({
+  value,
+  onChange,
+  onSend,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSend: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex gap-2 border-t bg-white p-3">
+      <input
+        type="text"
+        placeholder={disabled ? '대화방을 선택해주세요' : '메시지를 입력하세요'}
+        className="flex-1 rounded border px-3 py-1.5 text-sm outline-none focus:border-red-500"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          // 한글 조합 중 Enter 처리 시 초성 입력이 끼는 현상 방지
+          if (e.nativeEvent.isComposing) return;
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            onSend();
+          }
+        }}
+        disabled={disabled}
+      />
+      <button
+        type="button"
+        className="rounded bg-red-500 p-1.5 text-white hover:bg-red-600 disabled:opacity-50"
+        onClick={onSend}
+        disabled={disabled || value.trim().length === 0}
+        aria-label="send"
+      >
+        <Send size={18} />
+      </button>
+    </div>
+  );
+}

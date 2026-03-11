@@ -24,7 +24,7 @@ const SearchPage = () => {
     const fetchProducts = async () => {
       try {
         setIsInitialLoading(true);
-        const response = await api.get('/api/products');
+        const response = await api.get('/products');
         setProducts(response.data);
       } catch (error) {
         console.error('검색 데이터 로딩 실패:', error);

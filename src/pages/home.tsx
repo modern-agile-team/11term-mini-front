@@ -4,14 +4,37 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
+import { MOCK_PRODUCTS } from '../data/mock';
 import { useInfiniteList } from '../hooks/useInfiniteList';
 
 const PAGE_SIZE = 20;
 const SKELETON_COUNT = 10;
 const FETCHING_SKELETON_COUNT = 5;
 
+const normalizeProducts = (payload: unknown): Product[] => {
+  const data: Product[] = Array.isArray(payload)
+    ? payload
+    : Array.isArray((payload as { products?: Product[] })?.products)
+      ? (payload as { products: Product[] }).products
+      : Array.isArray((payload as { data?: Product[] })?.data)
+        ? (payload as { data: Product[] }).data
+        : [];
+
+  const onSaleProducts = data.filter(
+    (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+  );
+
+  const fallbackProducts = MOCK_PRODUCTS.filter(
+    (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
+  );
+
+  return (onSaleProducts.length > 0 ? onSaleProducts : fallbackProducts).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+};
+
 const Home = () => {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>(() => normalizeProducts(MOCK_PRODUCTS));
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
     items: allProducts,
@@ -22,22 +45,11 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         setIsInitialLoading(true);
-        const response = await api.get('/api/products');
-
-        const data: Product[] =
-          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
-
-        const onSaleProducts = data.filter(
-          (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
-        );
-
-        const sortedProducts = onSaleProducts.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
-
-        setAllProducts(sortedProducts);
+        const response = await api.get('/products');
+        setAllProducts(normalizeProducts(response.data));
       } catch (error) {
         console.error('상품 로딩 실패:', error);
+        setAllProducts(normalizeProducts(MOCK_PRODUCTS));
       } finally {
         setIsInitialLoading(false);
       }
