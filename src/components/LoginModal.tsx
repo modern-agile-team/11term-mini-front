@@ -28,7 +28,6 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const { login } = useAuth();
   const [step, setStep] = useState<'SELECT' | 'LOGIN' | 'SIGNUP'>('SELECT');
   const [isAllChecked, setIsAllChecked] = useState(false);
-  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const { formData, errors, handleChange, setFormData } = useAuthForm();
 
   // 스크롤 제어
@@ -41,45 +40,13 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     };
   }, [isOpen]);
 
-  // 회원가입 버튼 활성화 여부 계산
   const isSignupValid = useMemo(
     () =>
       isAllChecked &&
-      isNicknameChecked &&
       !Object.values(errors).some((e) => e) &&
       !!(formData.email && formData.password && formData.nickname && formData.name),
-    [isAllChecked, isNicknameChecked, errors, formData],
+    [isAllChecked, errors, formData],
   );
-
-  // 핸들러 함수들
-  const handleNicknameCheck = async () => {
-    if (!formData.nickname || errors.nickname) return alert('올바른 닉네임을 입력해주세요.');
-
-    try {
-      // 백엔드가 GET 방식을 사용한다고 가정 (query param)
-      const { data } = await api.get(`/api/auth/check?nickname=${formData.nickname}`);
-
-      // 서버에서 { isDuplicate: true/false } 형태로 반환하는 경우
-      if (data.isDuplicate) {
-        alert('이미 사용 중인 닉네임입니다.');
-        setIsNicknameChecked(false);
-      } else {
-        alert('사용 가능한 닉네임입니다.');
-        setIsNicknameChecked(true);
-      }
-    } catch (error: unknown) {
-      // 서버가 중복일 때 400이나 409 에러를 던지는 경우를 위한 방어 로직
-      if (
-        isAxiosError(error) &&
-        (error.response?.status === 409 || error.response?.status === 400)
-      ) {
-        alert('이미 사용 중인 닉네임입니다.');
-      } else {
-        alert('중복 체크 중 통신 오류가 발생했습니다. 백엔드 주소나 메서드를 확인해주세요.');
-      }
-      setIsNicknameChecked(false);
-    }
-  };
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -95,14 +62,13 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     try {
       await api.post('/api/auth/signup', formData);
       alert('가입 완료!');
-      // 가입 완료 후 폼 초기화
+
       setFormData({ email: '', password: '', name: '', nickname: '', phone: '', birth: '' });
-      setIsNicknameChecked(false);
       setIsAllChecked(false);
       setStep('LOGIN');
     } catch (error: unknown) {
       if (isAxiosError(error)) {
-        alert(error.response?.data?.message || '이미 가입된 이메일이거나 오류가 발생했습니다.');
+        alert(error.response?.data?.message || '이미 가입된 이메일이거나 중복된 닉네임입니다.');
       } else {
         alert('회원가입 중 알 수 없는 오류가 발생했습니다.');
       }
@@ -145,7 +111,6 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   <span className={`flex-1 text-center mr-8 ${p.hoverText || ''}`}>{p.label}</span>
                 </button>
               ))}
-              {/* 사용자가 작성했던 본인인증 버튼 유지 */}
               <button
                 onClick={() => setStep('LOGIN')}
                 className={`${STYLES.socialBtn} hover:bg-gray-100 mt-2`}
@@ -211,32 +176,15 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <h2 className="text-2xl font-bold mb-4">정보를 입력해주세요</h2>
 
             <AuthField label="닉네임" error={errors.nickname}>
-              <div className="flex items-center gap-2">
-                <input
-                  name="nickname"
-                  value={formData.nickname}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setIsNicknameChecked(false); // 타이핑 시 중복확인 초기화
-                  }}
-                  placeholder="닉네임 입력 (2~10자)"
-                  className="w-full outline-none text-lg"
-                />
-                <button
-                  type="button"
-                  onClick={handleNicknameCheck}
-                  className={`${STYLES.checkBtn} ${
-                    isNicknameChecked
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : 'border-black hover:bg-black hover:text-white'
-                  }`}
-                >
-                  {isNicknameChecked ? '확인됨' : '중복확인'}
-                </button>
-              </div>
+              <input
+                name="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
+                placeholder="닉네임 입력 (2~10자)"
+                className="w-full outline-none text-lg"
+              />
             </AuthField>
 
-            {/* ✅ name 타입 에러 완벽 해결 구간 */}
             {SIGNUP_FIELDS.map((f) => {
               const fieldName = f.name as keyof typeof formData;
               const fieldError = errors[fieldName as keyof typeof errors];
@@ -245,7 +193,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 <AuthField key={f.name} label={f.label} error={fieldError}>
                   <input
                     {...f}
-                    name={fieldName} // 명시적으로 주입
+                    name={fieldName}
                     value={formData[fieldName]}
                     onChange={handleChange}
                     className="w-full outline-none text-lg"
