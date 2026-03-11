@@ -45,14 +45,23 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     () =>
       isAllChecked &&
       !Object.values(errors).some((e) => e) &&
-      !!(formData.userId && formData.password && formData.nickname && formData.name),
+      !!(
+        formData.userId &&
+        formData.password &&
+        formData.name &&
+        formData.nickname &&
+        formData.address
+      ),
     [isAllChecked, errors, formData],
   );
 
   // 로그인 핸들러
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
-    const isSuccess = await login({ userId: formData.userId, password: formData.password });
+    const isSuccess = await login({
+      userId: formData.userId || '',
+      password: formData.password || '',
+    });
     if (isSuccess) {
       onClose();
       navigate('/mypage');
@@ -63,14 +72,36 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const onSignup = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/auth/register', formData);
+      await api.post('/auth/register', {
+        userId: formData.userId,
+        password: formData.password,
+        name: formData.name,
+        nickname: formData.nickname,
+        address: formData.address,
+      });
+
       alert('가입 완료! 로그인 해주세요.');
-      setFormData({ userId: '', password: '', name: '', nickname: '', phone: '', birth: '' });
+      setFormData({
+        userId: '',
+        password: '',
+        name: '',
+        nickname: '',
+        phone: '',
+        birth: '',
+        address: '',
+      });
       setIsAllChecked(false);
       setStep('LOGIN');
     } catch (error: unknown) {
       if (isAxiosError(error)) {
-        alert(error.response?.data?.message || '이미 가입된 아이디이거나 중복된 닉네임입니다.');
+        // 404 에러일 경우 서버 경로 확인 필요 메시지 출력
+        if (error.response?.status === 404) {
+          alert(
+            '서버의 회원가입 경로(/auth/register)를 찾을 수 없습니다. 백엔드 개발자에게 문의하세요.',
+          );
+        } else {
+          alert(error.response?.data?.message || '이미 가입된 아이디이거나 중복된 정보입니다.');
+        }
       } else {
         alert('회원가입 중 알 수 없는 오류가 발생했습니다.');
       }
@@ -90,7 +121,6 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           ✕
         </button>
 
-        {/* --- 1. 로그인 수단 선택 화면 --- */}
         {step === 'SELECT' && (
           <div className="text-center">
             <div className="mb-10 flex flex-col items-center">
@@ -106,11 +136,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   onClick={() => alert('준비중입니다.')}
                   className={`${STYLES.socialBtn} ${p.color}`}
                 >
-                  <span
-                    className={`w-8 text-xl ${p.textColor || ''} group-hover:invert group-hover:brightness-0`}
-                  >
-                    {p.icon}
-                  </span>
+                  <span className={`w-8 text-xl ${p.textColor || ''}`}>{p.icon}</span>
                   <span className={`flex-1 text-center mr-8 ${p.hoverText || ''}`}>{p.label}</span>
                 </button>
               ))}
@@ -119,13 +145,12 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 className={`${STYLES.socialBtn} hover:bg-gray-100 mt-2`}
               >
                 <span className="w-8 text-xl">📱</span>
-                <span className="flex-1 text-center mr-8">아이디/본인인증으로 이용하기</span>
+                <span className="flex-1 text-center mr-8">아이디로 이용하기</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* --- 2. 로그인 화면 --- */}
         {step === 'LOGIN' && (
           <form onSubmit={onLogin}>
             <button
@@ -148,7 +173,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               <input
                 name="password"
                 type="password"
-                value={formData.password}
+                value={formData.password || ''}
                 onChange={handleChange}
                 placeholder="비밀번호"
                 className={STYLES.input}
@@ -169,9 +194,11 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           </form>
         )}
 
-        {/* --- 3. 회원가입 화면 --- */}
         {step === 'SIGNUP' && (
-          <form onSubmit={onSignup} className="flex flex-col gap-5">
+          <form
+            onSubmit={onSignup}
+            className="flex flex-col gap-5 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar"
+          >
             <button
               type="button"
               onClick={() => setStep('LOGIN')}
@@ -180,16 +207,6 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               ← 로그인으로
             </button>
             <h2 className="text-2xl font-bold mb-4">정보를 입력해주세요</h2>
-
-            <AuthField label="닉네임" error={errors.nickname}>
-              <input
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="닉네임 입력 (2~10자)"
-                className="w-full outline-none text-lg"
-              />
-            </AuthField>
 
             {SIGNUP_FIELDS.map((f) => {
               const fieldName = f.name as keyof typeof formData;
@@ -200,7 +217,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                   <input
                     {...f}
                     name={fieldName}
-                    value={formData[fieldName]}
+                    value={formData[fieldName] || ''}
                     onChange={handleChange}
                     className="w-full outline-none text-lg"
                   />
@@ -214,10 +231,10 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             >
               <div
                 className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                  isAllChecked ? 'bg-[#ff5058] border-[#ff5058]' : 'bg-white'
+                  isAllChecked ? 'bg-[#ff5058] border-[#ff5058]' : 'bg-white border-gray-300'
                 }`}
               >
-                <span className="text-white text-[10px]">✓</span>
+                {isAllChecked && <span className="text-white text-[10px]">✓</span>}
               </div>
               <span className="font-bold text-sm">전체동의</span>
             </div>

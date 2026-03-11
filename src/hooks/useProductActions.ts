@@ -58,9 +58,12 @@ export const useProductActions = (product: Product | undefined) => {
     };
   }, [product?.id, userInfo?.userId]);
 
+  // 최근 본 상품 로컬스토리지 저장
   useEffect(() => {
     const productId = product?.id;
     if (!product || !productId) return;
+
+    if (product.image && product.image.startsWith('blob:')) return;
 
     try {
       const savedRecent = localStorage.getItem('recently_viewed');

@@ -22,11 +22,19 @@ const Home = () => {
         const response = await api.get<Product[] | ProductsResponse>('/products');
         const responseData = response.data;
 
-        const data: Product[] = Array.isArray(responseData)
-          ? responseData
-          : responseData.data || responseData.products || [];
+        let productList: Product[] = [];
+        if (Array.isArray(responseData)) {
+          productList = responseData;
+        } else if (responseData && typeof responseData === 'object') {
+          productList = responseData.data || responseData.products || [];
+        }
 
-        const onSaleProducts = data.filter(
+        // 최후의 안전장치
+        if (!Array.isArray(productList)) {
+          productList = [];
+        }
+
+        const onSaleProducts = productList.filter(
           (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
         );
 
