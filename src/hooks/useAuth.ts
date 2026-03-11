@@ -20,27 +20,47 @@ export const useAuth = () => {
 
   const [userInfo, setUserInfo] = useState<Account | null>(getStoredUser);
 
-  const refreshAuth = useCallback(() => {
-    setUserInfo(getStoredUser());
+  const fetchMe = useCallback(async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setUserInfo(null);
+      return;
+    }
+
+    try {
+      const response = await api.get('/auth/me');
+      // 백엔드가 객체를 한 번 더 감싸서 보낼 경우를 대비
+      const userData = response.data?.data || response.data;
+
+      const mergedUser = { ...getStoredUser(), ...userData };
+      localStorage.setItem('currentUser', JSON.stringify(mergedUser));
+      setUserInfo(mergedUser);
+    } catch (error) {
+      console.error('사용자 최신 정보 갱신 실패:', error);
+    }
   }, []);
 
   useEffect(() => {
-    window.addEventListener('auth-change', refreshAuth);
-    window.addEventListener('storage', refreshAuth);
+    fetchMe();
+    window.addEventListener('auth-change', fetchMe);
+    window.addEventListener('storage', fetchMe);
     return () => {
-      window.removeEventListener('auth-change', refreshAuth);
-      window.removeEventListener('storage', refreshAuth);
+      window.removeEventListener('auth-change', fetchMe);
+      window.removeEventListener('storage', fetchMe);
     };
-  }, [refreshAuth]);
+  }, [fetchMe]);
 
-  // 1. 로그인
   const login = async (credentials: LoginData): Promise<boolean> => {
     try {
-      const { data } = await api.post<LoginResponse>('/auth/login', credentials);
+      const response = await api.post<LoginResponse>('/auth/login', credentials);
+      const data = response.data;
 
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('currentUser', JSON.stringify(data.user));
-      setUserInfo(data.user);
+      // 혹시 데이터 포맷이 깊을 경우를 대비
+      const userData = (data as any).data?.user || data.user || data;
+
+      localStorage.setItem('accessToken', data.accessToken || (data as any).token);
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+      setUserInfo(userData);
 
       window.dispatchEvent(new Event('auth-change'));
       return true;
@@ -54,7 +74,6 @@ export const useAuth = () => {
     }
   };
 
-  // 2. 로그아웃
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('currentUser');
@@ -65,7 +84,6 @@ export const useAuth = () => {
     navigate('/');
   }, [navigate]);
 
-  // 3. 회원 탈퇴
   const withdraw = useCallback(async () => {
     try {
       await api.delete('/auth/withdraw');
@@ -87,12 +105,12 @@ export const useAuth = () => {
     }
   }, [navigate]);
 
-  // 4. 정보 수정
   const updateUserInfo = async (updateData: Partial<Account>): Promise<boolean> => {
     try {
-      const { data } = await api.patch<{ user: Account }>('/auth/update', updateData);
+      const response = await api.patch('/auth/update', updateData);
+      const data = response.data;
+      const updatedUser = data.data?.user || data.user || data;
 
-      const updatedUser = data.user || data;
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
       setUserInfo(updatedUser);
 
@@ -108,7 +126,6 @@ export const useAuth = () => {
     }
   };
 
-  // 5. 권한 체크
   const requireAuth = useCallback(() => {
     if (!userInfo) {
       if (!isAlerting) {

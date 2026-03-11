@@ -1,23 +1,37 @@
-export interface Account {
-  id: number;
-  email: string;
-  name: string;
-  phone: string;
+// 팔로우 목록에 들어갈 유저의 기본 정보 (any 대체)
+export interface BaseUser {
+  userId: string;
   nickname: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
+  imageUrl?: string;
+}
 
-  avatar?: string;
-  joinDate?: string;
-  birth?: string;
+export interface FollowData {
+  followingList: BaseUser[];
+  followerList: BaseUser[];
+  followingCnt: number;
+  followerCnt: number;
+}
+
+export interface Account {
+  userId: string;
+  name: string;
+  nickname: string;
+  address?: string;
+  visitCount: number;
+  createdAt: string;
+  imageUrl?: string;
+  follow?: FollowData;
+
+  email?: string;
+  phone?: string;
   shopIntro?: string;
+  birth?: string;
   wishList?: string;
 }
 
 export type SignupData = Omit<
   Account,
-  'id' | 'joinDate' | 'createdAt' | 'updatedAt' | 'role' | 'wishList'
+  'userId' | 'createdAt' | 'visitCount' | 'imageUrl' | 'follow' | 'wishList'
 > & {
   password: string;
 };
@@ -27,9 +41,17 @@ export interface LoginData {
   password: string;
 }
 
+export interface LoginResponseData {
+  accessToken?: string;
+  token?: string;
+  user?: Account;
+}
+
 export interface LoginResponse {
-  accessToken: string;
-  user: Account;
+  data?: LoginResponseData;
+  accessToken?: string;
+  token?: string;
+  user?: Account;
 }
 
 export const VALIDATION_PATTERNS = {
