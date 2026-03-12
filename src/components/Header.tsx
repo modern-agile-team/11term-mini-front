@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import CategoryMenu from './CategoryMenu';
 import SearchDropdown from './SearchDropdown';
 import { useAuth } from '../hooks/useAuth';
+import { useRecentSearches } from '../hooks/useRecentSearches';
 import { SEARCH_CONFIG, HEADER_TEXT, HEADER_ACTIONS } from '../constants/header';
 
 interface HeaderProps {
@@ -17,6 +18,8 @@ const Header = ({ onLoginClick }: HeaderProps) => {
   const navigate = useNavigate();
 
   const { userInfo: user, logout } = useAuth();
+  const { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches } =
+    useRecentSearches();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,17 +32,16 @@ const Header = ({ onLoginClick }: HeaderProps) => {
   }, []);
 
   const executeSearch = (term: string) => {
-    if (term.trim() === '') return;
-    const saved = localStorage.getItem(SEARCH_CONFIG.STORAGE_KEY);
-    const prevSearches = saved ? JSON.parse(saved) : [];
-    const updatedPrevSearches = [term, ...prevSearches.filter((t: string) => t !== term)].slice(
-      0,
-      SEARCH_CONFIG.MAX_RECENT_SEARCHES,
-    );
-    localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, JSON.stringify(updatedPrevSearches));
+    const normalizedSearchTerm = term.trim();
+
+    if (!normalizedSearchTerm) {
+      return;
+    }
+
+    addRecentSearch(normalizedSearchTerm);
     setIsSearchOpen(false);
     setSearchValue('');
-    navigate(`/search?q=${encodeURIComponent(term)}`);
+    navigate(`/search?q=${encodeURIComponent(normalizedSearchTerm)}`);
   };
 
   return (
@@ -141,8 +143,11 @@ const Header = ({ onLoginClick }: HeaderProps) => {
           <input
             type="text"
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && executeSearch(searchValue)}
+            onChange={(event) => {
+              setSearchValue(event.target.value);
+              setIsSearchOpen(true);
+            }}
+            onKeyDown={(event) => event.key === 'Enter' && executeSearch(searchValue)}
             onFocus={() => setIsSearchOpen(true)}
             placeholder={SEARCH_CONFIG.PLACEHOLDER}
             className="w-full border-2 border-[#ff5058] px-4 py-2 outline-none text-sm"
@@ -154,7 +159,14 @@ const Header = ({ onLoginClick }: HeaderProps) => {
             🔍
           </span>
           {isSearchOpen && (
-            <SearchDropdown onClose={() => setIsSearchOpen(false)} onSearch={executeSearch} />
+            <SearchDropdown
+              query={searchValue}
+              recentSearches={recentSearches}
+              onDeleteRecentSearch={removeRecentSearch}
+              onClearRecentSearches={clearRecentSearches}
+              onClose={() => setIsSearchOpen(false)}
+              onSearch={executeSearch}
+            />
           )}
         </div>
         <div className="flex items-center gap-4 text-[14px] font-medium shrink-0">

@@ -1,6 +1,7 @@
 // 검색 관련 설정
 export const SEARCH_CONFIG = {
   MAX_RECENT_SEARCHES: 12,
+  MAX_AUTOCOMPLETE_SUGGESTIONS: 8,
   PLACEHOLDER: '상품명, 지역명, @상점명 입력',
   STORAGE_KEY: 'recentSearches',
 };
