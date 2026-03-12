@@ -41,6 +41,7 @@ export const ImageUploader = ({
           {/* 삭제 버튼 */}
           <button
             type="button"
+            aria-label={`${i + 1}번째 이미지 삭제`}
             onClick={() => onRemove(i)}
             className="absolute -top-2 -right-2 bg-black text-white w-5 h-5 rounded-full text-xs flex items-center justify-center border border-white z-10 hover:bg-[#ff5058] transition-colors"
           >

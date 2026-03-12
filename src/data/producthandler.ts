@@ -3,18 +3,36 @@ import { MOCK_PRODUCTS } from './mock';
 import type { Product, CreateProductInput, SaleStatus } from '../types/Product';
 import type { Account } from '../types/Account';
 import { SEARCH_CONFIG } from '../constants/header';
+import { normalizeProductCategory } from '../utils/productCategory';
+
+const normalizeProduct = (product: Product): Product => {
+  const { categoryId, category } = normalizeProductCategory({
+    categoryId: product.categoryId,
+    categoryName: product.category,
+    title: product.title,
+  });
+
+  return {
+    ...product,
+    categoryId,
+    category,
+  };
+};
 
 const getStoredProducts = (): Product[] => {
   const stored = localStorage.getItem('products');
   if (stored) {
     try {
-      return JSON.parse(stored) as Product[];
+      const parsedProducts = (JSON.parse(stored) as Product[]).map(normalizeProduct);
+      localStorage.setItem('products', JSON.stringify(parsedProducts));
+      return parsedProducts;
     } catch (e) {
       console.error('로컬스토리지 파싱 에러:', e);
     }
   }
-  localStorage.setItem('products', JSON.stringify(MOCK_PRODUCTS));
-  return MOCK_PRODUCTS;
+  const normalizedMockProducts = MOCK_PRODUCTS.map(normalizeProduct);
+  localStorage.setItem('products', JSON.stringify(normalizedMockProducts));
+  return normalizedMockProducts;
 };
 
 const viewCache = new Set<string>();
@@ -118,6 +136,12 @@ export const producthandler = [
       }
     }
 
+    const normalizedCategory = normalizeProductCategory({
+      categoryId: inputData.categoryId,
+      categoryName: inputData.category,
+      title: inputData.title,
+    });
+
     const newProduct: Product = {
       id: Date.now(),
       sellerId: currentSellerId,
@@ -130,7 +154,8 @@ export const producthandler = [
       views: 0,
       wishCount: 0,
       description: inputData.description || '',
-      category: inputData.category || '기타',
+      category: normalizedCategory.category || '기타',
+      categoryId: normalizedCategory.categoryId,
       status: inputData.status || 'NEW',
       tags: inputData.tags || [],
       saleStatus: 'ON_SALE',
@@ -156,12 +181,20 @@ export const producthandler = [
         ? updateData.images[0]
         : products[index].image;
 
+    const normalizedCategory = normalizeProductCategory({
+      categoryId: updateData.categoryId ?? products[index].categoryId,
+      categoryName: updateData.category ?? products[index].category,
+      title: updateData.title ?? products[index].title,
+    });
+
     const updatedProduct: Product = {
       ...products[index],
       ...updateData,
       image: mainImage,
       id: Number(id),
       sellerId: products[index].sellerId,
+      category: normalizedCategory.category,
+      categoryId: normalizedCategory.categoryId,
     };
 
     products[index] = updatedProduct;

@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { PRODUCT_STATUS } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
@@ -9,6 +8,7 @@ import { useFollowList } from '../hooks/useFollowList';
 import SellerProfileCard from '../components/seller/SellerProfileCard';
 import FollowListModal from '../components/seller/FollowListModal';
 import { Heart, Eye, Clock } from 'lucide-react';
+import { fetchProductByIdWithFallback } from '../utils/productSource';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,11 +38,10 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/products/${id}`);
-        const data = response?.data;
+        const data = await fetchProductByIdWithFallback(id);
 
         if (data?.id) {
-          setProduct(data as Product);
+          setProduct(data);
         } else {
           setProduct(null);
         }

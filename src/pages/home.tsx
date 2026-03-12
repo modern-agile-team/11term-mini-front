@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import HomeBanner from '../components/Banner/HomeBanner';
-import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { useInfiniteList } from '../hooks/useInfiniteList';
+import { fetchProductsWithFallback } from '../utils/productSource';
 
 const PAGE_SIZE = 20;
 const SKELETON_COUNT = 10;
@@ -22,10 +22,7 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         setIsInitialLoading(true);
-        const response = await api.get('/api/products');
-
-        const data: Product[] =
-          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
+        const data = await fetchProductsWithFallback();
 
         const onSaleProducts = data.filter(
           (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
@@ -38,6 +35,7 @@ const Home = () => {
         setAllProducts(sortedProducts);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
+        setAllProducts([]);
       } finally {
         setIsInitialLoading(false);
       }

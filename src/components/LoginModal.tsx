@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SOCIAL_PROVIDERS, SIGNUP_FIELDS } from '../constants/auth';
-import { AuthField } from './auth/AuthField';
+import { AuthField } from './Banner/auth/AuthField';
 import { useAuthForm } from '../hooks/useAuthForm';
 import { useAuth } from '../hooks/useAuth';
 import type { FormEvent } from 'react';

@@ -14,6 +14,7 @@ export interface Product {
   wishCount: number; // 찜 수
   description: string; // 상품 설명
   category: string; // 카테고리
+  categoryId: string; // 카테고리 ID
   status: string; // 상품 상태 코드
   tags: string[]; // 태그 리스트
   saleStatus?: SaleStatus; // 판매상태

@@ -13,6 +13,8 @@ const SellerManager = () => {
     setFormData,
     selectedMainId,
     setSelectedMainId,
+    selectedSubId,
+    setSelectedSubId,
     tagInput,
     setTagInput,
     handleImageUpload,
@@ -22,13 +24,62 @@ const SellerManager = () => {
   } = useSellerForm();
 
   const selectedMainCategory = CATEGORIES.find((cat) => cat.id === selectedMainId);
+  const selectedSubCategory =
+    selectedMainCategory?.subCategories?.find((sub) => sub.id === selectedSubId) ?? null;
+  const leafCategories = selectedSubCategory?.subCategories ?? [];
+
+  const handleSelectMain = (mainId: string) => {
+    setSelectedMainId(mainId);
+    setSelectedSubId(null);
+
+    const mainCategory = CATEGORIES.find((category) => category.id === mainId);
+    if (!mainCategory?.subCategories?.length) {
+      setFormData((prev) => ({ ...prev, category: mainCategory?.name ?? '', categoryId: mainId }));
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, category: '', categoryId: '' }));
+  };
+
+  const handleSelectSub = (subId: string) => {
+    setSelectedSubId(subId);
+
+    const subCategory = selectedMainCategory?.subCategories?.find((sub) => sub.id === subId);
+    if (!subCategory?.subCategories?.length) {
+      setFormData((prev) => ({
+        ...prev,
+        category: subCategory?.name ?? '',
+        categoryId: subId,
+      }));
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, category: '', categoryId: '' }));
+  };
+
+  const handleSelectLeaf = (leafId: string, leafName: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      category: leafName,
+      categoryId: leafId,
+    }));
+  };
+
+  const selectedPathText = [
+    selectedMainCategory?.name,
+    selectedSubCategory?.name,
+    formData.categoryId === selectedSubCategory?.id ? undefined : formData.category || undefined,
+  ]
+    .filter(Boolean)
+    .join(' > ');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     //  간단한 유효성 검사
     if (formData.images.length === 0) return alert('상품 이미지를 최소 1장 등록해주세요.');
     if (!formData.title.trim()) return alert('상품명을 입력해주세요.');
-    if (!formData.category) return alert('카테고리를 선택해주세요.');
+    if (!formData.categoryId) return alert('카테고리를 선택해주세요.');
     if (formData.price <= 0) return alert('올바른 가격을 입력해주세요.');
 
     try {
@@ -79,7 +130,7 @@ const SellerManager = () => {
                 <div
                   key={cat.id}
                   className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${selectedMainId === cat.id ? 'bg-gray-50 text-[#ff5058] font-bold' : ''}`}
-                  onClick={() => setSelectedMainId(cat.id)}
+                  onClick={() => handleSelectMain(cat.id)}
                 >
                   {cat.name}
                 </div>
@@ -89,21 +140,35 @@ const SellerManager = () => {
               {selectedMainCategory?.subCategories?.map((sub) => (
                 <div
                   key={sub.id}
-                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${formData.category === sub.name ? 'text-[#ff5058] font-bold bg-white' : ''}`}
-                  onClick={() => setFormData((prev) => ({ ...prev, category: sub.name }))}
+                  className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${selectedSubId === sub.id ? 'text-[#ff5058] font-bold bg-white' : ''}`}
+                  onClick={() => handleSelectSub(sub.id)}
                 >
                   {sub.name}
                 </div>
               )) || <div className="p-10 text-center text-gray-400">대분류 선택</div>}
             </div>
-            <div className="w-1/3 flex items-center justify-center text-gray-300 bg-gray-50/50 italic">
-              소분류 없음
+            <div className="w-1/3 overflow-y-auto custom-scrollbar bg-gray-50/50">
+              {leafCategories.length > 0 ? (
+                leafCategories.map((leaf) => (
+                  <div
+                    key={leaf.id}
+                    className={`p-2.5 px-3 hover:bg-gray-50 cursor-pointer ${formData.categoryId === leaf.id ? 'text-[#ff5058] font-bold bg-white' : ''}`}
+                    onClick={() => handleSelectLeaf(leaf.id, leaf.name)}
+                  >
+                    {leaf.name}
+                  </div>
+                ))
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-300 italic">
+                  소분류 없음
+                </div>
+              )}
             </div>
           </div>
           <p className="text-[#ff5058] text-xs font-bold italic">
             선택한 카테고리 :{' '}
             <span className="text-gray-800 not-italic">
-              {selectedMainCategory?.name} {formData.category && `> ${formData.category}`}
+              {selectedPathText || '선택 없음'}
             </span>
           </p>
         </SellerFormSection>

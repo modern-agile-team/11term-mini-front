@@ -1,12 +1,32 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import type { CreateProductInput, Product } from '../types/Product';
+import { findCategoryPathById } from '../utils/productCategory';
 
-const DEFAULT_FORM_DATA: CreateProductInput & {
+export type SellerFormData = CreateProductInput & {
   shippingFee: 'include' | 'exclude';
   directTrade: boolean;
   quantity: number;
-} = {
+};
+
+interface UseSellerFormResult {
+  formData: SellerFormData;
+  setFormData: Dispatch<SetStateAction<SellerFormData>>;
+  selectedMainId: string | null;
+  setSelectedMainId: Dispatch<SetStateAction<string | null>>;
+  selectedSubId: string | null;
+  setSelectedSubId: Dispatch<SetStateAction<string | null>>;
+  tagInput: string;
+  setTagInput: Dispatch<SetStateAction<string>>;
+  handleImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+  removeImage: (index: number) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleTagKeyDown: (e: KeyboardEvent) => void;
+  removeTag: (tagToRemove: string) => void;
+}
+
+const DEFAULT_FORM_DATA: SellerFormData = {
   title: '',
   sellerId: '',
   price: 0,
@@ -14,6 +34,7 @@ const DEFAULT_FORM_DATA: CreateProductInput & {
   image: '',
   images: [],
   category: '',
+  categoryId: '',
   description: '',
   status: 'NEW',
   isThunderPay: false,
@@ -23,7 +44,7 @@ const DEFAULT_FORM_DATA: CreateProductInput & {
   quantity: 1,
 };
 
-const transformProductToForm = (data: Product) => ({
+const transformProductToForm = (data: Product): SellerFormData => ({
   title: data.title || '',
   sellerId: data.sellerId || '',
   price: data.price || 0,
@@ -31,6 +52,7 @@ const transformProductToForm = (data: Product) => ({
   image: data.image || '',
   images: data.image ? [data.image] : [],
   category: data.category || '',
+  categoryId: data.categoryId || '',
   description: data.description || '',
   status: data.status || 'NEW',
   isThunderPay: data.isThunderPay || false,
@@ -40,19 +62,27 @@ const transformProductToForm = (data: Product) => ({
   quantity: 1,
 });
 
-export const useSellerForm = (initialData?: Product | null) => {
-  const [selectedMainId, setSelectedMainId] = useState<string | null>(null);
+export const useSellerForm = (initialData?: Product | null): UseSellerFormResult => {
+  const initialCategoryPath = initialData?.categoryId
+    ? findCategoryPathById(initialData.categoryId)
+    : [];
+
+  const [selectedMainId, setSelectedMainId] = useState<string | null>(initialCategoryPath[0]?.id ?? null);
+  const [selectedSubId, setSelectedSubId] = useState<string | null>(initialCategoryPath[1]?.id ?? null);
   const [tagInput, setTagInput] = useState<string>('');
-  const [formData, setFormData] = useState(() => {
+  const [formData, setFormData] = useState<SellerFormData>(() => {
     if (initialData) return transformProductToForm(initialData);
     return DEFAULT_FORM_DATA;
   });
-  const [prevId, setPrevId] = useState<number | null>(initialData?.id || null);
 
-  if (initialData && initialData.id !== prevId) {
-    setPrevId(initialData.id);
+  useEffect(() => {
+    if (!initialData) return;
+
+    const categoryPath = initialData.categoryId ? findCategoryPathById(initialData.categoryId) : [];
+    setSelectedMainId(categoryPath[0]?.id ?? null);
+    setSelectedSubId(categoryPath[1]?.id ?? null);
     setFormData(transformProductToForm(initialData));
-  }
+  }, [initialData]);
 
   const handleImageUpload = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -134,6 +164,8 @@ export const useSellerForm = (initialData?: Product | null) => {
     setFormData,
     selectedMainId,
     setSelectedMainId,
+    selectedSubId,
+    setSelectedSubId,
     tagInput,
     setTagInput,
     handleImageUpload,

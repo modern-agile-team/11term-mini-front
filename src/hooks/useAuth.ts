@@ -123,7 +123,7 @@ export const useAuth = () => {
   };
 
   // 5. 권한 체크
-  const requireAuth = useCallback(() => {
+  const requireAuth = useCallback((): boolean => {
     if (!userInfo) {
       if (!isAlerting) {
         isAlerting = true;
@@ -133,7 +133,10 @@ export const useAuth = () => {
           isAlerting = false;
         }, 1000);
       }
+      return false;
     }
+
+    return true;
   }, [userInfo, navigate]);
 
   return { userInfo, login, logout, withdraw, updateUserInfo, requireAuth };

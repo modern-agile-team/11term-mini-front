@@ -1,5 +1,6 @@
 import type { Product } from '../types/Product';
 import type { AdItem } from './ADmock';
+import { normalizeProductCategory, resolveCategoryId } from '../utils/productCategory';
 
 const MANUAL_PRODUCTS: Product[] = [
   {
@@ -14,6 +15,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 8,
     description: '선물 받은 미개봉 새상품입니다. GPS 모델이고 44mm 실버 색상이에요.',
     category: '디지털기기',
+    categoryId: resolveCategoryId('디지털기기', '애플워치 SE2 44mm GPS 미개봉'),
     status: 'NEW',
     tags: ['애플워치', '미개봉', 'SE2'],
     isThunderPay: true,
@@ -30,6 +32,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 42,
     description: '배터리 효율 100%입니다. 기스 하나 없는 풀박스 제품이에요.',
     category: '디지털기기',
+    categoryId: resolveCategoryId('디지털기기', '아이폰 15 프로 128GB 티타늄'),
     status: 'LIKE_NEW',
     tags: ['아이폰15', '프로', '티타늄'],
     isThunderPay: true,
@@ -46,6 +49,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 15,
     description: '실사용 3회 미만입니다. 케이스와 케이블 모두 포함입니다.',
     category: '디지털기기',
+    categoryId: resolveCategoryId('디지털기기', '소니 WH-1000XM5 헤드셋'),
     status: 'LIKE_NEW',
     tags: ['소니', '헤드셋', '노이즈캔슬링'],
     isThunderPay: true,
@@ -62,6 +66,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 23,
     description: '필기용으로 썼습니다. 종이질감 필름 붙어있어요.',
     category: '디지털기기',
+    categoryId: resolveCategoryId('디지털기기', '아이패드 에어 5세대 64GB'),
     status: 'USED_GOOD',
     tags: ['아이패드', '에어5', '태블릿'],
     isThunderPay: true,
@@ -78,6 +83,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 6,
     description: '사무용으로 샀는데 손에 안 맞아서 팔아요.',
     category: '디지털기기',
+    categoryId: resolveCategoryId('디지털기기', '로지텍 MX Master 3S 마우스'),
     status: 'LIKE_NEW',
     tags: ['로지텍', '마우스', '사무용'],
     isThunderPay: true,
@@ -94,6 +100,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 56,
     description: '나이키 공홈 선착순 구매 제품입니다. 실착 1회.',
     category: '남성의류',
+    categoryId: resolveCategoryId('신발', '나이키 덩크 로우 범고래 270'),
     status: 'USED_GOOD',
     tags: ['나이키', '덩크', '범고래'],
     isThunderPay: true,
@@ -110,6 +117,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 21,
     description: '정품 등록 완료했습니다. 등산용으로 좋습니다.',
     category: '스포츠/레저',
+    categoryId: resolveCategoryId('스포츠/레저', '아크테릭스 헬리아드 15 백팩'),
     status: 'LIKE_NEW',
     tags: ['아크테릭스', '백팩', '등산'],
     isThunderPay: true,
@@ -126,6 +134,7 @@ const MANUAL_PRODUCTS: Product[] = [
     wishCount: 105,
     description: '컷수 1,000컷 미만입니다. 상태 매우 깨끗합니다.',
     category: '디지털기기',
+    categoryId: resolveCategoryId('디지털기기', '후지필름 X100V 실버 풀박스'),
     status: 'LIKE_NEW',
     tags: ['후지필름', 'X100V', '카메라'],
     isThunderPay: true,
@@ -471,22 +480,31 @@ const RAW_LIST = [
   },
 ];
 
-const MAPPED_PRODUCTS: Product[] = RAW_LIST.map((p) => ({
-  id: p.id,
-  sellerId: '',
-  title: p.title,
-  price: p.price,
-  image: `https://loremflickr.com/400/400/${p.img}`,
-  createdAt: new Date(Date.now() - 1000 * 60 * 60 * Math.random() * 100).toISOString(),
-  location: p.loc,
-  views: Math.floor(Math.random() * 300) + 10,
-  wishCount: Math.floor(Math.random() * 50),
-  description: `${p.title} 정품입니다. 상태 깔끔하고 배송비 포함 가격입니다. 편하게 번개톡 주세요.`,
-  category: p.cat || '기타',
-  status: 'LIKE_NEW',
-  tags: [p.title.split(' ')[0], '중고거래'],
-  isThunderPay: true,
-}));
+const MAPPED_PRODUCTS: Product[] = RAW_LIST.map((p) => {
+  const { categoryId, category } = normalizeProductCategory({
+    categoryId: resolveCategoryId(p.cat || '기타', p.title),
+    categoryName: p.cat || '기타',
+    title: p.title,
+  });
+
+  return {
+    id: p.id,
+    sellerId: '',
+    title: p.title,
+    price: p.price,
+    image: `https://loremflickr.com/400/400/${p.img}`,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * Math.random() * 100).toISOString(),
+    location: p.loc,
+    views: Math.floor(Math.random() * 300) + 10,
+    wishCount: Math.floor(Math.random() * 50),
+    description: `${p.title} 정품입니다. 상태 깔끔하고 배송비 포함 가격입니다. 편하게 번개톡 주세요.`,
+    category,
+    categoryId,
+    status: 'LIKE_NEW',
+    tags: [p.title.split(' ')[0], '중고거래'],
+    isThunderPay: true,
+  };
+});
 
 export const MOCK_PRODUCTS: Product[] = [...MANUAL_PRODUCTS, ...MAPPED_PRODUCTS];
 

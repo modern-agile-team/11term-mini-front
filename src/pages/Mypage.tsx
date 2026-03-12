@@ -118,10 +118,12 @@ const MyPage = () => {
           </div>
           <input
             type="file"
+            id="profile-image-upload"
             ref={fileInputRef}
             onChange={handleImageChange}
             className="hidden"
             accept="image/*"
+            aria-label="프로필 이미지 업로드"
           />
         </div>
 
@@ -134,6 +136,8 @@ const MyPage = () => {
                     type="text"
                     value={tempNickname}
                     onChange={(e) => setTempNickname(e.target.value)}
+                    aria-label="닉네임"
+                    placeholder="닉네임 입력"
                     className="text-2xl font-bold border-b-2 border-red-500 focus:outline-none px-1"
                   />
                   <button
@@ -314,6 +318,7 @@ const MyPage = () => {
                   <div className="flex flex-col gap-2 justify-center w-40">
                     <select
                       value={product.saleStatus || 'ON_SALE'}
+                      aria-label={`${product.title} 판매 상태`}
                       onChange={(e) =>
                         updateProductStatus(product.id, e.target.value as SaleStatus)
                       }
