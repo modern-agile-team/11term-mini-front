@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import type { Product } from '../types/Product';
-import { timeAgo } from '../utils/timeAgo';
 
-const ProductCard = ({ product }: { product: Product }) => {
+interface ProductCardProps {
+  product: Product;
+}
+
+const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
 
   return (
@@ -10,7 +13,6 @@ const ProductCard = ({ product }: { product: Product }) => {
       onClick={() => navigate(`/product/${product.id}`)}
       className="w-full border border-gray-200 cursor-pointer bg-white group"
     >
-      {/* 이미지 영역 */}
       <div className="relative aspect-square overflow-hidden bg-gray-100">
         <img
           src={product.image}
@@ -20,7 +22,6 @@ const ProductCard = ({ product }: { product: Product }) => {
           }`}
         />
 
-        {/* 예약중 / 판매완료 오버레이 */}
         {product.saleStatus === 'RESERVED' && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
             <span className="text-white font-bold text-lg border-2 border-white px-4 py-1.5 rounded-sm shadow-sm tracking-widest">
@@ -43,7 +44,6 @@ const ProductCard = ({ product }: { product: Product }) => {
         )}
       </div>
 
-      {/* 정보 영역 */}
       <div className="p-3">
         <h3 className="text-[14px] text-gray-800 line-clamp-2 h-[40px] mb-2 group-hover:underline">
           {product.title}
@@ -54,9 +54,9 @@ const ProductCard = ({ product }: { product: Product }) => {
               {product.price.toLocaleString()}
               <span className="text-sm font-normal ml-0.5">원</span>
             </span>
-            <span className="text-[12px] text-gray-400">{timeAgo(product.createdAt)}</span>
+            <span className="text-xs text-gray-400">{product.createdAt ? '최근' : ''}</span>
           </div>
-          <div className="text-[11px] text-gray-400 truncate">{product.location}</div>
+          <span className="text-[11px] text-gray-500 truncate">{product.location || '전국'}</span>
         </div>
       </div>
     </div>

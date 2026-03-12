@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api/axios';
 import { useSellerForm } from '../hooks/useSellerForm';
 import { SellerFormSection } from '../components/seller/SellerFormSection';
-import { SellerSubNav } from '../components/seller/SellerNav';
-import { PRODUCT_STATUS } from '../types/Product';
 import type { Product } from '../types/Product';
 import { X } from 'lucide-react';
+
+interface DetailResponse {
+  data?: Product;
+}
 
 const ProductEdit = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +17,9 @@ const ProductEdit = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isFetched = useRef(false);
 
-  // 1. 기존 데이터 불러오기
+  const { formData, handleInputChange, tagInput, setTagInput, handleTagKeyDown, removeTag } =
+    useSellerForm(originalData);
+
   useEffect(() => {
     if (!id || isFetched.current) return;
     isFetched.current = true;
@@ -23,10 +27,11 @@ const ProductEdit = () => {
     const fetchOriginal = async () => {
       try {
         setIsLoading(true);
-        const res = await api.get(`/api/products/${id}`);
-        // 타입 안전하게 처리
-        if (res.data && (res.data as Product).id) {
-          setOriginalData(res.data as Product);
+        const res = await api.get<Product | DetailResponse>(`/products/${id}`);
+        const data = 'data' in res.data && res.data.data ? res.data.data : (res.data as Product);
+
+        if (data && data.id) {
+          setOriginalData(data);
         } else {
           alert('상품 정보를 찾을 수 없습니다.');
           navigate(-1);
@@ -39,141 +44,61 @@ const ProductEdit = () => {
         setIsLoading(false);
       }
     };
+
     fetchOriginal();
   }, [id, navigate]);
 
-  // 2. 폼 훅 초기화
-  const {
-    formData,
-    tagInput,
-    setTagInput,
-    handleInputChange,
-    handleImageUpload,
-    removeImage,
-    handleTagKeyDown,
-    removeTag,
-  } = useSellerForm(originalData);
-
-  // 3. 수정 완료 처리
   const handleUpdate = async () => {
-    if (!formData.title.trim()) return alert('상품명을 입력해주세요.');
-    if (formData.price <= 0) return alert('올바른 가격을 입력해주세요.');
-
     try {
-      await api.patch(`/api/products/${id}`, formData);
-      alert('상품이 수정되었습니다!');
-      navigate(`/product/${id}`);
-    } catch (error) {
-      console.error('수정 실패:', error);
-      alert('상품 수정 중 오류가 발생했습니다.');
+      await api.patch(`/products/${id}`, formData);
+      alert('상품이 수정되었습니다.');
+      navigate(`/product/${id}`, { replace: true });
+    } catch (e) {
+      console.error(e);
+      alert('수정에 실패했습니다.');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f9f9f9]">
-        <p className="text-gray-500 font-bold">데이터를 불러오는 중...</p>
-      </div>
-    );
-  }
-
+  if (isLoading) return <div className="p-20 text-center">로딩 중...</div>;
   if (!originalData) return null;
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] pb-20">
-      <SellerSubNav />
+    <div className="max-w-[1024px] mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-8 pb-4 border-b-2 border-black">기본정보 수정</h1>
 
-      <main className="max-w-[850px] mx-auto mt-8 px-4 bg-white border border-gray-200 shadow-sm p-10">
-        <h2 className="text-2xl font-bold pb-6 border-b-2 border-black mb-8">상품 정보 수정</h2>
-
-        {/* 1. 이미지 */}
-        <SellerFormSection
-          label="상품이미지"
-          type="image"
-          images={formData.images}
-          onImageUpload={handleImageUpload}
-          onRemoveImage={removeImage}
-          count={`${formData.images.length}/12`}
-          required
-        />
-
-        {/* 2. 상품명 */}
-        <SellerFormSection
-          label="상품명"
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          placeholder="상품명을 입력해 주세요."
-          maxLength={40}
-          required
-        />
-
-        {/* 3. 카테고리 */}
-        <SellerFormSection label="카테고리" required>
-          <div className="w-full border border-gray-200 bg-gray-50 p-3 text-sm text-gray-500 rounded-sm">
-            {formData.category || '카테고리 정보 없음'}
-          </div>
+      <div className="flex flex-col gap-6">
+        <SellerFormSection label="상품명 *">
+          <input
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            className="w-full border border-gray-200 p-3 text-sm outline-none focus:border-black rounded-sm"
+            placeholder="상품명을 입력해 주세요."
+          />
         </SellerFormSection>
 
-        {/* 4. 거래지역 */}
-        <SellerFormSection
-          label="거래지역"
-          type="text"
-          name="location"
-          value={formData.location}
-          onChange={handleInputChange}
-          required
-        />
-
-        {/* 5. 상태 */}
-        <SellerFormSection label="상품상태" required>
-          <div className="flex gap-4">
-            {PRODUCT_STATUS.map((status) => (
-              <label key={status.id} className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="radio"
-                  name="status"
-                  value={status.id}
-                  checked={formData.status === status.id}
-                  onChange={handleInputChange}
-                  className="accent-[#ff5058] w-4 h-4"
-                />
-                <span className="text-sm text-gray-700">{status.label}</span>
-              </label>
-            ))}
-          </div>
+        <SellerFormSection label="가격 *">
+          <input
+            name="price"
+            type="number"
+            value={formData.price || ''}
+            onChange={handleInputChange}
+            className="w-full border border-gray-200 p-3 text-sm outline-none focus:border-black rounded-sm"
+            placeholder="가격을 입력해 주세요."
+          />
         </SellerFormSection>
 
-        {/* 6. 가격 */}
-        <SellerFormSection
-          label="가격"
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={handleInputChange}
-          placeholder="숫자만 입력해주세요."
-          unit="원"
-          required
-        />
+        <SellerFormSection label="설명 *">
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="w-full h-40 border border-gray-200 p-3 text-sm outline-none focus:border-black rounded-sm resize-none"
+            placeholder="상품 설명을 입력해 주세요."
+          />
+        </SellerFormSection>
 
-        {/* 7. 설명 */}
-        <SellerFormSection
-          label="상품설명"
-          type="textarea"
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          placeholder="상품에 대한 자세한 설명을 적어주세요."
-          maxLength={2000}
-          required
-        />
-
-        {/* 8. 태그 */}
-        <SellerFormSection
-          label="연관태그"
-          description="태그를 입력하고 엔터를 누르세요 (최대 5개)"
-        >
+        <SellerFormSection label="태그">
           <div className="flex flex-wrap gap-2 mb-2">
             {formData.tags.map((tag) => (
               <span
@@ -194,8 +119,8 @@ const ProductEdit = () => {
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleTagKeyDown}
-            className="w-full border border-gray-200 p-2.5 text-sm outline-none focus:border-black rounded-sm"
-            placeholder="태그 입력"
+            className="w-full border border-gray-200 p-3 text-sm outline-none focus:border-black rounded-sm"
+            placeholder="태그 입력 후 Enter"
           />
         </SellerFormSection>
 
@@ -208,12 +133,12 @@ const ProductEdit = () => {
           </button>
           <button
             onClick={handleUpdate}
-            className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-md hover:bg-[#ff3038] transition-colors"
+            className="px-10 py-3 text-sm font-bold bg-[#ff5058] text-white shadow-md hover:bg-[#e64951] transition-colors"
           >
-            수정 완료
+            수정하기
           </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

@@ -1,8 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { VALIDATION_PATTERNS } from '../types/Account';
 import { useAuth } from './useAuth';
 import type { Product, SaleStatus } from '../types/Product';
 import api from '../api/axios';
+
+interface ProductsResponse {
+  products?: Product[];
+  data?: Product[];
+}
 
 export const useMyPage = () => {
   const { userInfo, updateUserInfo } = useAuth();
@@ -13,18 +18,28 @@ export const useMyPage = () => {
   const [isNicknameEditing, setIsNicknameEditing] = useState(false);
   const [isIntroEditing, setIsIntroEditing] = useState(false);
 
-  const [tempNickname, setTempNickname] = useState(userInfo?.nickname || '');
-  const [tempIntro, setTempIntro] = useState(userInfo?.shopIntro || '');
+  const [tempNickname, setTempNickname] = useState('');
+  const [tempIntro, setTempIntro] = useState('');
 
-  const userId = userInfo?.id;
+  const userId = userInfo?.userId;
 
-  const sortProducts = (products: Product[]) => {
+  const sortProducts = useCallback((products: Product[]) => {
     return [...products].sort((a, b) => {
       if (a.saleStatus === 'SOLD_OUT' && b.saleStatus !== 'SOLD_OUT') return 1;
       if (a.saleStatus !== 'SOLD_OUT' && b.saleStatus === 'SOLD_OUT') return -1;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  };
+  }, []);
+
+  const startEditingNickname = useCallback(() => {
+    setTempNickname(userInfo?.nickname || '');
+    setIsNicknameEditing(true);
+  }, [userInfo?.nickname]);
+
+  const startEditingIntro = useCallback(() => {
+    setTempIntro(userInfo?.shopIntro || '');
+    setIsIntroEditing(true);
+  }, [userInfo?.shopIntro]);
 
   useEffect(() => {
     let ignore = false;
@@ -32,14 +47,16 @@ export const useMyPage = () => {
     const fetchMyProducts = async () => {
       if (!userId) return;
       try {
-        const response = await api.get('/api/products');
-        const data: Product[] = Array.isArray(response.data)
-          ? response.data
-          : response.data?.products || [];
+        const response = await await api.get<Product[] | ProductsResponse>('/products');
+        const responseData = response.data;
+        const data: Product[] = Array.isArray(responseData)
+          ? responseData
+          : responseData.products || responseData.data || [];
+
+        const my = data.filter((product) => String(product.sellerId) === String(userId));
 
         if (!ignore) {
-          const filtered = data.filter((p) => String(p.sellerId) === String(userId));
-          setMyProducts(sortProducts(filtered));
+          setMyProducts(sortProducts(my));
         }
       } catch (error) {
         console.error('내 상품 로딩 실패:', error);
@@ -51,24 +68,25 @@ export const useMyPage = () => {
     return () => {
       ignore = true;
     };
-  }, [userId]);
+  }, [userId, sortProducts]);
 
   const updateProductStatus = async (productId: number, newStatus: SaleStatus) => {
     try {
-      await api.patch(`/api/products/${productId}/status`, { saleStatus: newStatus });
-      setMyProducts((prev) => {
-        const updated = prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p));
-        return sortProducts(updated);
-      });
+      await api.patch(`/products/${productId}/status`, { saleStatus: newStatus });
+      setMyProducts((prev) =>
+        sortProducts(prev.map((p) => (p.id === productId ? { ...p, saleStatus: newStatus } : p))),
+      );
     } catch (error) {
-      console.error('상품 상태 업데이트 실패:', error);
+      console.error('상태 변경 실패:', error);
       alert('상태 변경에 실패했습니다.');
     }
   };
 
   const deleteProduct = async (productId: number) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+
     try {
-      await api.delete(`/api/products/${productId}`);
+      await api.delete(`/products/${productId}`);
       setMyProducts((prev) => prev.filter((p) => p.id !== productId));
       alert('상품이 삭제되었습니다.');
     } catch (error) {
@@ -77,7 +95,7 @@ export const useMyPage = () => {
     }
   };
 
-  const getOpenDays = (joinDate: string) => {
+  const getOpenDays = (joinDate?: string) => {
     if (!joinDate) return 1;
     const startDate = new Date(joinDate.replace(/\./g, '-'));
     const today = new Date();
@@ -108,7 +126,7 @@ export const useMyPage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        updateUserInfo({ avatar: reader.result as string });
+        updateUserInfo({ imageUrl: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
@@ -134,5 +152,7 @@ export const useMyPage = () => {
     handleImageChange,
     updateProductStatus,
     deleteProduct,
+    startEditingNickname,
+    startEditingIntro,
   };
 };

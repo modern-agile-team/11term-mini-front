@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import CategoryNav from '../components/CategoryNav';
 import ProductCard from '../components/ProductCard';
@@ -7,11 +7,10 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import QuickMenu from '../components/QuickMenu';
 import Filterbar from '../components/Filterbar';
 
-import { MOCK_PRODUCTS } from '../data/mock';
 import { CATEGORIES } from '../data/categories';
-
 import { sortProducts } from '../utils/sortProducts';
 import { findCategoryPath } from '../utils/findCategoryPath';
+import api from '../api/axios';
 import { makeCategoryGridItems } from '../utils/categoryGrid';
 import { useInfiniteList } from '../hooks/useInfiniteList';
 
@@ -23,11 +22,44 @@ const CATEGORY_GRID_COLUMNS = 5;
 const PAGE_SIZE = 20;
 const FETCHING_SKELETON_COUNT = 5;
 
-const CategoryDetail = () => {
-  const { id } = useParams();
-  const [sort, setSort] = useState<SortKey>('latest');
+interface ProductsResponse {
+  products?: Product[];
+  data?: Product[];
+}
 
-  const sortedProducts = useMemo(() => sortProducts(MOCK_PRODUCTS as Product[], sort), [sort]);
+const CategoryDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const [sort, setSort] = useState<SortKey>('latest');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategoryProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get<Product[] | ProductsResponse>('/products');
+        const responseData = response.data;
+        const data: Product[] = Array.isArray(responseData)
+          ? responseData
+          : responseData.products || responseData.data || [];
+
+        const filtered = data.filter((p) => {
+          if (!id) return true;
+          return p.category === id;
+        });
+
+        setProducts(filtered);
+      } catch (error) {
+        console.error('카테고리 상품 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoryProducts();
+  }, [id]);
+
+  const sortedProducts = useMemo(() => sortProducts(products, sort), [products, sort]);
 
   const categoryPath = useMemo(() => {
     if (!id) return [];
@@ -68,12 +100,10 @@ const CategoryDetail = () => {
 
         {showMegaGrid && (
           <section className="mt-4 mb-6 bg-white">
-            {/* ✅ border는 wrapper(부모)에만 주고, 셀은 border-r/b만 유지해서 중첩을 줄임 */}
             <div className="grid grid-cols-5 border border-gray-200">
               {gridCardItems.map((card) => {
                 const isPad = card.id.startsWith('pad:');
 
-                // ✅ 빈칸 셀: 클릭 안 되고 글자 없음, 대신 border는 유지
                 if (isPad) {
                   return (
                     <div
@@ -110,18 +140,31 @@ const CategoryDetail = () => {
           onChangeSort={setSort}
         />
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {visibleItems.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-
-          {isFetchingMore &&
-            Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
-              <ProductCardSkeleton key={`categoryFetching-${index}`} />
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 mt-6">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <ProductCardSkeleton key={`categoryInitialSkeleton-${index}`} />
             ))}
-        </div>
+          </div>
+        ) : sortedProducts.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 mt-6">
+              {visibleItems.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
 
-        {hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
+              {isFetchingMore &&
+                Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
+                  <ProductCardSkeleton key={`categoryFetching-${index}`} />
+                ))}
+            </div>
+            {hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
+          </>
+        ) : (
+          <div className="py-20 text-center text-gray-400">
+            해당 카테고리에 등록된 상품이 없습니다.
+          </div>
+        )}
       </main>
     </div>
   );

@@ -2,7 +2,6 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
-import { PRODUCT_STATUS } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
 import { useFollow } from '../hooks/useFollow';
 import { useFollowList } from '../hooks/useFollowList';
@@ -10,13 +9,16 @@ import SellerProfileCard from '../components/seller/SellerProfileCard';
 import FollowListModal from '../components/seller/FollowListModal';
 import { Heart, Eye, Clock } from 'lucide-react';
 
+interface DetailResponse {
+  data?: Product;
+}
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchedIdRef = useRef<string | null>(null);
-
   const { isWished, toggleWish } = useProductActions(product || undefined);
   const { sellerProfile, canFollow, isFollowPending, toggleSellerFollow } = useFollow(
     product?.sellerId,
@@ -38,11 +40,15 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/products/${id}`);
-        const data = response?.data;
+        const response = await api.get<Product | DetailResponse>(`/products/${id}`);
+        const responseData = response.data;
+        const data: Product =
+          'data' in responseData && responseData.data
+            ? responseData.data
+            : (responseData as Product);
 
         if (data?.id) {
-          setProduct(data as Product);
+          setProduct(data);
         } else {
           setProduct(null);
         }
@@ -63,7 +69,7 @@ const ProductDetail = () => {
       if (!prev) return prev;
       return {
         ...prev,
-        wishCount: isWished ? Math.max(0, prev.wishCount - 1) : prev.wishCount + 1,
+        wishCount: isWished ? prev.wishCount - 1 : prev.wishCount + 1,
       };
     });
   };
@@ -103,60 +109,26 @@ const ProductDetail = () => {
       <div className="flex gap-10 mb-16 bg-white">
         <div className="w-107 h-107 overflow-hidden border border-gray-100 shadow-sm shrink-0">
           <img
-            src={product.image || ''}
-            alt={product.title || '상품 이미지'}
-            className="w-full h-full object-cover"
+            src={product.image}
+            alt={product.title}
+            className="w-full aspect-square object-cover bg-gray-100"
           />
         </div>
-
-        <div className="flex-1 flex flex-col justify-between">
+        <div className="md:w-1/2 flex flex-col justify-between">
           <div>
-            <h1 className="text-2xl font-bold mb-4 text-gray-900">
-              {product.title || '제목 없음'}
-            </h1>
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-4xl font-bold">{(product.price || 0).toLocaleString()}</span>
-              <span className="text-2xl font-normal">원</span>
-            </div>
-
-            <div className="flex justify-between items-center py-4 border-t border-gray-100 text-gray-400 text-sm">
+            <h1 className="text-2xl font-bold mb-4">{product.title}</h1>
+            <p className="text-3xl font-bold mb-6">{product.price.toLocaleString()}원</p>
+            <div className="flex flex-col gap-3 text-sm border-t border-b py-6 border-gray-100">
               <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={handleWishClick}
-                  className="flex items-center gap-1 group transition-colors"
-                  aria-label="찜하기"
-                >
-                  <Heart
-                    size={18}
-                    className={`transition-all ${
-                      isWished
-                        ? 'text-[#ff5058] fill-[#ff5058]'
-                        : 'text-gray-300 group-hover:text-gray-400'
-                    }`}
-                  />
-                  <span className={`text-sm ${isWished ? 'text-[#ff5058]' : 'text-gray-400'}`}>
-                    {product.wishCount || 0}
-                  </span>
-                </button>
-                <span className="flex items-center gap-1">
-                  <Eye size={18} className="text-gray-300" /> {product.views || 0}
+                <span className="text-gray-400 w-24 flex items-center gap-1">
+                  <Eye size={16} /> 조회수
                 </span>
-                <span className="flex items-center gap-1">
-                  <Clock size={18} className="text-gray-300" /> 방금 전
-                </span>
+                <span className="text-gray-800 font-medium">{product.views || 0}</span>
               </div>
-            </div>
-
-            <div className="border-t border-gray-100 pt-6 space-y-4">
-              <div className="flex text-[14px]">
-                <span className="text-gray-400 w-24">• 상품상태</span>
-                <span className="text-gray-800 font-medium">
-                  {PRODUCT_STATUS.find((s) => s.id === product.status)?.label || '알 수 없음'}
+              <div className="flex items-center gap-4">
+                <span className="text-gray-400 w-24 flex items-center gap-1">
+                  <Clock size={16} /> 거래지역
                 </span>
-              </div>
-              <div className="flex text-[14px]">
-                <span className="text-gray-400 w-24">• 거래지역</span>
                 <span className="text-gray-800 font-medium">📍 {product.location || '전국'}</span>
               </div>
             </div>
@@ -184,7 +156,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <div className="border-t border-gray-200 pt-12">
+      <div className="border-t border-gray-200 pt-12 mt-12">
         <h2 className="text-xl font-bold mb-8">상품정보</h2>
         <div className="text-gray-800 leading-relaxed whitespace-pre-wrap min-h-50">
           {product.description || '등록된 상세 설명이 없습니다.'}

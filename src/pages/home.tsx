@@ -10,6 +10,11 @@ const PAGE_SIZE = 20;
 const SKELETON_COUNT = 10;
 const FETCHING_SKELETON_COUNT = 5;
 
+interface ProductsResponse {
+  data?: Product[];
+  products?: Product[];
+}
+
 const Home = () => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -22,12 +27,21 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         setIsInitialLoading(true);
-        const response = await api.get('/api/products');
+        const response = await api.get<Product[] | ProductsResponse>('/products');
+        const responseData = response.data;
 
-        const data: Product[] =
-          (Array.isArray(response.data) ? response.data : response.data?.products) || [];
+        let productList: Product[] = [];
+        if (Array.isArray(responseData)) {
+          productList = responseData;
+        } else if (responseData && typeof responseData === 'object') {
+          productList = responseData.data || responseData.products || [];
+        }
 
-        const onSaleProducts = data.filter(
+        if (!Array.isArray(productList)) {
+          productList = [];
+        }
+
+        const onSaleProducts = productList.filter(
           (product) => !product.saleStatus || product.saleStatus === 'ON_SALE',
         );
 
@@ -66,7 +80,7 @@ const Home = () => {
           </div>
         </section>
 
-        <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
+        <h2 className="text-xl font-bold mb-6">오늘의 추천 상품</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {isInitialLoading
             ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (

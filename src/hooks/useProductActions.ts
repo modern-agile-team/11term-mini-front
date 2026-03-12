@@ -1,68 +1,109 @@
 import { useState, useEffect, useCallback } from 'react';
+import api from '../api/axios';
+import { useAuth } from './useAuth';
 import type { Product } from '../types/Product';
 
-export const useProductActions = (product: Product | undefined) => {
-  // ✅ 초기값 설정 시 안전하게 검사
-  const getInitialWishStatus = useCallback(() => {
-    if (!product?.id) return false; // 데이터가 없으면 즉시 종료
-    try {
-      const savedWishes = localStorage.getItem('wish_list');
-      const wishArr = savedWishes ? JSON.parse(savedWishes) : [];
-      if (!Array.isArray(wishArr)) return false;
-      return wishArr.map(String).includes(String(product.id));
-    } catch {
-      return false;
-    }
-  }, [product?.id]);
+interface FavoriteProduct {
+  productId: number;
+  productTitle: string;
+  productPrice: number;
+  imageUrl: string;
+  createdAt: string;
+}
 
+interface FavoriteResponse {
+  data?: FavoriteProduct[];
+}
+
+export const useProductActions = (product: Product | undefined) => {
+  const { userInfo } = useAuth();
   const [isWished, setIsWished] = useState(false);
 
+  // 관심상품 상태 조회
   useEffect(() => {
-    setIsWished(getInitialWishStatus());
-  }, [getInitialWishStatus]);
+    let ignore = false;
 
-  // ✅ 최근 본 상품 업데이트 (데이터 유효성 검사 강화)
+    const fetchWishStatus = async () => {
+      const productId = product?.id;
+      const userId = userInfo?.userId;
+
+      if (!productId || !userId) {
+        await Promise.resolve();
+        if (!ignore) setIsWished(false);
+        return;
+      }
+
+      try {
+        const response = await api.get<FavoriteProduct[] | FavoriteResponse>(
+          `/users/${userId}/favorites`,
+        );
+        const responseData = response.data;
+
+        const favorites: FavoriteProduct[] = Array.isArray(responseData)
+          ? responseData
+          : responseData.data || [];
+
+        const isFav = favorites.some((fav) => String(fav.productId) === String(productId));
+        if (!ignore) setIsWished(isFav);
+      } catch (error) {
+        console.error('관심상품 상태 조회 실패:', error);
+        if (!ignore) setIsWished(false);
+      }
+    };
+
+    fetchWishStatus();
+
+    return () => {
+      ignore = true;
+    };
+  }, [product?.id, userInfo?.userId]);
+
+  // 최근 본 상품 로컬스토리지 저장
   useEffect(() => {
-      if (!product || !product.id) return;
+    const productId = product?.id;
+    if (!product || !productId) return;
+    if (product.image && product.image.startsWith('blob:')) return;
+
     try {
       const savedRecent = localStorage.getItem('recently_viewed');
       let recentArr: Product[] = savedRecent ? (JSON.parse(savedRecent) as Product[]) : [];
+
       if (!Array.isArray(recentArr)) recentArr = [];
 
-      // 불완전한 데이터 필터링 및 중복 제거
       recentArr = recentArr.filter(
-        (item) => item && item.id && String(item.id) !== String(product.id),
+        (item) => item && item.id && String(item.id) !== String(productId),
       );
       recentArr.unshift(product);
 
       localStorage.setItem('recently_viewed', JSON.stringify(recentArr.slice(0, 5)));
       window.dispatchEvent(new Event('storage-update'));
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error('최근 본 상품 업데이트 실패:', error);
     }
   }, [product]);
 
-  const toggleWish = useCallback(() => {
-    if (!product?.id) return;
-    try {
-      const savedWishes = localStorage.getItem('wish_list');
-      let wishArr: string[] = savedWishes ? (JSON.parse(savedWishes) as string[]) : [];
-      if (!Array.isArray(wishArr)) wishArr = [];
+  const toggleWish = useCallback(async () => {
+    const productId = product?.id;
+    if (!productId) return;
 
-      const productIdStr = String(product.id);
-      if (wishArr.map(String).includes(productIdStr)) {
-        wishArr = wishArr.filter((id) => String(id) !== productIdStr);
+    if (!userInfo) {
+      alert('로그인이 필요한 서비스입니다.');
+      return;
+    }
+
+    try {
+      if (isWished) {
+        await api.delete(`/products/${productId}/favorites`);
         setIsWished(false);
       } else {
-        wishArr.push(productIdStr);
+        await api.post(`/products/${productId}/favorites`);
         setIsWished(true);
       }
-      localStorage.setItem('wish_list', JSON.stringify(wishArr));
-      window.dispatchEvent(new Event('storage-update'));
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error('관심상품 처리 중 오류:', error);
+      alert('관심상품 처리에 실패했습니다.');
     }
-  }, [product]);
+  }, [product?.id, userInfo, isWished]);
 
   return { isWished, toggleWish };
 };
