@@ -1,6 +1,7 @@
 export interface FollowSummary {
   userId: string;
   nickname: string;
+<<<<<<< HEAD
   imageUrl?: string;
 }
 
@@ -32,6 +33,39 @@ export type SignupData = Pick<Account, 'userId' | 'name' | 'nickname' | 'address
 };
 
 // 로그인 데이터
+=======
+  shopIntro?: string;
+  wishList: (string | number)[];
+  followers: string[];
+  following: string[];
+  createdAt: string;
+}
+
+export type SignupData = Omit<
+  Account,
+  'id' | 'joinDate' | 'createdAt' | 'wishList' | 'followers' | 'following'
+> & {
+  password: string;
+};
+
+export interface UserProfile {
+  id: string;
+  nickname: string;
+  avatar?: string;
+  shopIntro?: string;
+  followerCount: number;
+  followingCount: number;
+  isFollowing: boolean;
+}
+
+export interface FollowUserItem {
+  id: string;
+  nickname: string;
+  avatar?: string;
+  shopIntro?: string;
+}
+
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
 export interface LoginData {
   userId: string;
   password: string;

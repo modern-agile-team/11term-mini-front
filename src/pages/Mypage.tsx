@@ -5,11 +5,17 @@ import { Store, Users, ShoppingBag } from 'lucide-react';
 import api from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import type { Product, SaleStatus } from '../types/Product';
+<<<<<<< HEAD
 
 interface ProductsResponse {
   products?: Product[];
   data?: Product[];
 }
+=======
+import { timeAgo } from '../utils/timeAgo';
+import { useFollowList } from '../hooks/useFollowList';
+import FollowListModal from '../components/seller/FollowListModal';
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
 
 const MyPage = () => {
   const navigate = useNavigate();
@@ -38,6 +44,14 @@ const MyPage = () => {
   } = useMyPage();
 
   const [wishProducts, setWishProducts] = useState<Product[]>([]);
+  const {
+    isModalOpen,
+    isListLoading,
+    listType,
+    followUsers,
+    openFollowListModal,
+    closeFollowListModal,
+  } = useFollowList();
 
   useEffect(() => {
     let ignore = false;
@@ -88,7 +102,16 @@ const MyPage = () => {
 
   if (!userInfo) return null;
 
+  const handleOpenFollowers = async () => {
+    await openFollowListModal(userInfo.id, 'followers');
+  };
+
+  const handleOpenFollowing = async () => {
+    await openFollowListModal(userInfo.id, 'following');
+  };
+
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-[#fafafa]">
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-[1024px] mx-auto px-4 py-8">
@@ -103,13 +126,83 @@ const MyPage = () => {
                   alt="프로필"
                   className="w-[120px] h-[120px] rounded-full object-cover border border-gray-100"
                 />
+=======
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      {/* 프로필 섹션 */}
+      <div className="flex gap-8 mb-8 bg-white p-8 border border-gray-100 shadow-sm rounded-sm">
+        <div
+          className="relative group cursor-pointer w-37.5 h-37.5 shrink-0"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <img
+            src={userInfo.avatar || 'https://api.dicebear.com/7.x/notionists/svg?seed=Felix'}
+            alt="프로필"
+            className="w-full h-full rounded-full object-cover border border-gray-200"
+          />
+          <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <span className="text-white text-sm font-medium">사진 변경</span>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            className="hidden"
+            accept="image/*"
+          />
+        </div>
+
+        <div className="flex-1">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1">
+              {isNicknameEditing ? (
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={tempNickname}
+                    onChange={(e) => setTempNickname(e.target.value)}
+                    className="text-2xl font-bold border-b-2 border-red-500 focus:outline-none px-1"
+                  />
+                  <button
+                    onClick={saveNickname}
+                    className="px-3 py-1 bg-red-500 text-white text-sm rounded"
+                  >
+                    저장
+                  </button>
+                  <button
+                    onClick={() => setIsNicknameEditing(false)}
+                    className="px-3 py-1 bg-gray-200 text-sm rounded"
+                  >
+                    취소
+                  </button>
+                </div>
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
               ) : (
                 <div className="w-[120px] h-[120px] bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
                   <Store className="w-10 h-10 text-gray-400" />
                 </div>
               )}
+<<<<<<< HEAD
               <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-white text-xs font-bold">사진 변경</span>
+=======
+
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                <span className="flex items-center gap-1">
+                  <Store size={16} /> 상점오픈 {getOpenDays(userInfo.createdAt || '')}일째
+                </span>
+                <span className="flex items-center gap-1">
+                  <Users size={16} /> 상점방문 0명
+                </span>
+                <button type="button" onClick={handleOpenFollowers} className="hover:text-gray-700">
+                  팔로워 {userInfo.followers?.length || 0}
+                </button>
+                <button type="button" onClick={handleOpenFollowing} className="hover:text-gray-700">
+                  팔로잉 {userInfo.following?.length || 0}
+                </button>
+                <span className="flex items-center gap-1">
+                  <ShoppingBag size={16} /> 상품판매 0회
+                </span>
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
               </div>
               <input
                 type="file"
@@ -157,6 +250,7 @@ const MyPage = () => {
                 )}
               </div>
 
+<<<<<<< HEAD
               <div className="flex items-center gap-6 text-[13px] text-gray-500 mb-6">
                 <div className="flex items-center gap-1.5">
                   <Store className="w-4 h-4" />
@@ -217,12 +311,48 @@ const MyPage = () => {
                     </button>
                   </div>
                 )}
+=======
+          <div className="relative group">
+            {isIntroEditing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={tempIntro}
+                  onChange={(e) => setTempIntro(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded text-sm focus:outline-none focus:border-red-500 min-h-25 resize-none"
+                  placeholder="상점 소개글을 입력해주세요."
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => setIsIntroEditing(false)}
+                    className="px-3 py-1.5 bg-gray-100 text-sm rounded"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={saveIntro}
+                    className="px-3 py-1.5 bg-red-500 text-white text-sm rounded"
+                  >
+                    저장
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="bg-gray-50 p-4 rounded text-sm text-gray-600 min-h-25 whitespace-pre-wrap flex justify-between items-start cursor-pointer hover:bg-gray-100 transition-colors"
+                onClick={() => setIsIntroEditing(true)}
+              >
+                <span>{userInfo.shopIntro || '상점 소개글을 입력해주세요.'}</span>
+                <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  클릭하여 수정
+                </span>
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
               </div>
             </div>
           </div>
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="max-w-[1024px] mx-auto px-4 py-8">
         <div className="flex gap-6 border-b border-gray-200 mb-6">
           {['상품', '상점후기', '관심상품'].map((tab) => (
@@ -247,6 +377,30 @@ const MyPage = () => {
         </div>
 
         {activeTab === '관심상품' ? (
+=======
+      <div className="flex border-b border-gray-200 mb-8">
+        {['상품', '찜', '후기'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-8 py-4 font-bold text-[15px] transition-colors relative ${
+              activeTab === tab ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            {tab}
+            {activeTab === tab && (
+              <div className="absolute bottom-0 left-0 w-full h-0.75 bg-gray-900" />
+            )}
+            <span className="ml-1 text-sm font-normal">
+              {tab === '찜' ? wishProducts.length : tab === '상품' ? myProducts.length : '0'}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="min-h-100">
+        {activeTab === '찜' ? (
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
           wishProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {wishProducts.map((product) => (
@@ -262,9 +416,63 @@ const MyPage = () => {
           myProducts.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {myProducts.map((product) => (
+<<<<<<< HEAD
                 <div key={product.id} className="relative group">
                   <ProductCard product={product} />
                   <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
+=======
+                <div key={`manage-${product.id}`} className="flex py-6 border-b border-gray-100">
+                  <div
+                    className="relative w-35 h-35 shrink-0 border border-gray-200 cursor-pointer"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className={`w-full h-full object-cover transition-all ${
+                        product.saleStatus === 'SOLD_OUT' ? 'grayscale opacity-70' : ''
+                      }`}
+                    />
+                    {product.saleStatus === 'RESERVED' && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
+                        <span className="text-white font-bold border-2 border-white px-3 py-1 rounded-sm tracking-widest text-sm">
+                          예약중
+                        </span>
+                      </div>
+                    )}
+                    {product.saleStatus === 'SOLD_OUT' && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                        <span className="text-gray-300 font-bold border-2 border-gray-300 px-3 py-1 rounded-sm tracking-widest text-sm">
+                          판매완료
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 px-6 flex flex-col justify-center">
+                    <div className="text-sm font-bold text-gray-500 mb-1">
+                      {product.saleStatus === 'ON_SALE'
+                        ? '판매중'
+                        : product.saleStatus === 'RESERVED'
+                          ? '예약중'
+                          : '판매완료'}
+                    </div>
+                    <h3
+                      className="text-lg text-gray-800 line-clamp-1 mb-2 hover:underline cursor-pointer"
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      {product.title}
+                    </h3>
+                    <div className="font-bold text-xl mb-3">{product.price.toLocaleString()}원</div>
+                    <div className="text-sm text-gray-400 flex items-center gap-2">
+                      <span>{timeAgo(product.createdAt)}</span>
+                      <span>•</span>
+                      <span className="truncate max-w-[200px]">{product.location}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 justify-center w-40">
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
                     <select
                       value={product.saleStatus}
                       onChange={(e) => handleStatusChange(product.id, e)}
@@ -318,6 +526,14 @@ const MyPage = () => {
           </div>
         )}
       </div>
+
+      <FollowListModal
+        isOpen={isModalOpen}
+        listType={listType}
+        isLoading={isListLoading}
+        followUsers={followUsers}
+        onClose={closeFollowListModal}
+      />
     </div>
   );
 };

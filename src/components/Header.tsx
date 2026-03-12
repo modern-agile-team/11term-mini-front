@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import CategoryMenu from './CategoryMenu';
 import SearchDropdown from './SearchDropdown';
 import { useAuth } from '../hooks/useAuth';
+import { useRecentSearches } from '../hooks/useRecentSearches';
 import { SEARCH_CONFIG, HEADER_TEXT, HEADER_ACTIONS } from '../constants/header';
 
 interface HeaderProps {
@@ -17,6 +18,8 @@ const Header = ({ onLoginClick }: HeaderProps) => {
   const navigate = useNavigate();
 
   const { userInfo: user, logout } = useAuth();
+  const { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches } =
+    useRecentSearches();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,23 +32,22 @@ const Header = ({ onLoginClick }: HeaderProps) => {
   }, []);
 
   const executeSearch = (term: string) => {
-    if (term.trim() === '') return;
-    const saved = localStorage.getItem(SEARCH_CONFIG.STORAGE_KEY);
-    const prevSearches = saved ? JSON.parse(saved) : [];
-    const updatedPrevSearches = [term, ...prevSearches.filter((t: string) => t !== term)].slice(
-      0,
-      SEARCH_CONFIG.MAX_RECENT_SEARCHES,
-    );
-    localStorage.setItem(SEARCH_CONFIG.STORAGE_KEY, JSON.stringify(updatedPrevSearches));
+    const normalizedSearchTerm = term.trim();
+
+    if (!normalizedSearchTerm) {
+      return;
+    }
+
+    addRecentSearch(normalizedSearchTerm);
     setIsSearchOpen(false);
     setSearchValue('');
-    navigate(`/search?q=${encodeURIComponent(term)}`);
+    navigate(`/search?q=${encodeURIComponent(normalizedSearchTerm)}`);
   };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="border-b border-gray-100">
-        <div className="flex justify-end max-w-[1024px] mx-auto py-2 px-4 text-xs text-gray-500 gap-4 items-center h-10">
+        <div className="flex justify-end max-w-5xl mx-auto py-2 px-4 text-xs text-gray-500 gap-4 items-center h-10">
           {user ? (
             <>
               <div
@@ -131,9 +133,9 @@ const Header = ({ onLoginClick }: HeaderProps) => {
         </div>
       </div>
 
-      <div className="max-w-[1024px] mx-auto flex items-center justify-between py-6 px-4 gap-8">
+      <div className="max-w-5xl mx-auto flex items-center justify-between py-6 px-4 gap-8">
         <Link to="/">
-          <h1 className="text-3xl font-bold text-[#ff5058] cursor-pointer flex-shrink-0">
+          <h1 className="text-3xl font-bold text-[#ff5058] cursor-pointer shrink-0">
             {HEADER_TEXT.LOGO_TITLE}
           </h1>
         </Link>
@@ -141,8 +143,11 @@ const Header = ({ onLoginClick }: HeaderProps) => {
           <input
             type="text"
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && executeSearch(searchValue)}
+            onChange={(event) => {
+              setSearchValue(event.target.value);
+              setIsSearchOpen(true);
+            }}
+            onKeyDown={(event) => event.key === 'Enter' && executeSearch(searchValue)}
             onFocus={() => setIsSearchOpen(true)}
             placeholder={SEARCH_CONFIG.PLACEHOLDER}
             className="w-full border-2 border-[#ff5058] px-4 py-2 outline-none text-sm"
@@ -154,10 +159,17 @@ const Header = ({ onLoginClick }: HeaderProps) => {
             🔍
           </span>
           {isSearchOpen && (
-            <SearchDropdown onClose={() => setIsSearchOpen(false)} onSearch={executeSearch} />
+            <SearchDropdown
+              query={searchValue}
+              recentSearches={recentSearches}
+              onDeleteRecentSearch={removeRecentSearch}
+              onClearRecentSearches={clearRecentSearches}
+              onClose={() => setIsSearchOpen(false)}
+              onSearch={executeSearch}
+            />
           )}
         </div>
-        <div className="flex items-center gap-4 text-[14px] font-medium flex-shrink-0">
+        <div className="flex items-center gap-4 text-[14px] font-medium shrink-0">
           {HEADER_ACTIONS.map((action, index) => (
             <Fragment key={action.id}>
               <div
@@ -176,7 +188,7 @@ const Header = ({ onLoginClick }: HeaderProps) => {
       </div>
 
       <div className="border-t border-gray-100">
-        <div className="max-w-[1024px] mx-auto px-4 flex items-center gap-6">
+        <div className="max-w-5xl mx-auto px-4 flex items-center gap-6">
           <CategoryMenu />
           <div className="h-4 w-[1px] bg-gray-200"></div>
           <button

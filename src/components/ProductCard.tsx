@@ -24,14 +24,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {product.saleStatus === 'RESERVED' && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 backdrop-blur-[1px]">
-            <span className="text-white font-bold text-lg border-2 border-white px-4 py-1.5 rounded-[4px] shadow-sm tracking-widest">
+            <span className="text-white font-bold text-lg border-2 border-white px-4 py-1.5 rounded-sm shadow-sm tracking-widest">
               예약중
             </span>
           </div>
         )}
         {product.saleStatus === 'SOLD_OUT' && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
-            <span className="text-gray-300 font-bold text-lg border-2 border-gray-300 px-4 py-1.5 rounded-[4px] shadow-sm tracking-widest">
+            <span className="text-gray-300 font-bold text-lg border-2 border-gray-300 px-4 py-1.5 rounded-sm shadow-sm tracking-widest">
               판매완료
             </span>
           </div>

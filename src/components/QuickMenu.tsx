@@ -106,6 +106,7 @@ const QuickMenu = () => {
                           {(item.price || 0).toLocaleString()}원
                         </p>
                       </div>
+<<<<<<< HEAD
                       <div className="w-16 h-16 flex-shrink-0 border border-gray-100">
                         <img
                           src={item.image || ''}
@@ -113,6 +114,10 @@ const QuickMenu = () => {
                           className="w-full h-full object-cover"
                           onError={handleImageError}
                         />
+=======
+                      <div className="w-16 h-16 shrink-0 border border-gray-100">
+                        <img src={item.image || ''} alt="" className="w-full h-full object-cover" />
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
                       </div>
                     </Link>
                   </div>

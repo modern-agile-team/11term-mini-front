@@ -62,12 +62,12 @@ export const useProductActions = (product: Product | undefined) => {
   useEffect(() => {
     const productId = product?.id;
     if (!product || !productId) return;
-
     if (product.image && product.image.startsWith('blob:')) return;
 
     try {
       const savedRecent = localStorage.getItem('recently_viewed');
-      let recentArr: Product[] = savedRecent ? JSON.parse(savedRecent) : [];
+      let recentArr: Product[] = savedRecent ? (JSON.parse(savedRecent) as Product[]) : [];
+
       if (!Array.isArray(recentArr)) recentArr = [];
 
       recentArr = recentArr.filter(

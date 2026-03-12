@@ -1,8 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import HomeBanner from '../components/Banner/HomeBanner';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
+import { useInfiniteList } from '../hooks/useInfiniteList';
+
+const PAGE_SIZE = 20;
+const SKELETON_COUNT = 10;
+const FETCHING_SKELETON_COUNT = 5;
 
 interface ProductsResponse {
   data?: Product[];
@@ -10,17 +16,23 @@ interface ProductsResponse {
 }
 
 const Home = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const isFetched = useRef(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const { visibleItems, isFetchingMore, hasNextPage, setSentinelRef } = useInfiniteList({
+    items: allProducts,
+    pageSize: PAGE_SIZE,
+  });
 
   useEffect(() => {
-    if (isFetched.current) return;
-    isFetched.current = true;
-
     const fetchProducts = async () => {
       try {
+<<<<<<< HEAD
         const response = await api.get<Product[] | ProductsResponse>('/products');
         const responseData = response.data;
+=======
+        setIsInitialLoading(true);
+        const response = await api.get('/api/products');
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
 
         let productList: Product[] = [];
         if (Array.isArray(responseData)) {
@@ -42,9 +54,11 @@ const Home = () => {
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
 
-        setProducts(sortedProducts);
+        setAllProducts(sortedProducts);
       } catch (error) {
         console.error('상품 로딩 실패:', error);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
 
@@ -53,7 +67,12 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
+<<<<<<< HEAD
       <main className="max-w-[1024px] mx-auto px-4 py-8">
+=======
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        {/* 배너 및 앱 다운로드 섹션 */}
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
         <section className="w-full mb-10">
           <HomeBanner />
           <div className="w-full h-[100px] bg-[#f9f9f9] border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -70,6 +89,7 @@ const Home = () => {
           </div>
         </section>
 
+<<<<<<< HEAD
         <h2 className="text-xl font-bold mb-6">오늘의 추천 상품</h2>
         {products.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -82,6 +102,24 @@ const Home = () => {
             상품을 불러오는 중이거나 등록된 상품이 없습니다.
           </div>
         )}
+=======
+        <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
+          {isInitialLoading
+            ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                <ProductCardSkeleton key={`homeSkeleton-${index}`} />
+              ))
+            : visibleItems.map((product) => <ProductCard key={product.id} product={product} />)}
+
+          {!isInitialLoading &&
+            isFetchingMore &&
+            Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
+              <ProductCardSkeleton key={`homeFetching-${index}`} />
+            ))}
+        </div>
+
+        {!isInitialLoading && hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
+>>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
       </main>
     </div>
   );
