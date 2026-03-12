@@ -94,7 +94,6 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       setStep('LOGIN');
     } catch (error: unknown) {
       if (isAxiosError(error)) {
-        // 404 에러일 경우 서버 경로 확인 필요 메시지 출력
         if (error.response?.status === 404) {
           alert(
             '서버의 회원가입 경로(/auth/register)를 찾을 수 없습니다. 백엔드 개발자에게 문의하세요.',
