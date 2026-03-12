@@ -5,8 +5,10 @@ import type { Product } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
 import { useFollow } from '../hooks/useFollow';
 import { useFollowList } from '../hooks/useFollowList';
+import { useRecommendedProducts } from '../hooks/useRecommendedProducts';
 import SellerProfileCard from '../components/seller/SellerProfileCard';
 import FollowListModal from '../components/seller/FollowListModal';
+import RecommendedProductSection from '../components/product/RecommendedProductSection';
 import { Heart, Eye, Clock } from 'lucide-react';
 
 interface DetailResponse {
@@ -20,6 +22,8 @@ const ProductDetail = () => {
 
   const fetchedIdRef = useRef<string | null>(null);
   const { isWished, toggleWish } = useProductActions(product || undefined);
+  const { recommendedProducts, isLoading: isRecommendedProductsLoading } =
+    useRecommendedProducts(product);
   const { sellerProfile, canFollow, isFollowPending, toggleSellerFollow } = useFollow(
     product?.sellerId,
   );
@@ -180,6 +184,11 @@ const ProductDetail = () => {
         isLoading={isListLoading}
         followUsers={followUsers}
         onClose={closeFollowListModal}
+      />
+
+      <RecommendedProductSection
+        recommendedProducts={recommendedProducts}
+        isLoading={isRecommendedProductsLoading}
       />
     </div>
   );
