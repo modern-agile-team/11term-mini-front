@@ -3,19 +3,15 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../api/axios';
 import type { Product } from '../types/Product';
 import { useProductActions } from '../hooks/useProductActions';
-<<<<<<< HEAD
-import { Heart } from 'lucide-react';
-
-interface DetailResponse {
-  data?: Product;
-}
-=======
 import { useFollow } from '../hooks/useFollow';
 import { useFollowList } from '../hooks/useFollowList';
 import SellerProfileCard from '../components/seller/SellerProfileCard';
 import FollowListModal from '../components/seller/FollowListModal';
 import { Heart, Eye, Clock } from 'lucide-react';
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
+
+interface DetailResponse {
+  data?: Product;
+}
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,15 +74,6 @@ const ProductDetail = () => {
     });
   };
 
-<<<<<<< HEAD
-  if (loading) return <div className="py-20 text-center">불러오는 중...</div>;
-  if (!product) return <div className="py-20 text-center">상품을 찾을 수 없습니다.</div>;
-
-  return (
-    <div className="max-w-[1024px] mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="md:w-1/2">
-=======
   const handleFollowClick = async () => {
     try {
       await toggleSellerFollow();
@@ -121,7 +108,6 @@ const ProductDetail = () => {
     <div className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex gap-10 mb-16 bg-white">
         <div className="w-107 h-107 overflow-hidden border border-gray-100 shadow-sm shrink-0">
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
           <img
             src={product.image}
             alt={product.title}
@@ -134,11 +120,15 @@ const ProductDetail = () => {
             <p className="text-3xl font-bold mb-6">{product.price.toLocaleString()}원</p>
             <div className="flex flex-col gap-3 text-sm border-t border-b py-6 border-gray-100">
               <div className="flex items-center gap-4">
-                <span className="text-gray-400 w-24">• 조회수</span>
+                <span className="text-gray-400 w-24 flex items-center gap-1">
+                  <Eye size={16} /> 조회수
+                </span>
                 <span className="text-gray-800 font-medium">{product.views || 0}</span>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-gray-400 w-24">• 거래지역</span>
+                <span className="text-gray-400 w-24 flex items-center gap-1">
+                  <Clock size={16} /> 거래지역
+                </span>
                 <span className="text-gray-800 font-medium">📍 {product.location || '전국'}</span>
               </div>
             </div>
@@ -168,13 +158,8 @@ const ProductDetail = () => {
 
       <div className="border-t border-gray-200 pt-12 mt-12">
         <h2 className="text-xl font-bold mb-8">상품정보</h2>
-<<<<<<< HEAD
-        <div className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-          {product.description}
-=======
         <div className="text-gray-800 leading-relaxed whitespace-pre-wrap min-h-50">
           {product.description || '등록된 상세 설명이 없습니다.'}
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
         </div>
       </div>
 

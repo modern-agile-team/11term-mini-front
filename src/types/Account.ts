@@ -1,7 +1,6 @@
 export interface FollowSummary {
   userId: string;
   nickname: string;
-<<<<<<< HEAD
   imageUrl?: string;
 }
 
@@ -25,6 +24,12 @@ export interface Account {
   phone?: string;
   birth?: string;
   shopIntro?: string;
+  // @준호 코드
+  id?: string;
+  avatar?: string;
+  wishList?: (string | number)[];
+  followers?: string[];
+  following?: string[];
 }
 
 // 회원가입 데이터
@@ -32,22 +37,7 @@ export type SignupData = Pick<Account, 'userId' | 'name' | 'nickname' | 'address
   password: string;
 };
 
-// 로그인 데이터
-=======
-  shopIntro?: string;
-  wishList: (string | number)[];
-  followers: string[];
-  following: string[];
-  createdAt: string;
-}
-
-export type SignupData = Omit<
-  Account,
-  'id' | 'joinDate' | 'createdAt' | 'wishList' | 'followers' | 'following'
-> & {
-  password: string;
-};
-
+// 프론트 UI
 export interface UserProfile {
   id: string;
   nickname: string;
@@ -65,7 +55,7 @@ export interface FollowUserItem {
   shopIntro?: string;
 }
 
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
+// 로그인 데이터
 export interface LoginData {
   userId: string;
   password: string;

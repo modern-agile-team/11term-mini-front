@@ -26,13 +26,9 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-<<<<<<< HEAD
+        setIsInitialLoading(true);
         const response = await api.get<Product[] | ProductsResponse>('/products');
         const responseData = response.data;
-=======
-        setIsInitialLoading(true);
-        const response = await api.get('/api/products');
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
 
         let productList: Product[] = [];
         if (Array.isArray(responseData)) {
@@ -41,7 +37,6 @@ const Home = () => {
           productList = responseData.data || responseData.products || [];
         }
 
-        // 최후의 안전장치
         if (!Array.isArray(productList)) {
           productList = [];
         }
@@ -67,12 +62,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-<<<<<<< HEAD
-      <main className="max-w-[1024px] mx-auto px-4 py-8">
-=======
       <main className="max-w-5xl mx-auto px-4 py-8">
         {/* 배너 및 앱 다운로드 섹션 */}
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
         <section className="w-full mb-10">
           <HomeBanner />
           <div className="w-full h-[100px] bg-[#f9f9f9] border border-gray-100 mt-4 rounded-sm flex items-center px-10 gap-4 cursor-pointer hover:bg-gray-50 transition-colors">
@@ -89,21 +80,7 @@ const Home = () => {
           </div>
         </section>
 
-<<<<<<< HEAD
         <h2 className="text-xl font-bold mb-6">오늘의 추천 상품</h2>
-        {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex justify-center items-center py-20 text-gray-400">
-            상품을 불러오는 중이거나 등록된 상품이 없습니다.
-          </div>
-        )}
-=======
-        <h2 className="text-xl font-bold mb-6">오늘의 상품 추천</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
           {isInitialLoading
             ? Array.from({ length: SKELETON_COUNT }).map((_, index) => (
@@ -119,7 +96,6 @@ const Home = () => {
         </div>
 
         {!isInitialLoading && hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
       </main>
     </div>
   );

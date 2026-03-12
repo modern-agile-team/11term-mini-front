@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { useParams } from 'react-router-dom';
-import { useMemo, useState, useEffect } from 'react';
-=======
 import { useParams, Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
+import { useMemo, useState, useEffect } from 'react';
 
 import CategoryNav from '../components/CategoryNav';
 import ProductCard from '../components/ProductCard';
@@ -15,12 +10,9 @@ import Filterbar from '../components/Filterbar';
 import { CATEGORIES } from '../data/categories';
 import { sortProducts } from '../utils/sortProducts';
 import { findCategoryPath } from '../utils/findCategoryPath';
-<<<<<<< HEAD
 import api from '../api/axios';
-=======
 import { makeCategoryGridItems } from '../utils/categoryGrid';
 import { useInfiniteList } from '../hooks/useInfiniteList';
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
 
 import type { SortKey } from '../types/sort';
 import type { Product } from '../types/Product';
@@ -108,12 +100,10 @@ const CategoryDetail = () => {
 
         {showMegaGrid && (
           <section className="mt-4 mb-6 bg-white">
-            {/* ✅ border는 wrapper(부모)에만 주고, 셀은 border-r/b만 유지해서 중첩을 줄임 */}
             <div className="grid grid-cols-5 border border-gray-200">
               {gridCardItems.map((card) => {
                 const isPad = card.id.startsWith('pad:');
 
-                // ✅ 빈칸 셀: 클릭 안 되고 글자 없음, 대신 border는 유지
                 if (isPad) {
                   return (
                     <div
@@ -150,34 +140,31 @@ const CategoryDetail = () => {
           onChangeSort={setSort}
         />
 
-<<<<<<< HEAD
         {loading ? (
-          <div className="py-20 text-center text-gray-400">상품을 불러오는 중입니다...</div>
-        ) : sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-6">
-            {sortedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 mt-6">
+            {Array.from({ length: 10 }).map((_, index) => (
+              <ProductCardSkeleton key={`categoryInitialSkeleton-${index}`} />
             ))}
           </div>
+        ) : sortedProducts.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4 mt-6">
+              {visibleItems.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+
+              {isFetchingMore &&
+                Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
+                  <ProductCardSkeleton key={`categoryFetching-${index}`} />
+                ))}
+            </div>
+            {hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
+          </>
         ) : (
           <div className="py-20 text-center text-gray-400">
             해당 카테고리에 등록된 상품이 없습니다.
           </div>
         )}
-=======
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-4">
-          {visibleItems.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-
-          {isFetchingMore &&
-            Array.from({ length: FETCHING_SKELETON_COUNT }).map((_, index) => (
-              <ProductCardSkeleton key={`categoryFetching-${index}`} />
-            ))}
-        </div>
-
-        {hasNextPage && <div ref={setSentinelRef} className="h-10 mt-4" />}
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
       </main>
     </div>
   );
