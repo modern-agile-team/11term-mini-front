@@ -43,12 +43,8 @@ const QuickMenu = () => {
     };
   }, [handleStorageUpdate]);
 
-  // ✅ 무한 루프 방지 & 안전한 인라인 대체 이미지 적용
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    // 1. 또 에러가 나더라도 onError가 다시 실행되지 않도록 이벤트 연결 끊기 (무한 루프 방지 핵심)
     e.currentTarget.onerror = null;
-
-    // 2. 외부 서버를 거치지 않는 초경량 브라우저 내장 SVG 이미지 할당
     e.currentTarget.src =
       "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70'%3E%3Crect width='70' height='70' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='10' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
   };
@@ -106,7 +102,6 @@ const QuickMenu = () => {
                           {(item.price || 0).toLocaleString()}원
                         </p>
                       </div>
-<<<<<<< HEAD
                       <div className="w-16 h-16 flex-shrink-0 border border-gray-100">
                         <img
                           src={item.image || ''}
@@ -114,10 +109,6 @@ const QuickMenu = () => {
                           className="w-full h-full object-cover"
                           onError={handleImageError}
                         />
-=======
-                      <div className="w-16 h-16 shrink-0 border border-gray-100">
-                        <img src={item.image || ''} alt="" className="w-full h-full object-cover" />
->>>>>>> 5de801689552a20592eb8c5df24e7f25c67ae159
                       </div>
                     </Link>
                   </div>
