@@ -48,7 +48,11 @@ export const useFollow = (sellerId?: string) => {
 
   const toggleSellerFollow = useCallback(async () => {
     if (!sellerProfile?.id) return;
-    if (!requireAuth()) return;
+
+    if (!userInfo) {
+      requireAuth();
+      return;
+    }
 
     try {
       setIsFollowPending(true);
@@ -73,7 +77,7 @@ export const useFollow = (sellerId?: string) => {
     } finally {
       setIsFollowPending(false);
     }
-  }, [requireAuth, sellerProfile]);
+  }, [requireAuth, sellerProfile, userInfo]);
 
   const canFollow = !userInfo || !sellerProfile || userInfo.id !== sellerProfile.id;
 
