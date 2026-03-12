@@ -100,11 +100,15 @@ const MyPage = () => {
   if (!userInfo) return null;
 
   const handleOpenFollowers = async () => {
-    await openFollowListModal(userInfo.id, 'followers');
+    const targetId = userInfo.id || userInfo.userId;
+    if (!targetId) return;
+    await openFollowListModal(targetId, 'followers');
   };
 
   const handleOpenFollowing = async () => {
-    await openFollowListModal(userInfo.id, 'following');
+    const targetId = userInfo.id || userInfo.userId;
+    if (!targetId) return;
+    await openFollowListModal(targetId, 'following');
   };
 
   return (
@@ -176,7 +180,6 @@ const MyPage = () => {
                 )}
               </div>
 
-              {/* 팔로우 버튼과 상점 정보 통합 */}
               <div className="flex items-center gap-6 text-[13px] text-gray-500 mb-6">
                 <div className="flex items-center gap-1.5">
                   <Store className="w-4 h-4" />
